@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+    
+    match /admin/{userId} {
+      // Allow users to read their own admin document to check role
+      allow read: if isOwner(userId);
+      // Only allow manual creation via Firebase Console for now
+      allow write: if false;
+    }
+    
+    match /guru/{userId} {
+      // Allow users to read their own guru document to check role
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+    
+    match /siswa/{userId} {
+      // Allow users to read their own siswa document to check role
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+  }
+}

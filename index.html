@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Google AI Studio App</title>
+    <script>
+      // Prevent "Cannot set property fetch of #<Window> which has only a getter" error
+      try {
+        const originalFetch = window.fetch;
+        Object.defineProperty(window, 'fetch', {
+          get: function() { return originalFetch; },
+          set: function(val) { console.warn('Ignored attempt to set window.fetch'); },
+          configurable: true
+        });
+      } catch (e) {
+        console.error('Failed to redefine window.fetch', e);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

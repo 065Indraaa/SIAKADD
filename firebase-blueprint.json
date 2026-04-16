@@ -1,0 +1,28 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Base user data",
+      "type": "object",
+      "properties": {
+        "nama": { "type": "string" },
+        "status_akun": { "type": "string", "enum": ["aktif", "nonaktif"] }
+      },
+      "required": ["nama", "status_akun"]
+    }
+  },
+  "firestore": {
+    "/admin/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Admin users"
+    },
+    "/guru/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Guru users"
+    },
+    "/siswa/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Siswa users"
+    }
+  }
+}
