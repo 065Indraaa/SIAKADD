@@ -33,6 +33,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
         { name: 'Manajemen Pengguna', href: '/admin/users', icon: Users },
         { name: 'Manajemen Kelas', href: '/admin/classes', icon: BookOpen },
+        { name: 'Jadwal Pelajaran', href: '/admin/schedules', icon: BookOpen },
         { name: 'Penjurusan', href: '/admin/majors', icon: GraduationCap },
         { name: 'Alumni', href: '/admin/alumni', icon: Award },
         { name: 'Pengaturan', href: '/admin/settings', icon: Settings },

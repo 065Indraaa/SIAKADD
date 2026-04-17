@@ -6,6 +6,7 @@ import AdminUsers from './AdminUsers';
 import AdminClasses from './AdminClasses';
 import AdminMajors from './AdminMajors';
 import AdminAlumni from './AdminAlumni';
+import AdminSchedules from './AdminSchedules';
 
 function AdminOverview() {
   return (
@@ -113,6 +114,7 @@ export default function AdminDashboard() {
       <Route path="/" element={<AdminOverview />} />
       <Route path="/users" element={<AdminUsers />} />
       <Route path="/classes" element={<AdminClasses />} />
+      <Route path="/schedules" element={<AdminSchedules />} />
       <Route path="/majors" element={<AdminMajors />} />
       <Route path="/alumni" element={<AdminAlumni />} />
       <Route path="/settings" element={<div className="p-4 bg-white rounded-lg shadow">Pengaturan (WIP)</div>} />
