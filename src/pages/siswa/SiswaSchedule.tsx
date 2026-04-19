@@ -14,38 +14,50 @@ export default function SiswaSchedule() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-slate-100">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Jadwal Pelajaran</h2>
-        <p className="text-slate-500">Jadwal mingguan kelas XI-IPA-1.</p>
+        <h2 className="text-3xl font-bold tracking-tight text-white">Jadwal Pelajaran</h2>
+        <p className="text-slate-400">Jadwal mingguan kelas XI-IPA-1.</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Semester Ganjil 2024/2025</CardTitle>
+      <Card className="bg-slate-900/50 backdrop-blur-md border border-white/10 shadow-xl">
+        <CardHeader className="border-b border-white/5">
+          <CardTitle className="text-white">Semester Ganjil 2024/2025</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[150px]">Waktu</TableHead>
-                  <TableHead>Senin</TableHead>
-                  <TableHead>Selasa</TableHead>
-                  <TableHead>Rabu</TableHead>
-                  <TableHead>Kamis</TableHead>
-                  <TableHead>Jumat</TableHead>
+              <TableHeader className="bg-slate-950/50">
+                <TableRow className="border-white/10 hover:bg-transparent">
+                  <TableHead className="text-slate-400 w-[150px]">Waktu</TableHead>
+                  <TableHead className="text-slate-400 text-center">Senin</TableHead>
+                  <TableHead className="text-slate-400 text-center">Selasa</TableHead>
+                  <TableHead className="text-slate-400 text-center">Rabu</TableHead>
+                  <TableHead className="text-slate-400 text-center">Kamis</TableHead>
+                  <TableHead className="text-slate-400 text-center">Jumat</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {schedule.map((row, index) => (
-                  <TableRow key={index} className={row.mon === 'ISTIRAHAT' ? 'bg-slate-100' : ''}>
-                    <TableCell className="font-medium">{row.time}</TableCell>
-                    <TableCell className={row.mon === 'ISTIRAHAT' ? 'text-center font-bold text-slate-500' : ''}>{row.mon}</TableCell>
-                    <TableCell className={row.tue === 'ISTIRAHAT' ? 'text-center font-bold text-slate-500' : ''}>{row.tue}</TableCell>
-                    <TableCell className={row.wed === 'ISTIRAHAT' ? 'text-center font-bold text-slate-500' : ''}>{row.wed}</TableCell>
-                    <TableCell className={row.thu === 'ISTIRAHAT' ? 'text-center font-bold text-slate-500' : ''}>{row.thu}</TableCell>
-                    <TableCell className={row.fri === 'ISTIRAHAT' ? 'text-center font-bold text-slate-500' : ''}>{row.fri}</TableCell>
+                  <TableRow 
+                    key={index} 
+                    className={`border-white/5 ${row.mon === 'ISTIRAHAT' ? 'bg-slate-800/30' : 'hover:bg-white/5'}`}
+                  >
+                    <TableCell className="font-medium text-slate-300">{row.time}</TableCell>
+                    
+                    {row.mon === 'ISTIRAHAT' ? (
+                      <TableCell colSpan={5} className="text-center font-bold text-slate-500 uppercase tracking-widest">
+                        ISTIRAHAT
+                      </TableCell>
+                    ) : (
+                      <>
+                        <TableCell className="text-center text-slate-200">{row.mon}</TableCell>
+                        <TableCell className="text-center text-slate-200">{row.tue}</TableCell>
+                        <TableCell className="text-center text-slate-200">{row.wed}</TableCell>
+                        <TableCell className="text-center text-slate-200">{row.thu}</TableCell>
+                        <TableCell className="text-center text-slate-200">{row.fri}</TableCell>
+                      </>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

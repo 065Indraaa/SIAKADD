@@ -62,11 +62,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const navigation = getNavigation();
 
   return (
-    <div className="flex h-screen bg-slate-50">
-      {/* Sidebar for Desktop */}
-      <div className="hidden md:flex w-64 flex-col bg-slate-900 text-white">
-        <div className="flex h-16 items-center justify-center border-b border-slate-800 px-4">
-          <h1 className="text-xl font-bold tracking-tight">SIAKAD SMA</h1>
+    <div className="flex h-screen bg-slate-950 text-slate-100">
+      {/* Sidebar Desktop */}
+      <div className="hidden md:flex w-64 flex-col bg-slate-950 border-r border-white/10">
+        <div className="flex h-16 items-center justify-center border-b border-white/10 px-4">
+          <h1 className="text-xl font-bold tracking-tight text-white">SIAKAD SMA</h1>
         </div>
         <div className="flex flex-1 flex-col overflow-y-auto py-4">
           <nav className="flex-1 space-y-1 px-2">
@@ -76,8 +76,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`group flex items-center rounded-md px-2 py-2 text-sm font-medium ${
-                    isActive ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                  className={`group flex items-center rounded-md px-2 py-2 text-sm font-medium transition-all ${
+                    isActive ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-slate-900 hover:text-white'
                   }`}
                 >
                   <item.icon className="mr-3 h-5 w-5 flex-shrink-0" aria-hidden="true" />
@@ -87,96 +87,51 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
         </div>
-        <div className="border-t border-slate-800 p-4">
-          <div className="flex items-center mb-4">
-            <div className="ml-3">
-              <p className="text-sm font-medium text-white">{user?.name}</p>
-              <p className="text-xs font-medium text-slate-400 capitalize">{user?.role}</p>
-            </div>
+        <div className="border-t border-white/10 p-4">
+          <div className="mb-4">
+            <p className="text-sm font-medium text-white">{user?.name}</p>
+            <p className="text-xs text-slate-400 capitalize">{user?.role}</p>
           </div>
-          <Button variant="destructive" className="w-full justify-start" onClick={handleLogout}>
+          <Button variant="ghost" className="w-full justify-start text-slate-400 hover:text-white hover:bg-red-900/20" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout
           </Button>
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 flex md:hidden">
-          <div className="fixed inset-0 bg-slate-600 bg-opacity-75" onClick={() => setIsMobileMenuOpen(false)}></div>
-          <div className="relative flex w-full max-w-xs flex-1 flex-col bg-slate-900 text-white pt-5 pb-4">
-            <div className="flex items-center px-4">
-              <h1 className="text-xl font-bold">SIAKAD SMA</h1>
-            </div>
-            <div className="mt-5 h-0 flex-1 overflow-y-auto">
-              <nav className="space-y-1 px-2">
-                {navigation.map((item) => {
-                  const isActive = location.pathname === item.href;
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`group flex items-center rounded-md px-2 py-2 text-base font-medium ${
-                        isActive ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                      }`}
-                    >
-                      <item.icon className="mr-4 h-6 w-6 flex-shrink-0" aria-hidden="true" />
-                      {item.name}
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-            <div className="border-t border-slate-800 p-4">
-              <Button variant="destructive" className="w-full justify-start" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main content */}
+      {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
+        <header className="flex h-16 items-center justify-between border-b border-white/10 bg-slate-950/50 backdrop-blur-md px-4 sm:px-6 lg:px-8">
           <button
             type="button"
-            className="text-slate-500 hover:text-slate-700 md:hidden"
+            className="text-slate-400 hover:text-white md:hidden"
             onClick={() => setIsMobileMenuOpen(true)}
           >
-            <span className="sr-only">Open sidebar</span>
-            <Menu className="h-6 w-6" aria-hidden="true" />
+            <Menu className="h-6 w-6" />
           </button>
-          <div className="flex flex-1 justify-end">
-            <div className="ml-4 flex items-center md:ml-6">
-              <span className="text-sm font-medium text-slate-700 mr-4 hidden sm:block">
-                Tahun Ajaran 2024/2025
-              </span>
-            </div>
+          <div className="ml-auto text-sm font-medium text-slate-400">
+            Tahun Ajaran 2024/2025
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto bg-slate-950 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
 
-      {/* Floating Chatbot Button */}
+      {/* Floating Chatbot */}
       <button
         onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed bottom-6 right-6 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50"
+        className="fixed bottom-6 right-6 p-4 bg-blue-600 text-white rounded-full shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:bg-blue-500 transition-all z-50"
       >
         <MessageSquare className="h-6 w-6" />
       </button>
 
       {/* Chatbot Window */}
       {isChatOpen && (
-        <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 flex flex-col">
+        <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 flex flex-col">
           <div className="bg-blue-600 p-4 text-white flex justify-between items-center">
-            <h3 className="font-semibold">SIAKAD Assistant</h3>
+            <h3 className="font-semibold">SCOLA Assistant</h3>
             <button onClick={() => setIsChatOpen(false)} className="text-white hover:text-blue-200">
               &times;
             </button>

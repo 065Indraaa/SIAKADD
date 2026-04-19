@@ -12,7 +12,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 export default function AdminAlumni() {
   const [searchTerm, setSearchTerm] = useState('');
-
   const [alumni, setAlumni] = useState([
     { id: 1, name: 'Andi Saputra', year: 2023, status: 'Kuliah', institution: 'Universitas Indonesia', major: 'Teknik Informatika' },
     { id: 2, name: 'Bunga Citra', year: 2022, status: 'Kerja', institution: 'PT Telkom', major: 'Software Engineer' },
@@ -20,19 +19,16 @@ export default function AdminAlumni() {
     { id: 4, name: 'Dina Mariana', year: 2021, status: 'Kerja', institution: 'Bank Mandiri', major: 'Teller' },
   ]);
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingAlumni, setEditingAlumni] = useState<any>(null);
+  const [formData, setFormData] = useState<any>({});
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
   const filteredAlumni = alumni.filter(alum => 
     alum.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     alum.year.toString().includes(searchTerm)
   );
-
-  // Dialog State
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAlumni, setEditingAlumni] = useState<any>(null);
-  const [formData, setFormData] = useState<any>({});
-
-  // Alert Dialog State
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const handleOpenDialog = (alum: any = null) => {
     if (alum) {
@@ -40,13 +36,7 @@ export default function AdminAlumni() {
       setFormData(alum);
     } else {
       setEditingAlumni(null);
-      setFormData({
-        name: '',
-        year: new Date().getFullYear(),
-        status: 'Kuliah',
-        institution: '',
-        major: ''
-      });
+      setFormData({ name: '', year: new Date().getFullYear(), status: 'Kuliah', institution: '', major: '' });
     }
     setIsDialogOpen(true);
   };
@@ -74,67 +64,64 @@ export default function AdminAlumni() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-slate-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Data Alumni</h2>
-          <p className="text-slate-500">Kelola data alumni dan penelusuran lulusan.</p>
+          <h2 className="text-3xl font-bold tracking-tight text-white">Data Alumni</h2>
+          <p className="text-slate-400">Kelola data alumni dan penelusuran lulusan.</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => handleOpenDialog()}>
+        <Button onClick={() => handleOpenDialog()} className="bg-blue-600 hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
           <Plus className="mr-2 h-4 w-4" /> Tambah Alumni
         </Button>
       </div>
 
-      <Card className="shadow-sm border-slate-200">
-        <CardHeader className="pb-3">
+      <Card className="bg-slate-900/50 backdrop-blur-md border border-white/10 shadow-xl">
+        <CardHeader className="pb-3 border-b border-white/5">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 flex-wrap">
-            <CardTitle>Daftar Alumni</CardTitle>
+            <CardTitle className="text-white">Daftar Alumni</CardTitle>
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
               <Input
-                placeholder="Cari nama atau tahun lulus..."
-                className="pl-8 bg-slate-50"
+                placeholder="Cari..."
+                className="pl-8 bg-slate-950 border-white/10 text-white placeholder:text-slate-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border border-slate-200">
+        <CardContent className="pt-6">
+          <div className="rounded-lg border border-white/10 overflow-hidden">
             <Table>
-              <TableHeader className="bg-slate-50">
-                <TableRow>
-                  <TableHead>Nama</TableHead>
-                  <TableHead>Tahun Lulus</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Institusi/Perusahaan</TableHead>
-                  <TableHead>Jurusan/Jabatan</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+              <TableHeader className="bg-slate-950/50">
+                <TableRow className="border-white/10 hover:bg-transparent">
+                  <TableHead className="text-slate-400">Nama</TableHead>
+                  <TableHead className="text-slate-400">Tahun Lulus</TableHead>
+                  <TableHead className="text-slate-400">Status</TableHead>
+                  <TableHead className="text-slate-400">Institusi/Perusahaan</TableHead>
+                  <TableHead className="text-slate-400">Jurusan/Jabatan</TableHead>
+                  <TableHead className="text-right text-slate-400">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredAlumni.length > 0 ? (
                   filteredAlumni.map((alum) => (
-                    <TableRow key={alum.id} className="hover:bg-slate-50/50">
-                      <TableCell className="font-medium text-slate-900">{alum.name}</TableCell>
-                      <TableCell>{alum.year}</TableCell>
+                    <TableRow key={alum.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                      <TableCell className="font-medium text-white">{alum.name}</TableCell>
+                      <TableCell className="text-slate-300">{alum.year}</TableCell>
                       <TableCell>
-                        <Badge 
-                          variant={alum.status === 'Kuliah' ? 'default' : 'secondary'}
-                          className={alum.status === 'Kuliah' ? 'bg-blue-100 text-blue-800 hover:bg-blue-100' : alum.status === 'Kerja' ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-slate-100 text-slate-800'}
-                        >
+                        <Badge className={alum.status === 'Kuliah' ? 'bg-blue-600/20 text-blue-400 border-blue-500/20' : 'bg-emerald-600/20 text-emerald-400 border-emerald-500/20'}>
                           {alum.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{alum.institution}</TableCell>
-                      <TableCell>{alum.major}</TableCell>
+                      <TableCell className="text-slate-300">{alum.institution}</TableCell>
+                      <TableCell className="text-slate-300">{alum.major}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(alum)} className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(alum)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/20">
                             <Edit2 className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => confirmDelete(alum.id)} className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50">
+                          <Button variant="ghost" size="icon" onClick={() => confirmDelete(alum.id)} className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -142,9 +129,7 @@ export default function AdminAlumni() {
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center text-slate-500">Tidak ada data alumni ditemukan.</TableCell>
-                  </TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center text-slate-500 py-10">Tidak ada data.</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -152,68 +137,93 @@ export default function AdminAlumni() {
         </CardContent>
       </Card>
 
-      {/* Dialog for Add/Edit */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{editingAlumni ? 'Edit Alumni' : 'Tambah Alumni'}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Nama</Label>
-              <Input className="col-span-3" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Tahun</Label>
-              <Input type="number" className="col-span-3" value={formData.year} onChange={(e) => setFormData({...formData, year: parseInt(e.target.value) || new Date().getFullYear()})} />
-            </div>
 
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Status</Label>
-              <Select value={formData.status} onValueChange={(val) => setFormData({...formData, status: val})}>
-                <SelectTrigger className="col-span-3"><SelectValue placeholder="Pilih Status" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Kuliah">Kuliah</SelectItem>
-                  <SelectItem value="Kerja">Kerja</SelectItem>
-                  <SelectItem value="Wirausaha">Wirausaha</SelectItem>
-                  <SelectItem value="Lainnya">Lainnya</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+  <DialogContent className="bg-slate-900 border border-white/10 text-white sm:max-w-md">
+    <DialogHeader>
+      <DialogTitle className="text-white">
+        {editingAlumni ? 'Edit Alumni' : 'Tambah Alumni'}
+      </DialogTitle>
+    </DialogHeader>
 
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Institusi</Label>
-              <Input className="col-span-3" value={formData.institution} placeholder="Nama Universitas / PT" onChange={(e) => setFormData({...formData, institution: e.target.value})} />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Jurusan / Posisi</Label>
-              <Input className="col-span-3" value={formData.major} onChange={(e) => setFormData({...formData, major: e.target.value})} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Batal</Button>
-            <Button onClick={handleSaveAlumni} className="bg-blue-600 hover:bg-blue-700">Simpan</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+    <div className="flex flex-col gap-3 py-4">
+      {/* Nama */}
+      <div className="flex flex-col gap-1.5">
+        <Label className="text-slate-400 text-sm">Nama</Label>
+        <Input
+          className="bg-slate-950 border-white/10 text-white"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        />
+      </div>
 
-      {/* Alert Dialog Delete */}
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tindakan ini tidak dapat dibatalkan. Ini akan menghapus data alumni dari sistem.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel variant="outline" size="default">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white">Hapus</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Tahun */}
+      <div className="flex flex-col gap-1.5">
+        <Label className="text-slate-400 text-sm">Tahun</Label>
+        <Input
+          type="number"
+          className="bg-slate-950 border-white/10 text-white"
+          value={formData.year}
+          onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+        />
+      </div>
+
+      {/* Status */}
+      <div className="flex flex-col gap-1.5">
+        <Label className="text-slate-400 text-sm">Status</Label>
+        <Select
+          value={formData.status}
+          onValueChange={(val) => setFormData({ ...formData, status: val })}
+        >
+          <SelectTrigger className="bg-slate-950 border-white/10 text-white">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-slate-900 border-white/10 text-white">
+            <SelectItem value="Kuliah" className="text-white hover:bg-slate-800">Kuliah</SelectItem>
+            <SelectItem value="Kerja" className="text-white hover:bg-slate-800">Kerja</SelectItem>
+            <SelectItem value="Wirausaha" className="text-white hover:bg-slate-800">Wirausaha</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Institusi */}
+      <div className="flex flex-col gap-1.5">
+        <Label className="text-slate-400 text-sm">Institusi</Label>
+        <Input
+          className="bg-slate-950 border-white/10 text-white"
+          value={formData.institution}
+          onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
+        />
+      </div>
+
+      {/* Jurusan/Jabatan */}
+      <div className="flex flex-col gap-1.5">
+        <Label className="text-slate-400 text-sm">Jurusan/Jabatan</Label>
+        <Input
+          className="bg-slate-950 border-white/10 text-white"
+          value={formData.major}
+          onChange={(e) => setFormData({ ...formData, major: e.target.value })}
+        />
+      </div>
+    </div>
+
+    <DialogFooter className="flex flex-row justify-end gap-2 pt-2 border-t border-white/10 bg-slate-900">
+      <Button
+        variant="outline"
+        onClick={() => setIsDialogOpen(false)}
+        className="border-white/10 text-slate-300 hover:text-white hover:bg-slate-800 bg-transparent"
+      >
+        Batal
+      </Button>
+      <Button
+        onClick={handleSaveAlumni}
+        className="bg-blue-600 hover:bg-blue-500 text-white"
+      >
+        Simpan
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }

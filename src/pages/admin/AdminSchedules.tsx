@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -21,12 +21,9 @@ export default function AdminSchedules() {
     { id: 5, kelas: 'XI IPS 1', hari: 'Selasa', jam: '08:30 - 10:00', mapel: 'Sejarah', guru: 'Ahmad Dahlan, S.Pd', ruang: 'R.15' },
   ]);
 
-  // Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<any>(null);
   const [formData, setFormData] = useState<any>({});
-
-  // Alert Dialog State
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -38,14 +35,7 @@ export default function AdminSchedules() {
       setFormData(schedule);
     } else {
       setEditingSchedule(null);
-      setFormData({
-        kelas: kelasFilter,
-        hari: hariFilter,
-        jam: '',
-        mapel: '',
-        guru: '',
-        ruang: ''
-      });
+      setFormData({ kelas: kelasFilter, hari: hariFilter, jam: '', mapel: '', guru: '', ruang: '' });
     }
     setIsDialogOpen(true);
   };
@@ -73,81 +63,76 @@ export default function AdminSchedules() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-slate-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Jadwal Pelajaran</h2>
-          <p className="text-slate-500">Atur penjadwalan mata pelajaran untuk masing-masing kelas.</p>
+          <h2 className="text-3xl font-bold tracking-tight text-white">Jadwal Pelajaran</h2>
+          <p className="text-slate-400">Atur penjadwalan mata pelajaran untuk masing-masing kelas.</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => handleOpenDialog()}>
+        <Button onClick={() => handleOpenDialog()} className="bg-blue-600 hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
           <Plus className="mr-2 h-4 w-4" /> Buat Jadwal Baru
         </Button>
       </div>
 
-      <Card className="shadow-sm border-slate-200">
-        <CardHeader className="pb-4">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <CardTitle>Filter Jadwal</CardTitle>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4 mt-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+      <Card className="bg-slate-900/50 backdrop-blur-md border border-white/10 shadow-xl">
+        <CardHeader className="pb-4 border-b border-white/5">
+          <CardTitle className="text-white">Filter Jadwal</CardTitle>
+          <div className="flex flex-col sm:flex-row gap-4 mt-4 bg-slate-950 p-4 rounded-xl border border-white/10">
             <div className="flex-1 space-y-1">
-              <label className="text-sm font-medium text-slate-700">Pilih Kelas</label>
+              <label className="text-sm font-medium text-slate-400">Pilih Kelas</label>
               <Select value={kelasFilter} onValueChange={setKelasFilter}>
-                <SelectTrigger className="bg-white">
-                  <SelectValue placeholder="Pilih Kelas" />
+                <SelectTrigger className="bg-slate-900 border-white/10 text-white">
+                  <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="X IPA 1">X IPA 1</SelectItem>
-                  <SelectItem value="X IPA 2">X IPA 2</SelectItem>
-                  <SelectItem value="XI IPS 1">XI IPS 1</SelectItem>
-                  <SelectItem value="XII IPA 1">XII IPA 1</SelectItem>
+                <SelectContent className="bg-slate-900 border-white/10 text-white">
+                  <SelectItem value="X IPA 1" className="hover:bg-slate-800 focus:bg-slate-800">X IPA 1</SelectItem>
+                  <SelectItem value="X IPA 2" className="hover:bg-slate-800 focus:bg-slate-800">X IPA 2</SelectItem>
+                  <SelectItem value="XI IPS 1" className="hover:bg-slate-800 focus:bg-slate-800">XI IPS 1</SelectItem>
+                  <SelectItem value="XII IPA 1" className="hover:bg-slate-800 focus:bg-slate-800">XII IPA 1</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            
             <div className="flex-1 space-y-1">
-              <label className="text-sm font-medium text-slate-700">Pilih Hari</label>
+              <label className="text-sm font-medium text-slate-400">Pilih Hari</label>
               <Select value={hariFilter} onValueChange={setHariFilter}>
-                <SelectTrigger className="bg-white">
-                  <SelectValue placeholder="Pilih Hari" />
+                <SelectTrigger className="bg-slate-900 border-white/10 text-white">
+                  <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Senin">Senin</SelectItem>
-                  <SelectItem value="Selasa">Selasa</SelectItem>
-                  <SelectItem value="Rabu">Rabu</SelectItem>
-                  <SelectItem value="Kamis">Kamis</SelectItem>
-                  <SelectItem value="Jumat">Jumat</SelectItem>
+                <SelectContent className="bg-slate-900 border-white/10 text-white">
+                  {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].map(h => (
+                    <SelectItem key={h} value={h} className="hover:bg-slate-800 focus:bg-slate-800">{h}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border border-slate-200">
+        <CardContent className="pt-6">
+          <div className="rounded-lg border border-white/10 overflow-hidden">
             <Table>
-              <TableHeader className="bg-slate-50">
-                <TableRow>
-                  <TableHead className="w-[100px]">Jam</TableHead>
-                  <TableHead>Mata Pelajaran</TableHead>
-                  <TableHead>Guru Pengajar</TableHead>
-                  <TableHead>Ruang</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+              <TableHeader className="bg-slate-950/50">
+                <TableRow className="border-white/10 hover:bg-transparent">
+                  <TableHead className="text-slate-400">Jam</TableHead>
+                  <TableHead className="text-slate-400">Mata Pelajaran</TableHead>
+                  <TableHead className="text-slate-400">Guru Pengajar</TableHead>
+                  <TableHead className="text-slate-400">Ruang</TableHead>
+                  <TableHead className="text-slate-400 text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredSchedules.length > 0 ? (
                   filteredSchedules.map((schedule) => (
-                    <TableRow key={schedule.id} className="hover:bg-slate-50/50">
-                      <TableCell className="font-medium text-slate-900">{schedule.jam}</TableCell>
-                      <TableCell className="font-semibold text-blue-700">{schedule.mapel}</TableCell>
-                      <TableCell>{schedule.guru}</TableCell>
-                      <TableCell>{schedule.ruang}</TableCell>
+                    <TableRow key={schedule.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                      <TableCell className="font-medium text-slate-300">{schedule.jam}</TableCell>
+                      <TableCell className="font-semibold text-blue-400">{schedule.mapel}</TableCell>
+                      <TableCell className="text-slate-300">{schedule.guru}</TableCell>
+                      <TableCell className="text-slate-300">{schedule.ruang}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(schedule)} className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(schedule)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/20">
                             <Edit2 className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => confirmDelete(schedule.id)} className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50">
+                          <Button variant="ghost" size="icon" onClick={() => confirmDelete(schedule.id)} className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -167,82 +152,38 @@ export default function AdminSchedules() {
         </CardContent>
       </Card>
 
-      {/* Dialog for Add/Edit */}
+      {/* Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="bg-slate-900 border border-white/10 text-white">
           <DialogHeader>
             <DialogTitle>{editingSchedule ? 'Edit Jadwal' : 'Tambah Jadwal'}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Kelas</Label>
+              <Label className="text-right text-slate-400">Kelas</Label>
               <Select value={formData.kelas} onValueChange={(val) => setFormData({...formData, kelas: val})}>
-                <SelectTrigger className="col-span-3"><SelectValue placeholder="Pilih Kelas" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="X IPA 1">X IPA 1</SelectItem>
-                  <SelectItem value="X IPA 2">X IPA 2</SelectItem>
-                  <SelectItem value="XI IPS 1">XI IPS 1</SelectItem>
-                  <SelectItem value="XII IPA 1">XII IPA 1</SelectItem>
+                <SelectTrigger className="col-span-3 bg-slate-950 border-white/10 text-white"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-slate-900 border-white/10 text-white">
+                  <SelectItem value="X IPA 1" className="hover:bg-slate-800">X IPA 1</SelectItem>
+                  <SelectItem value="XI IPS 1" className="hover:bg-slate-800">XI IPS 1</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Hari</Label>
-              <Select value={formData.hari} onValueChange={(val) => setFormData({...formData, hari: val})}>
-                <SelectTrigger className="col-span-3"><SelectValue placeholder="Pilih Hari" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Senin">Senin</SelectItem>
-                  <SelectItem value="Selasa">Selasa</SelectItem>
-                  <SelectItem value="Rabu">Rabu</SelectItem>
-                  <SelectItem value="Kamis">Kamis</SelectItem>
-                  <SelectItem value="Jumat">Jumat</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="text-right text-slate-400">Jam</Label>
+              <Input className="col-span-3 bg-slate-950 border-white/10 text-white" value={formData.jam} onChange={(e) => setFormData({...formData, jam: e.target.value})} />
             </div>
-
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Jam</Label>
-              <Input className="col-span-3" value={formData.jam} placeholder="07:00 - 08:30" onChange={(e) => setFormData({...formData, jam: e.target.value})} />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Mata Pelajaran</Label>
-              <Input className="col-span-3" value={formData.mapel} onChange={(e) => setFormData({...formData, mapel: e.target.value})} />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Guru</Label>
-              <Input className="col-span-3" value={formData.guru} onChange={(e) => setFormData({...formData, guru: e.target.value})} />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Ruangan</Label>
-              <Input className="col-span-3" value={formData.ruang} onChange={(e) => setFormData({...formData, ruang: e.target.value})} />
+              <Label className="text-right text-slate-400">Mapel</Label>
+              <Input className="col-span-3 bg-slate-950 border-white/10 text-white" value={formData.mapel} onChange={(e) => setFormData({...formData, mapel: e.target.value})} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Batal</Button>
-            <Button onClick={handleSaveSchedule} className="bg-blue-600 hover:bg-blue-700">Simpan</Button>
+            <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="text-slate-400">Batal</Button>
+            <Button onClick={handleSaveSchedule} className="bg-blue-600 hover:bg-blue-500">Simpan</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Alert Dialog Delete */}
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tindakan ini tidak dapat dibatalkan. Ini akan menghapus jadwal pelajaran dari sistem.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel variant="outline" size="default">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white">Hapus</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

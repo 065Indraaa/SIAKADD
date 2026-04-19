@@ -23,27 +23,27 @@ export default function SiswaGrades() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-slate-100">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Nilai & Rapor</h2>
-          <p className="text-slate-500">Lihat hasil evaluasi belajar Anda.</p>
+          <h2 className="text-3xl font-bold tracking-tight text-white">Nilai & Rapor</h2>
+          <p className="text-slate-400">Lihat hasil evaluasi belajar Anda.</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" className="border-white/10 hover:bg-slate-800 text-black hover:text-gray-300" onClick={() => alert('Fitur unduh rapor belum tersedia')}>
           <Download className="mr-2 h-4 w-4" /> Unduh Rapor
         </Button>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3 border-b">
+      <Card className="bg-slate-900/50 backdrop-blur-md border border-white/10 shadow-xl">
+        <CardHeader className="pb-3 border-b border-white/5">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <CardTitle>Rapor Semester</CardTitle>
+            <CardTitle className="text-white">Rapor Semester</CardTitle>
             <div className="flex space-x-2">
               <Select defaultValue="2024-1">
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[180px] bg-slate-950 border-white/10 text-white">
                   <SelectValue placeholder="Pilih Semester" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-900 border-white/10 text-white">
                   <SelectItem value="2024-1">2024/2025 - Ganjil</SelectItem>
                   <SelectItem value="2023-2">2023/2024 - Genap</SelectItem>
                   <SelectItem value="2023-1">2023/2024 - Ganjil</SelectItem>
@@ -53,28 +53,30 @@ export default function SiswaGrades() {
           </div>
         </CardHeader>
         <CardContent className="pt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mata Pelajaran</TableHead>
-                <TableHead className="text-center">Nilai Harian</TableHead>
-                <TableHead className="text-center">UTS</TableHead>
-                <TableHead className="text-center">UAS</TableHead>
-                <TableHead className="text-right">Nilai Akhir</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {grades.map((grade) => (
-                <TableRow key={grade.id}>
-                  <TableCell className="font-medium">{grade.subject}</TableCell>
-                  <TableCell className="text-center">{grade.nh}</TableCell>
-                  <TableCell className="text-center">{grade.uts}</TableCell>
-                  <TableCell className="text-center">{grade.uas}</TableCell>
-                  <TableCell className="text-right font-bold text-blue-600">{grade.final}</TableCell>
+          <div className="rounded-lg border border-white/10 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-slate-950/50">
+                <TableRow className="border-white/10 hover:bg-transparent">
+                  <TableHead className="text-slate-400">Mata Pelajaran</TableHead>
+                  <TableHead className="text-center text-slate-400">Nilai Harian</TableHead>
+                  <TableHead className="text-center text-slate-400">UTS</TableHead>
+                  <TableHead className="text-center text-slate-400">UAS</TableHead>
+                  <TableHead className="text-right text-slate-400">Nilai Akhir</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {grades.map((grade) => (
+                  <TableRow key={grade.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                    <TableCell className="font-medium text-white">{grade.subject}</TableCell>
+                    <TableCell className="text-center text-slate-200">{grade.nh}</TableCell>
+                    <TableCell className="text-center text-slate-200">{grade.uts}</TableCell>
+                    <TableCell className="text-center text-slate-200">{grade.uas}</TableCell>
+                    <TableCell className="text-right font-bold text-blue-400">{grade.final}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
