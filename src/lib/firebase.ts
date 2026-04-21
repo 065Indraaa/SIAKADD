@@ -3,12 +3,12 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "mock-api-key",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "mock-auth-domain",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "mock-project-id",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "mock-storage-bucket",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "mock-sender-id",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "mock-app-id"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCQ7cTRkw8IiJZInu0uJA6tU7HW44Pc1EQ",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "uassiakad.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "uassiakad",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "uassiakad.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "1099442024286",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1099442024286:web:18207393255145655361"
 };
 
 export const app = initializeApp(firebaseConfig);

@@ -1,0 +1,12 @@
+specVersion: "v1beta"
+serviceId: "uassiakad-service"
+location: "asia-southeast2"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "uassiakad-db-v3"
+      cloudSql:
+        instanceId: "uassiakad-instance"
+connectorDirs:
+  - "./connector"

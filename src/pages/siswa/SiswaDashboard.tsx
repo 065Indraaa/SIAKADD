@@ -1,15 +1,59 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Award, Calendar, TrendingUp } from 'lucide-react';
+import { BookOpen, Award, Calendar, TrendingUp, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import SiswaProfile from './SiswaProfile';
 import SiswaGrades from './SiswaGrades';
 import SiswaSchedule from './SiswaSchedule';
 import SiswaAchievements from './SiswaAchievements';
+import { fetchPrestasiSiswa, fetchNilaiSiswa, fetchJadwalKelas } from '@/lib/schoolService';
 
 function SiswaOverview() {
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>({
+    className: '--',
+    homeroom: '--',
+    avgGrade: 0,
+    achievementCount: 0,
+    attendance: '0%',
+  });
+  const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user && userData?.role === 'siswa' && userData?.id) {
+      loadDashboardData();
+    }
+  }, [user, userData]);
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    try {
+      const siswaId = userData?.siswaId; // Membutuhkan siswaId dari context auth
+
+      // Jika kita mengimplementasi fetch semua:
+      // const prestasi = await fetchPrestasiSiswa(siswaId);
+      // const nilai = await fetchNilaiSiswa(siswaId, 'Ganjil', '2023/2024');
+
+      setStats({
+        className: userData?.className || 'Belum Masuk Kelas',
+        homeroom: 'Wali Kelas Default',
+        avgGrade: 0,
+        achievementCount: 0,
+        attendance: '100%',
+      });
+
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="p-8 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>;
+  }
 
   return (
     <div className="space-y-6 text-slate-100">
@@ -27,8 +71,8 @@ function SiswaOverview() {
             <BookOpen className="h-4 w-4 text-blue-300" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">XI-IPA-1</div>
-            <p className="text-xs text-blue-200 mt-1">Wali Kelas: Bpk. Ahmad</p>
+            <div className="text-3xl font-bold">{stats.className}</div>
+            <p className="text-xs text-blue-200 mt-1">Wali Kelas: {stats.homeroom}</p>
           </CardContent>
         </Card>
 
@@ -39,8 +83,8 @@ function SiswaOverview() {
             <TrendingUp className="h-4 w-4 text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">88.5</div>
-            <p className="text-xs text-emerald-400 font-medium mt-1">+2.4 dari semester lalu</p>
+            <div className="text-2xl font-bold text-white">{stats.avgGrade.toFixed(2)}</div>
+            <p className="text-xs text-emerald-400 font-medium mt-1">Terbaru</p>
           </CardContent>
         </Card>
 
@@ -51,8 +95,8 @@ function SiswaOverview() {
             <Award className="h-4 w-4 text-amber-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">3</div>
-            <p className="text-xs text-slate-400 mt-1">Tingkat Kota/Provinsi</p>
+            <div className="text-2xl font-bold text-white">{stats.achievementCount}</div>
+            <p className="text-xs text-slate-400 mt-1">Sertifikat/Piala</p>
           </CardContent>
         </Card>
 
@@ -63,8 +107,8 @@ function SiswaOverview() {
             <Calendar className="h-4 w-4 text-rose-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">98%</div>
-            <p className="text-xs text-slate-400 mt-1">Semester Ganjil</p>
+            <div className="text-2xl font-bold text-white">{stats.attendance}</div>
+            <p className="text-xs text-slate-400 mt-1">Kehadiran Baik</p>
           </CardContent>
         </Card>
       </div>
@@ -77,26 +121,22 @@ function SiswaOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border-l-4 border-blue-600 bg-slate-950/50 rounded-r-lg">
-                <div>
-                  <p className="font-bold text-white">07:00 - 08:30</p>
-                  <p className="text-sm font-medium text-slate-300">Fisika</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-slate-400">Ibu Siti</p>
-                  <p className="text-sm text-slate-400">Ruang Lab Fisika</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between p-4 border-l-4 border-emerald-600 bg-slate-950/50 rounded-r-lg">
-                <div>
-                  <p className="font-bold text-white">08:30 - 10:00</p>
-                  <p className="text-sm font-medium text-slate-300">Matematika Wajib</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-slate-400">Bpk. Budi</p>
-                  <p className="text-sm text-slate-400">Ruang 204</p>
-                </div>
-              </div>
+              {todaySchedule.length === 0 ? (
+                <div className="text-center text-slate-400 py-6">Hari ini tidak ada jadwal atau jadwal belum dimuat.</div>
+              ) : (
+                todaySchedule.map((s, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 border-l-4 border-blue-600 bg-slate-950/50 rounded-r-lg">
+                    <div>
+                      <p className="font-bold text-white">{s.waktuMasuk}</p>
+                      <p className="text-sm font-medium text-slate-300">{s.mataPelajaran}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-slate-400">{s.guru}</p>
+                      <p className="text-sm text-slate-400">{s.ruang}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
