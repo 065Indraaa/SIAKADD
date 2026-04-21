@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Download, BookOpen, Search, Filter, Sparkles, FileText } from 'lucide-react';
+import { Download, BookOpen, Search, Filter, Sparkles, FileText, TrendingUp } from 'lucide-react';
 
 export default function SiswaGrades() {
   const grades = [
