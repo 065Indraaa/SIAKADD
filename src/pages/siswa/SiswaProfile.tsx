@@ -1,85 +1,88 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Save } from 'lucide-react';
+import { User, Mail, MapPin, Phone, GraduationCap } from 'lucide-react';
 
 export default function SiswaProfile() {
   const { user } = useAuth();
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Profil Saya</h2>
-        <p className="text-slate-500">Lihat dan perbarui informasi pribadi Anda.</p>
+    // Background di-set ke slate-950 untuk menyamai Landing Page
+    <div className="min-h-screen bg-slate-950 p-6 space-y-6 text-slate-100">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-white">Profil Saya</h2>
+          <p className="text-slate-400">Informasi data diri Anda.</p>
+        </div>
+
+        {/* 1. Header Profil (Futuristic Glassmorphism) */}
+        <div className="bg-slate-900/50 backdrop-blur-xl p-6 rounded-2xl border border-white/10 flex items-center gap-6 shadow-2xl">
+          <div className="w-28 h-28 bg-slate-800 rounded-xl overflow-hidden border border-white/10 flex-shrink-0">
+             <img src="https://via.placeholder.com/150" alt="Profile" className="w-full h-full object-cover" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white mb-1">{user?.name || "YUSUF RAMADHAN"}</h1>
+            <p className="text-blue-400 font-medium flex items-center gap-2">
+              <GraduationCap className="h-4 w-4" /> S1 Pendidikan Teknologi Informasi
+            </p>
+            <p className="text-slate-400 text-sm mt-1">Periode Kuliah 2025/2026 Genap</p>
+          </div>
+        </div>
+
+        {/* 2. Data Diri */}
+        <Card className="bg-slate-900/50 backdrop-blur-xl border border-white/10 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <User className="h-5 w-5 text-blue-400" /> Data Diri
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[
+              { label: "NISN", value: "0012345678" },
+              { label: "NIS", value: "1001" },
+              { label: "Tempat Lahir", value: "Jakarta" },
+              { label: "Tanggal Lahir", value: "15 Mei 2007" },
+              { label: "Jenis Kelamin", value: "Laki-laki" },
+              { label: "Kelas / Jurusan", value: "XI-IPA-1 / MIPA" },
+            ].map((item, i) => (
+              <div key={i}>
+                <p className="text-sm text-slate-400">{item.label}</p>
+                <p className="text-lg font-medium text-white">{item.value}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* 3. Informasi Kontak */}
+        <Card className="bg-slate-900/50 backdrop-blur-xl border border-white/10 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-white">Informasi Kontak</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center gap-4">
+              <MapPin className="h-5 w-5 text-blue-400" />
+              <div>
+                <p className="text-sm text-slate-400">Alamat Lengkap</p>
+                <p className="text-white">Jl. Merdeka No. 123, Jakarta Selatan</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Phone className="h-5 w-5 text-blue-400" />
+              <div>
+                <p className="text-sm text-slate-400">Nomor Telepon</p>
+                <p className="text-white">081234567890</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Mail className="h-5 w-5 text-blue-400" />
+              <div>
+                <p className="text-sm text-slate-400">Email</p>
+                <p className="text-white">{user?.email || 'yusuf@student.unesa.ac.id'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Data Diri</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="nisn">NISN</Label>
-              <Input id="nisn" value="0012345678" disabled />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="nis">NIS</Label>
-              <Input id="nis" value="1001" disabled />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="name">Nama Lengkap</Label>
-              <Input id="name" value={user?.name || ''} disabled />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="ttl_tempat">Tempat Lahir</Label>
-              <Input id="ttl_tempat" defaultValue="Jakarta" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="ttl_tanggal">Tanggal Lahir</Label>
-              <Input id="ttl_tanggal" type="date" defaultValue="2007-05-15" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="gender">Jenis Kelamin</Label>
-              <Input id="gender" value="Laki-laki" disabled />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="class">Kelas / Jurusan</Label>
-              <Input id="class" value="XI-IPA-1 / MIPA" disabled />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Informasi Kontak</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="address">Alamat Lengkap</Label>
-              <Input id="address" defaultValue="Jl. Merdeka No. 123, Jakarta Selatan" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Nomor Telepon</Label>
-              <Input id="phone" defaultValue="081234567890" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" defaultValue={user?.email || ''} />
-            </div>
-          </div>
-          <div className="pt-4 flex justify-end">
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Save className="mr-2 h-4 w-4" /> Simpan Perubahan
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
