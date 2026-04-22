@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  LogOut, 
-  LayoutDashboard, 
-  Users, 
-  GraduationCap, 
-  BookOpen, 
+import {
+  LogOut,
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  BookOpen,
   Award,
   Settings,
   Menu,
@@ -70,7 +70,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const Calendar = LayoutDashboard; // Fallback if not imported correctly, though I added it to imports logic in my mind. Wait.
   // Actually I'll use the icons already available.
-  
+
   const navigation = getNavigation();
 
   return (
@@ -79,11 +79,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[100] md:hidden">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          
+
           {/* Menu Panel */}
           <div className="absolute top-0 left-0 bottom-0 w-80 bg-slate-900 border-r border-white/5 shadow-2xl flex flex-col animate-in slide-in-from-left duration-500">
             <div className="flex h-20 items-center justify-between px-6 border-b border-white/5">
@@ -93,7 +93,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
                 <h1 className="text-xl font-black tracking-tighter text-white italic">SIAKAD<span className="text-blue-500">PRO</span></h1>
               </div>
-              <button 
+              <button
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="p-2 rounded-xl bg-white/5 text-slate-400 hover:text-white"
               >
@@ -120,11 +120,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <Link
                       key={item.name}
                       to={item.href}
-                      className={`group flex items-center rounded-2xl px-4 py-4 text-sm font-bold transition-all ${
-                        isActive 
-                          ? 'bg-blue-600 shadow-xl shadow-blue-600/20 text-white translate-x-2' 
-                          : 'text-slate-400 hover:bg-white/5 hover:text-white'
-                      }`}
+                      className={`group flex items-center rounded-2xl px-4 py-4 text-sm font-bold transition-all ${isActive
+                        ? 'bg-blue-600 shadow-xl shadow-blue-600/20 text-white translate-x-2'
+                        : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                        }`}
                     >
                       <item.icon className={`mr-3 h-5 w-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-blue-400'}`} />
                       {item.name}
@@ -135,9 +134,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="p-6 border-t border-white/5">
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start h-14 rounded-2xl text-slate-400 hover:text-white hover:bg-red-500/10 font-bold group" 
+              <Button
+                variant="ghost"
+                className="w-full justify-start h-14 rounded-2xl text-slate-400 hover:text-white hover:bg-red-500/10 font-bold group"
                 onClick={handleLogout}
               >
                 <LogOut className="mr-3 h-5 w-5 text-red-500 group-hover:animate-pulse" />
@@ -170,11 +169,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`group flex items-center rounded-2xl px-4 py-4 text-sm font-bold transition-all relative overflow-hidden ${
-                    isActive 
-                      ? 'bg-blue-600 shadow-xl shadow-blue-600/20 text-white' 
-                      : 'text-slate-500 hover:bg-white/5 hover:text-white'
-                  }`}
+                  className={`group flex items-center rounded-2xl px-4 py-4 text-sm font-bold transition-all relative overflow-hidden ${isActive
+                    ? 'bg-blue-600 shadow-xl shadow-blue-600/20 text-white'
+                    : 'text-slate-500 hover:bg-white/5 hover:text-white'
+                    }`}
                 >
                   {isActive && <div className="absolute left-0 w-1 h-6 bg-white rounded-full ml-1" />}
                   <item.icon className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-600 group-hover:text-blue-400'}`} aria-hidden="true" />
@@ -195,9 +193,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{user?.role}</p>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start h-12 rounded-xl text-slate-500 hover:text-white hover:bg-red-500/10 font-bold transition-all" 
+          <Button
+            variant="ghost"
+            className="w-full justify-start h-12 rounded-xl text-slate-500 hover:text-white hover:bg-red-500/10 font-bold transition-all"
             onClick={handleLogout}
           >
             <LogOut className="mr-2 h-4 w-4 text-red-500 opacity-50" />
@@ -210,12 +208,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col overflow-hidden relative">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full -mr-64 -mt-64 pointer-events-none" />
-        
+
         <header className="flex h-20 items-center justify-between border-b border-white/5 bg-slate-950/20 backdrop-blur-2xl px-6 sm:px-8 z-20">
           <div className="flex items-center gap-4">
             <button
               type="button"
-              className="lg:hidden p-2 rounded-xl border border-white/5 bg-white/5 text-slate-400 hover:text-white transition-all active:scale-90 md:block hidden" 
+              className="lg:hidden p-2 rounded-xl border border-white/5 bg-white/5 text-slate-400 hover:text-white transition-all active:scale-90 md:block hidden"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Menu className="h-6 w-6" />
@@ -223,29 +221,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {/* The line above is actually for tablets, for phones see below */}
             <button
               type="button"
-              className="md:hidden p-2 rounded-xl border border-white/5 bg-white/5 text-slate-400 hover:text-white transition-all active:scale-90" 
+              className="md:hidden p-2 rounded-xl border border-white/5 bg-white/5 text-slate-400 hover:text-white transition-all active:scale-90"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Menu className="h-6 w-6" />
             </button>
-            
+
             <div className="hidden sm:flex flex-col">
-               <h2 className="text-sm font-black text-white leading-none italic uppercase tracking-tighter">SIAKAD<span className="text-blue-500">PRO</span></h2>
+              <h2 className="text-sm font-black text-white leading-none italic uppercase tracking-tighter">SMKN<span className="text-blue-500">ASOLOLE</span></h2>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-6">
-            <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-white/5 rounded-2xl border border-white/5">
-               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-blue-500">SIAKADPRO</span>
-            </div>
-            
             <div className="flex items-center gap-2">
               <button className="p-2.5 rounded-xl bg-white/5 text-slate-500 hover:text-white border border-transparent hover:border-white/5 transition-all">
-                 <Bell className="h-5 w-5" />
+                <Bell className="h-5 w-5" />
               </button>
               <button className="p-2.5 rounded-xl bg-white/5 text-slate-500 hover:text-white border border-transparent hover:border-white/5 transition-all">
-                 <Globe className="h-5 w-5" />
+                <Globe className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -263,15 +256,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="bg-blue-600 p-6 text-white flex justify-between items-center shadow-lg">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                   <MessageSquare className="h-6 w-6" />
+                  <MessageSquare className="h-6 w-6" />
                 </div>
                 <div>
-                   <h3 className="font-black text-lg tracking-tight leading-none italic">SCOLA AI</h3>
-                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-70 mt-1">Asisten Virtual</p>
+                  <h3 className="font-black text-lg tracking-tight leading-none italic">SCOLA AI</h3>
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-70 mt-1">Asisten Virtual</p>
                 </div>
               </div>
-              <button 
-                onClick={() => setIsChatOpen(false)} 
+              <button
+                onClick={() => setIsChatOpen(false)}
                 className="h-10 w-10 rounded-2xl hover:bg-white/20 flex items-center justify-center transition-all"
               >
                 <X className="h-6 w-6" />
@@ -282,7 +275,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         )}
-        
+
         <button
           onClick={() => setIsChatOpen(!isChatOpen)}
           className="h-16 w-16 bg-blue-600 text-white rounded-2xl shadow-[0_15px_40px_rgba(37,99,235,0.4)] hover:bg-blue-500 hover:scale-110 active:scale-95 transition-all pointer-events-auto flex items-center justify-center group"
@@ -292,4 +285,4 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
     </div>
   );
-}
+}

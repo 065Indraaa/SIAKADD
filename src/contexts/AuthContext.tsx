@@ -17,6 +17,7 @@ interface UserData {
   specialization?: string;
   className?: string;
   kelasId?: string;
+  nisn?: string;
 }
 
 interface AuthContextType {
