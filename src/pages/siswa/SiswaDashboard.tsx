@@ -10,7 +10,7 @@ import SiswaAchievements from './SiswaAchievements';
 import { fetchPrestasiSiswa, fetchNilaiSiswa, fetchJadwalKelas } from '@/lib/schoolService';
 
 function SiswaOverview() {
-  const { user, userData } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>({
     className: '--',
@@ -22,10 +22,10 @@ function SiswaOverview() {
   const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
 
   useEffect(() => {
-    if (user && userData?.role === 'siswa' && userData?.id) {
+    if (user && user.role === 'siswa' && user.uid) {
       loadDashboardData();
     }
-  }, [user, userData]);
+  }, [user]);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -34,7 +34,7 @@ function SiswaOverview() {
       await new Promise(resolve => setTimeout(resolve, 800));
       
       setStats({
-        className: userData?.className || 'X-MIPA-1',
+        className: user?.className || 'X-MIPA-1',
         homeroom: 'Drs. Sudirman',
         avgGrade: 88.5,
         achievementCount: 4,
