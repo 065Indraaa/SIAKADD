@@ -24,7 +24,7 @@ export default function LandingPage() {
               <div className="p-2 bg-blue-600 rounded-lg group-hover:rotate-12 transition-transform duration-300 shadow-[0_0_15px_rgba(37,99,235,0.4)]">
                 <GraduationCap className="h-6 w-6 text-white" />
               </div>
-              <span className="ml-3 text-2xl font-black tracking-tighter font-heading bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-400">SMK ASOLOLE</span>
+              <span className="ml-3 text-2xl font-black tracking-tighter font-heading bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-400">SCOLA</span>
             </div>
             <div className="hidden md:flex items-center space-x-8 text-xs font-black uppercase tracking-widest text-slate-500">
               <a href="#profil" className="hover:text-blue-400 transition-colors">Profil</a>
@@ -53,7 +53,7 @@ export default function LandingPage() {
             MENCETAK<br />ELITE DIGITAL
           </h1>
           <p className="text-xl md:text-2xl text-slate-400 font-medium max-w-3xl mx-auto mb-12 leading-relaxed">
-            SMK ASOLOLE hadir untuk membentuk teknokrat masa depan yang siap tempur di industri global dengan skil teknis mumpuni dan integritas tinggi.
+            SCOLA hadir untuk membentuk teknokrat masa depan yang siap tempur di industri global dengan skil teknis mumpuni dan integritas tinggi.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <div className="flex items-center gap-4 text-slate-500 font-bold uppercase tracking-widest text-[10px]">
@@ -145,7 +145,7 @@ export default function LandingPage() {
             </div>
             <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
               {[
-                { name: "Budi Santoso", pos: "Software Engineer @ Google", msg: "SMK Asolole memberikan fondasi logika yang kuat dan disiplin industri." },
+                { name: "Budi Santoso", pos: "Software Engineer @ Google", msg: "SCOLA memberikan fondasi logika yang kuat dan disiplin industri." },
                 { name: "Siti Aminah", pos: "UI Designer @ Tokopedia", msg: "Peralatan lab yang canggih sangat membantu saya mengeksplorasi kreativitas." }
               ].map((a, i) => (
                 <div key={i} className="p-8 bg-slate-900/40 rounded-[2rem] border border-white/5 space-y-4">
@@ -204,11 +204,11 @@ export default function LandingPage() {
                 <div className="p-2 bg-blue-600 rounded-lg shadow-[0_0_15px_rgba(37,99,235,0.4)]">
                   <GraduationCap className="h-5 w-5 text-white" />
                 </div>
-                <span className="ml-3 text-2xl font-black tracking-tighter text-white">SMK ASOLOLE</span>
+                <span className="ml-3 text-2xl font-black tracking-tighter text-white">SCOLA</span>
               </div>
               <p className="text-slate-500 max-w-sm font-medium">
                 Jl. Asolole No. 69, Kota Pendidikan, Indonesia.<br />
-                Email: info@smkasolole.sch.id<br />
+                Email: info@scola.sch.id<br />
                 Telp: (021) 1234-5678
               </p>
             </div>
@@ -228,7 +228,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-10 border-t border-white/5 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em]">
-            <p>&copy; 2026 SMK ASOLOLE. All rights reserved.</p>
+            <p>&copy; 2026 SCOLA. All rights reserved.</p>
             <div className="flex gap-8">
               <a href="#" className="hover:text-white">Privacy Policy</a>
               <a href="#" className="hover:text-white">Terms of Service</a>
@@ -253,7 +253,7 @@ export default function LandingPage() {
           <div className="bg-blue-600 p-6 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="h-2 w-2 bg-white rounded-full animate-pulse"></div>
-              <h3 className="font-bold text-white tracking-tight">Asolole Helpdesk AI</h3>
+              <h3 className="font-bold text-white tracking-tight">SCOLA Helpdesk AI</h3>
             </div>
             <button onClick={() => setIsChatOpen(false)} className="text-white text-2xl hover:scale-110 transition-transform">&times;</button>
           </div>

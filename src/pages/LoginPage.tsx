@@ -32,7 +32,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(30,58,138,0.2),_transparent_70%)]"></div>
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
       </div>
-      
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
         <div className="flex justify-center group pointer-events-none">
           <div className="h-20 w-20 bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl flex items-center justify-center shadow-[0_20px_50px_rgba(37,99,235,0.4)] group-hover:scale-110 transition-transform duration-500">
@@ -62,58 +62,55 @@ export default function LoginPage() {
             )}
 
             {/* Akses Siswa */}
-            <button 
-              onClick={() => handleBypassLogin('siswa')} 
+            <button
+              onClick={() => handleBypassLogin('siswa')}
               disabled={isLoading}
               className="group relative flex items-center justify-between w-full p-4 h-16 bg-blue-600/10 hover:bg-blue-600 border border-blue-500/20 hover:border-blue-400 rounded-2xl transition-all duration-300 active:scale-95 disabled:opacity-50"
             >
               <div className="flex items-center">
-                 <div className="h-10 w-10 bg-blue-600 group-hover:bg-white/20 rounded-xl flex items-center justify-center mr-4 transition-colors">
-                    <User className="h-5 w-5 text-white" />
-                 </div>
-                 <span className="text-lg font-bold text-white tracking-tight">Akses Siswa</span>
+                <div className="h-10 w-10 bg-blue-600 group-hover:bg-white/20 rounded-xl flex items-center justify-center mr-4 transition-colors">
+                  <User className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-lg font-bold text-white tracking-tight">Akses Siswa</span>
               </div>
               <ArrowRight className="h-5 w-5 text-blue-400 group-hover:text-white transition-all transform group-hover:translate-x-1" />
             </button>
 
             {/* Akses Guru */}
-            <button 
-              onClick={() => handleBypassLogin('guru')} 
+            <button
+              onClick={() => handleBypassLogin('guru')}
               disabled={isLoading}
               className="group relative flex items-center justify-between w-full p-4 h-16 bg-emerald-600/10 hover:bg-emerald-600 border border-emerald-500/20 hover:border-emerald-400 rounded-2xl transition-all duration-300 active:scale-95 disabled:opacity-50"
             >
               <div className="flex items-center">
-                 <div className="h-10 w-10 bg-emerald-600 group-hover:bg-white/20 rounded-xl flex items-center justify-center mr-4 transition-colors">
-                    <BookOpen className="h-5 w-5 text-white" />
-                 </div>
-                 <span className="text-lg font-bold text-white tracking-tight">Akses Pengajar</span>
+                <div className="h-10 w-10 bg-emerald-600 group-hover:bg-white/20 rounded-xl flex items-center justify-center mr-4 transition-colors">
+                  <BookOpen className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-lg font-bold text-white tracking-tight">Akses Pengajar</span>
               </div>
               <ArrowRight className="h-5 w-5 text-emerald-400 group-hover:text-white transition-all transform group-hover:translate-x-1" />
             </button>
 
             {/* Akses Admin */}
-            <button 
-              onClick={() => handleBypassLogin('admin')} 
+            <button
+              onClick={() => handleBypassLogin('admin')}
               disabled={isLoading}
               className="group relative flex items-center justify-between w-full p-4 h-16 bg-slate-800/50 hover:bg-slate-700 border border-white/10 rounded-2xl transition-all duration-300 active:scale-95 disabled:opacity-50"
             >
               <div className="flex items-center">
-                 <div className="h-10 w-10 bg-slate-700 group-hover:bg-white/20 rounded-xl flex items-center justify-center mr-4 transition-colors">
-                    <ShieldCheck className="h-5 w-5 text-white" />
-                 </div>
-                 <span className="text-lg font-bold text-white tracking-tight">Access Control</span>
+                <div className="h-10 w-10 bg-slate-700 group-hover:bg-white/20 rounded-xl flex items-center justify-center mr-4 transition-colors">
+                  <ShieldCheck className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-lg font-bold text-white tracking-tight">Access Control</span>
               </div>
               <ArrowRight className="h-5 w-5 text-slate-500 group-hover:text-white transition-all transform group-hover:translate-x-1" />
             </button>
           </CardContent>
-          <div className="bg-white/5 p-4 text-center border-t border-white/5">
-             <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500">Mode Sandbox: Autentikasi Bypass Aktif</p>
-          </div>
         </Card>
       </div>
 
       <p className="mt-10 text-center text-xs text-slate-600 font-medium tracking-wide relative z-10 animate-fade-in delay-500">
-        &copy; 2026 SCOLA Core Identity System. Secure Session Encrypted.
+        &copy; 2026 SCOLA
       </p>
     </div>
   );

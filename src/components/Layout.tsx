@@ -157,7 +157,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
             <div>
               <h1 className="text-2xl font-black tracking-tighter text-white italic leading-none">SIAKAD<span className="text-blue-500">PRO</span></h1>
-              <p className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-500 mt-1">Smart Academic System</p>
+              <p className="text-[8px] font-black uppercase tracking-[0.4em] text-blue-500 mt-1">SCOLA</p>
             </div>
           </div>
         </div>
@@ -230,15 +230,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </button>
             
             <div className="hidden sm:flex flex-col">
-               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 leading-none mb-1">Terminal</p>
-               <h2 className="text-sm font-bold text-white leading-none">Siakad Panel v4.0</h2>
+               <h2 className="text-sm font-black text-white leading-none italic uppercase tracking-tighter">SIAKAD<span className="text-blue-500">PRO</span></h2>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-6">
             <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-white/5 rounded-2xl border border-white/5">
                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">System Online</span>
+               <span className="text-[10px] font-black uppercase tracking-widest text-blue-500">SIAKADPRO</span>
             </div>
             
             <div className="flex items-center gap-2">
