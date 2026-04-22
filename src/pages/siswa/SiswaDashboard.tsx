@@ -70,7 +70,7 @@ function SiswaOverview() {
         <div>
           <div className="flex items-center gap-2 mb-3">
              <Zap className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Student Intelligence Hub</span>
+             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Pusat Kecerdasan Siswa</span>
           </div>
           <h2 className="text-5xl font-black tracking-tighter text-white font-heading leading-none">
             Halo, {user?.name.split(' ')[0]}!
@@ -127,7 +127,7 @@ function SiswaOverview() {
             {todaySchedule.length === 0 ? (
               <div className="text-center py-20 bg-slate-950/30 rounded-[2rem] border border-dashed border-white/5">
                 <div className="h-16 w-16 bg-slate-900 rounded-2xl mx-auto flex items-center justify-center mb-4 opacity-30 italic font-black text-2xl">Zzz</div>
-                <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Hari ini tidak ada jadwal kuliah.</p>
+                <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Hari ini tidak ada jadwal belajar.</p>
               </div>
             ) : (
               todaySchedule.map((s, idx) => (

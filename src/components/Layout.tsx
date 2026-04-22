@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const getNavigation = () => {
     if (user?.role === 'admin') {
       return [
-        { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+        { name: 'Panel Utama', href: '/admin', icon: LayoutDashboard },
         { name: 'Pengguna', href: '/admin/users', icon: Users },
         { name: 'Kelas', href: '/admin/classes', icon: BookOpen },
         { name: 'Jadwal', href: '/admin/schedules', icon: BookOpen },
@@ -50,7 +50,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
     if (user?.role === 'guru') {
       return [
-        { name: 'Dashboard', href: '/guru', icon: LayoutDashboard },
+        { name: 'Panel Utama', href: '/guru', icon: LayoutDashboard },
         { name: 'Input Nilai', href: '/guru/grades', icon: BookOpen },
         { name: 'Prestasi', href: '/guru/achievements', icon: Award },
         { name: 'Siswa', href: '/guru/students', icon: Users },
@@ -58,7 +58,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
     if (user?.role === 'siswa') {
       return [
-        { name: 'Dashboard', href: '/siswa', icon: LayoutDashboard },
+        { name: 'Panel Utama', href: '/siswa', icon: LayoutDashboard },
         { name: 'Profil Saya', href: '/siswa/profile', icon: Users },
         { name: 'Nilai & Rapor', href: '/siswa/grades', icon: BookOpen },
         { name: 'Jadwal Peserta', href: '/siswa/schedule', icon: Calendar },
@@ -201,7 +201,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             onClick={handleLogout}
           >
             <LogOut className="mr-2 h-4 w-4 text-red-500 opacity-50" />
-            Logout
+            Keluar Sesi
           </Button>
         </div>
       </div>
@@ -267,7 +267,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
                 <div>
                    <h3 className="font-black text-lg tracking-tight leading-none italic">SCOLA AI</h3>
-                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-70 mt-1">Virtual Assistant</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-70 mt-1">Asisten Virtual</p>
                 </div>
               </div>
               <button 

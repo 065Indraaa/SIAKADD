@@ -141,7 +141,7 @@ export default function LandingPage() {
               <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center text-slate-950 font-black">AI</div>
               <h2 className="text-4xl font-black text-white font-heading italic tracking-tighter">Jejaring Alumni</h2>
               <p className="text-slate-400 font-medium">98% lulusan kami langsung terserap di dunia kerja atau melanjutkan ke perguruan tinggi ternama.</p>
-              <Button variant="outline" className="border-white/10 text-white rounded-xl h-12 hover:bg-white/5">Lihat Success Story</Button>
+              <Button variant="outline" className="border-white/10 text-white rounded-xl h-12 hover:bg-white/5">Lihat Kisah Sukses</Button>
             </div>
             <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
               {[
@@ -189,7 +189,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              {[1, 2, 3, 4].map(i => <div key={i} className="aspect-video bg-blue-700/50 border border-white/20 rounded-2xl flex items-center justify-center font-black text-white/20">PREVIEW</div>)}
+              {[1, 2, 3, 4].map(i => <div key={i} className="aspect-video bg-blue-700/50 border border-white/20 rounded-2xl flex items-center justify-center font-black text-white/20">PRATINJAU</div>)}
             </div>
           </div>
         </div>
@@ -230,8 +230,8 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-10 border-t border-white/5 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em]">
             <p>&copy; 2026 SCOLA. All rights reserved.</p>
             <div className="flex gap-8">
-              <a href="#" className="hover:text-white">Privacy Policy</a>
-              <a href="#" className="hover:text-white">Terms of Service</a>
+              <a href="#" className="hover:text-white">Kebijakan Privasi</a>
+              <a href="#" className="hover:text-white">Ketentuan Layanan</a>
             </div>
           </div>
         </div>
@@ -253,7 +253,7 @@ export default function LandingPage() {
           <div className="bg-blue-600 p-6 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="h-2 w-2 bg-white rounded-full animate-pulse"></div>
-              <h3 className="font-bold text-white tracking-tight">SCOLA Helpdesk AI</h3>
+              <h3 className="font-bold text-white tracking-tight">Asisten Bantuan SCOLA</h3>
             </div>
             <button onClick={() => setIsChatOpen(false)} className="text-white text-2xl hover:scale-110 transition-transform">&times;</button>
           </div>

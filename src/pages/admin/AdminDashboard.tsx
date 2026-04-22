@@ -12,7 +12,7 @@ function AdminOverview() {
   return (
     <div className="space-y-6 text-slate-100">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-white">Dashboard Admin</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-white">Panel Utama Administrator</h2>
         <p className="text-slate-400">Ringkasan sistem informasi akademik hari ini.</p>
       </div>
 
@@ -66,7 +66,7 @@ function AdminOverview() {
         {/* Persetujuan Pending */}
         <Card className="col-span-3 bg-slate-900/50 backdrop-blur-md border border-white/10">
           <CardHeader>
-            <CardTitle className="text-white">Persetujuan Akun Pending</CardTitle>
+            <CardTitle className="text-white">Persetujuan Akun Tertunda</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-slate-950/50 border border-white/5 rounded-xl">
@@ -74,14 +74,14 @@ function AdminOverview() {
                 <p className="font-medium text-white">Siti Aminah</p>
                 <p className="text-sm text-slate-400">Guru Sejarah</p>
               </div>
-              <Link to="/admin/users" className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Review</Link>
+              <Link to="/admin/users" className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Tinjau</Link>
             </div>
             <div className="flex items-center justify-between p-4 bg-slate-950/50 border border-white/5 rounded-xl">
               <div>
                 <p className="font-medium text-white">Ahmad Fauzi</p>
                 <p className="text-sm text-slate-400">Siswa Pindahan</p>
               </div>
-              <Link to="/admin/users" className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Review</Link>
+              <Link to="/admin/users" className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Tinjau</Link>
             </div>
           </CardContent>
         </Card>

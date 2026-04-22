@@ -101,7 +101,7 @@ export default function LoginPage() {
                 <div className="h-10 w-10 bg-slate-700 group-hover:bg-white/20 rounded-xl flex items-center justify-center mr-4 transition-colors">
                   <ShieldCheck className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-lg font-bold text-white tracking-tight">Access Control</span>
+                <span className="text-lg font-bold text-white tracking-tight">Kontrol Akses</span>
               </div>
               <ArrowRight className="h-5 w-5 text-slate-500 group-hover:text-white transition-all transform group-hover:translate-x-1" />
             </button>

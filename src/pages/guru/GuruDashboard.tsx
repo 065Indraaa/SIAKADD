@@ -71,7 +71,7 @@ function GuruOverview() {
         <div>
           <div className="flex items-center gap-2 mb-3">
              <Zap className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Intelligent Educator Panel</span>
+             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Panel Pendidik Cerdas</span>
           </div>
           <h2 className="text-5xl font-black tracking-tighter text-white font-heading leading-none">
             Halo, {user?.name.split(' ')[0]}!
@@ -118,7 +118,7 @@ function GuruOverview() {
           <CardHeader className="p-8 border-b border-white/5 flex flex-row items-center justify-between">
             <div>
                <CardTitle className="text-white font-heading font-black text-2xl italic">Jadwal Hari Ini</CardTitle>
-               <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Timeline Pengajaran</p>
+               <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Linimasa Pengajaran</p>
             </div>
             <Sparkles className="h-6 w-6 text-blue-500 animate-pulse" />
           </CardHeader>
