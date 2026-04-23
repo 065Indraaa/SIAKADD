@@ -14,7 +14,7 @@ If a user is not using a supported framework, they can use the generated SDK dir
 Here's an example of how to use it with the first 5 operations:
 
 ```js
-import { createPengguna, updatePengguna, deletePengguna, createGuru, updateGuru, createSiswa, updateSiswa, createKelas, updateKelas, deleteKelas } from '@uassiakad/connector';
+import { createPengguna, updatePengguna, deletePengguna, createGuru, updateGuru, deleteGuru, createSiswa, updateSiswa, updateSiswaPeminatan, deleteSiswa } from '@uassiakad/connector';
 
 
 // Operation CreatePengguna:  For variables, look at type CreatePenggunaVars in ../index.d.ts
@@ -32,20 +32,20 @@ const { data } = await CreateGuru(dataConnect, createGuruVars);
 // Operation UpdateGuru:  For variables, look at type UpdateGuruVars in ../index.d.ts
 const { data } = await UpdateGuru(dataConnect, updateGuruVars);
 
+// Operation DeleteGuru:  For variables, look at type DeleteGuruVars in ../index.d.ts
+const { data } = await DeleteGuru(dataConnect, deleteGuruVars);
+
 // Operation CreateSiswa:  For variables, look at type CreateSiswaVars in ../index.d.ts
 const { data } = await CreateSiswa(dataConnect, createSiswaVars);
 
 // Operation UpdateSiswa:  For variables, look at type UpdateSiswaVars in ../index.d.ts
 const { data } = await UpdateSiswa(dataConnect, updateSiswaVars);
 
-// Operation CreateKelas:  For variables, look at type CreateKelasVars in ../index.d.ts
-const { data } = await CreateKelas(dataConnect, createKelasVars);
+// Operation UpdateSiswaPeminatan:  For variables, look at type UpdateSiswaPeminatanVars in ../index.d.ts
+const { data } = await UpdateSiswaPeminatan(dataConnect, updateSiswaPeminatanVars);
 
-// Operation UpdateKelas:  For variables, look at type UpdateKelasVars in ../index.d.ts
-const { data } = await UpdateKelas(dataConnect, updateKelasVars);
-
-// Operation DeleteKelas:  For variables, look at type DeleteKelasVars in ../index.d.ts
-const { data } = await DeleteKelas(dataConnect, deleteKelasVars);
+// Operation DeleteSiswa:  For variables, look at type DeleteSiswaVars in ../index.d.ts
+const { data } = await DeleteSiswa(dataConnect, deleteSiswaVars);
 
 
 ```

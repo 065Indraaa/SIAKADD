@@ -9,4 +9,4 @@ schema:
       cloudSql:
         instanceId: "uassiakad-instance"
 connectorDirs:
-  - "./connector"
+  - "./connector" 

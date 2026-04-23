@@ -8,6 +8,7 @@
 
 mutation CreatePengguna(
   $email: String!
+  $password: String
   $nama: String!
   $peran: PeranPengguna!
   $telepon: String
@@ -16,6 +17,7 @@ mutation CreatePengguna(
 ) @auth(level: PUBLIC) {
   pengguna_insert(data: {
     email: $email
+    password: $password
     nama: $nama
     peran: $peran
     telepon: $telepon
@@ -26,12 +28,14 @@ mutation CreatePengguna(
 
 mutation UpdatePengguna(
   $id: UUID!
+  $password: String
   $nama: String
   $telepon: String
   $alamat: String
   $fotoUrl: String
 ) @auth(level: PUBLIC) {
   pengguna_update(id: $id, data: {
+    password: $password
     nama: $nama
     telepon: $telepon
     alamat: $alamat
@@ -82,6 +86,10 @@ mutation UpdateGuru(
   })
 }
 
+mutation DeleteGuru($id: UUID!) @auth(level: PUBLIC) {
+  guru_delete(id: $id)
+}
+
 # -------------------------------------------------------
 # SISWA MUTATIONS
 # -------------------------------------------------------
@@ -127,6 +135,19 @@ mutation UpdateSiswa(
   })
 }
 
+mutation UpdateSiswaPeminatan(
+  $id: UUID!
+  $peminatanId: UUID
+) @auth(level: PUBLIC) {
+  siswa_update(id: $id, data: {
+    peminatanId: $peminatanId
+  })
+}
+
+mutation DeleteSiswa($id: UUID!) @auth(level: PUBLIC) {
+  siswa_delete(id: $id)
+}
+
 # -------------------------------------------------------
 # KELAS MUTATIONS
 # -------------------------------------------------------
@@ -152,11 +173,13 @@ mutation UpdateKelas(
   $nama: String
   $tingkat: Int
   $waliKelasId: UUID
+  $jurusanId: UUID
 ) @auth(level: PUBLIC) {
   kelas_update(id: $id, data: {
     nama: $nama
     tingkat: $tingkat
     waliKelasId: $waliKelasId
+    jurusanId: $jurusanId
   })
 }
 
@@ -172,8 +195,28 @@ mutation CreateJurusan($kode: String!, $nama: String!) @auth(level: PUBLIC) {
   jurusan_insert(data: { kode: $kode, nama: $nama })
 }
 
+mutation UpdateJurusan($id: UUID!, $kode: String, $nama: String) @auth(level: PUBLIC) {
+  jurusan_update(id: $id, data: { kode: $kode, nama: $nama })
+}
+
 mutation DeleteJurusan($id: UUID!) @auth(level: PUBLIC) {
   jurusan_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# MATA PELAJARAN MUTATIONS
+# -------------------------------------------------------
+
+mutation CreateMataPelajaran($kode: String!, $nama: String!) @auth(level: PUBLIC) {
+  mataPelajaran_insert(data: { kode: $kode, nama: $nama })
+}
+
+mutation UpdateMataPelajaran($id: UUID!, $kode: String, $nama: String) @auth(level: PUBLIC) {
+  mataPelajaran_update(id: $id, data: { kode: $kode, nama: $nama })
+}
+
+mutation DeleteMataPelajaran($id: UUID!) @auth(level: PUBLIC) {
+  mataPelajaran_delete(id: $id)
 }
 
 # -------------------------------------------------------
@@ -355,4 +398,23 @@ mutation UpdateAlumni(
 
 mutation DeleteAlumni($id: UUID!) @auth(level: PUBLIC) {
   alumni_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# DANGEROUS RESET MUTATIONS
+# -------------------------------------------------------
+
+mutation ResetDatabase @auth(level: PUBLIC) {
+  nilai_deleteMany(all: true)
+  jadwal_deleteMany(all: true)
+  prestasi_deleteMany(all: true)
+  kehadiran_deleteMany(all: true)
+  pengumuman_deleteMany(all: true)
+  alumni_deleteMany(all: true)
+  siswa_deleteMany(all: true)
+  guru_deleteMany(all: true)
+  kelas_deleteMany(all: true)
+  jurusan_deleteMany(all: true)
+  mataPelajaran_deleteMany(all: true)
+  pengguna_deleteMany(all: true)
 }

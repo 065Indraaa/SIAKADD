@@ -47,7 +47,9 @@ function GuruOverview() {
 
       if (myGuruId) {
         const jadwal = await fetchJadwalGuru(myGuruId, '2024/2025');
-        setTodaySchedule(jadwal.slice(0, 3)); // Mock filter limit
+        const hariIni = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
+        const jadwalHariIni = jadwal.filter((j: any) => j.hari.toLowerCase() === hariIni.toLowerCase());
+        setTodaySchedule(jadwalHariIni);
       }
     } catch (e) {
       console.error('Failed to load guru dashboard stats:', e);

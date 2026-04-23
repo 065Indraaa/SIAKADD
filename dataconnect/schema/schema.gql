@@ -50,6 +50,7 @@ type Pengguna @table(name: "pengguna") {
   telepon: String
   alamat: String
   fotoUrl: String
+  password: String
   dibuatPada: Timestamp! @default(expr: "request.time")
   diperbaruiPada: Timestamp! @default(expr: "request.time")
 }
@@ -70,7 +71,7 @@ type MataPelajaran @table(name: "mata_pelajaran") {
   id: UUID! @default(expr: "uuidV4()")
   kode: String!
   nama: String!
-  tipe: String!
+  tipe: String
 }
 
 # -------------------------------------------------------
@@ -115,6 +116,7 @@ type Siswa @table(name: "siswa") {
   alamat: String
   kelas: Kelas
   jurusan: Jurusan
+  peminatan: Jurusan
   tahunMasuk: Int
 }
 

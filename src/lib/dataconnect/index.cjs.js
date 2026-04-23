@@ -110,6 +110,18 @@ exports.updateGuru = function updateGuru(dcOrVars, vars) {
   return executeMutation(updateGuruRef(dcOrVars, vars));
 };
 
+const deleteGuruRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteGuru', inputVars);
+}
+deleteGuruRef.operationName = 'DeleteGuru';
+exports.deleteGuruRef = deleteGuruRef;
+
+exports.deleteGuru = function deleteGuru(dcOrVars, vars) {
+  return executeMutation(deleteGuruRef(dcOrVars, vars));
+};
+
 const createSiswaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -132,6 +144,30 @@ exports.updateSiswaRef = updateSiswaRef;
 
 exports.updateSiswa = function updateSiswa(dcOrVars, vars) {
   return executeMutation(updateSiswaRef(dcOrVars, vars));
+};
+
+const updateSiswaPeminatanRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateSiswaPeminatan', inputVars);
+}
+updateSiswaPeminatanRef.operationName = 'UpdateSiswaPeminatan';
+exports.updateSiswaPeminatanRef = updateSiswaPeminatanRef;
+
+exports.updateSiswaPeminatan = function updateSiswaPeminatan(dcOrVars, vars) {
+  return executeMutation(updateSiswaPeminatanRef(dcOrVars, vars));
+};
+
+const deleteSiswaRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteSiswa', inputVars);
+}
+deleteSiswaRef.operationName = 'DeleteSiswa';
+exports.deleteSiswaRef = deleteSiswaRef;
+
+exports.deleteSiswa = function deleteSiswa(dcOrVars, vars) {
+  return executeMutation(deleteSiswaRef(dcOrVars, vars));
 };
 
 const createKelasRef = (dcOrVars, vars) => {
@@ -182,6 +218,18 @@ exports.createJurusan = function createJurusan(dcOrVars, vars) {
   return executeMutation(createJurusanRef(dcOrVars, vars));
 };
 
+const updateJurusanRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateJurusan', inputVars);
+}
+updateJurusanRef.operationName = 'UpdateJurusan';
+exports.updateJurusanRef = updateJurusanRef;
+
+exports.updateJurusan = function updateJurusan(dcOrVars, vars) {
+  return executeMutation(updateJurusanRef(dcOrVars, vars));
+};
+
 const deleteJurusanRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -192,6 +240,42 @@ exports.deleteJurusanRef = deleteJurusanRef;
 
 exports.deleteJurusan = function deleteJurusan(dcOrVars, vars) {
   return executeMutation(deleteJurusanRef(dcOrVars, vars));
+};
+
+const createMataPelajaranRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateMataPelajaran', inputVars);
+}
+createMataPelajaranRef.operationName = 'CreateMataPelajaran';
+exports.createMataPelajaranRef = createMataPelajaranRef;
+
+exports.createMataPelajaran = function createMataPelajaran(dcOrVars, vars) {
+  return executeMutation(createMataPelajaranRef(dcOrVars, vars));
+};
+
+const updateMataPelajaranRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateMataPelajaran', inputVars);
+}
+updateMataPelajaranRef.operationName = 'UpdateMataPelajaran';
+exports.updateMataPelajaranRef = updateMataPelajaranRef;
+
+exports.updateMataPelajaran = function updateMataPelajaran(dcOrVars, vars) {
+  return executeMutation(updateMataPelajaranRef(dcOrVars, vars));
+};
+
+const deleteMataPelajaranRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteMataPelajaran', inputVars);
+}
+deleteMataPelajaranRef.operationName = 'DeleteMataPelajaran';
+exports.deleteMataPelajaranRef = deleteMataPelajaranRef;
+
+exports.deleteMataPelajaran = function deleteMataPelajaran(dcOrVars, vars) {
+  return executeMutation(deleteMataPelajaranRef(dcOrVars, vars));
 };
 
 const createJadwalRef = (dcOrVars, vars) => {
@@ -326,6 +410,18 @@ exports.deleteAlumni = function deleteAlumni(dcOrVars, vars) {
   return executeMutation(deleteAlumniRef(dcOrVars, vars));
 };
 
+const resetDatabaseRef = (dc) => {
+  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'ResetDatabase');
+}
+resetDatabaseRef.operationName = 'ResetDatabase';
+exports.resetDatabaseRef = resetDatabaseRef;
+
+exports.resetDatabase = function resetDatabase(dc) {
+  return executeMutation(resetDatabaseRef(dc));
+};
+
 const listPenggunaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars);
   dcInstance._useGeneratedSdk();
@@ -398,6 +494,18 @@ exports.getLastNip = function getLastNip(dc) {
   return executeQuery(getLastNipRef(dc));
 };
 
+const getGuruByPenggunaRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetGuruByPengguna', inputVars);
+}
+getGuruByPenggunaRef.operationName = 'GetGuruByPengguna';
+exports.getGuruByPenggunaRef = getGuruByPenggunaRef;
+
+exports.getGuruByPengguna = function getGuruByPengguna(dcOrVars, vars) {
+  return executeQuery(getGuruByPenggunaRef(dcOrVars, vars));
+};
+
 const listSemuaSiswaRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
   dcInstance._useGeneratedSdk();
@@ -446,6 +554,18 @@ exports.getLastNis = function getLastNis(dc) {
   return executeQuery(getLastNisRef(dc));
 };
 
+const getSiswaByPenggunaRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetSiswaByPengguna', inputVars);
+}
+getSiswaByPenggunaRef.operationName = 'GetSiswaByPengguna';
+exports.getSiswaByPenggunaRef = getSiswaByPenggunaRef;
+
+exports.getSiswaByPengguna = function getSiswaByPengguna(dcOrVars, vars) {
+  return executeQuery(getSiswaByPenggunaRef(dcOrVars, vars));
+};
+
 const listSemuaKelasRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
   dcInstance._useGeneratedSdk();
@@ -480,6 +600,18 @@ exports.listJurusanRef = listJurusanRef;
 
 exports.listJurusan = function listJurusan(dc) {
   return executeQuery(listJurusanRef(dc));
+};
+
+const listMataPelajaranRef = (dc) => {
+  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'ListMataPelajaran');
+}
+listMataPelajaranRef.operationName = 'ListMataPelajaran';
+exports.listMataPelajaranRef = listMataPelajaranRef;
+
+exports.listMataPelajaran = function listMataPelajaran(dc) {
+  return executeQuery(listMataPelajaranRef(dc));
 };
 
 const getJadwalByKelasRef = (dcOrVars, vars) => {

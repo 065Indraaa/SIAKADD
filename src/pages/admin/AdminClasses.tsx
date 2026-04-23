@@ -62,7 +62,7 @@ export default function AdminClasses() {
         id: cls.id,
         name: cls.name,
         level: String(cls.level),
-        waliKelasId: guruList.find(g => g.nip === cls.homeroomId)?.guruId || '',
+        waliKelasId: cls.homeroomId || '',
         jurusanId: cls.jurusanId || ''
       });
     } else {
@@ -84,6 +84,7 @@ export default function AdminClasses() {
           name: formData.name,
           level: formData.level,
           waliKelasId: formData.waliKelasId || undefined,
+          jurusanId: formData.jurusanId || undefined,
         });
       } else {
         await addKelas({
@@ -94,7 +95,9 @@ export default function AdminClasses() {
         });
       }
       setIsDialogOpen(false);
-      await loadData(); // Auto refresh
+      setTimeout(() => {
+        loadData();
+      }, 500);
     } catch (e: any) {
       setError(e.message || "Gagal menyimpan kelas.");
     } finally {
@@ -108,7 +111,9 @@ export default function AdminClasses() {
     if (!deletingId) return;
     try {
       await deleteKelas(dataConnect, { id: deletingId });
-      await loadData(); // Auto refresh
+      setTimeout(() => {
+        loadData();
+      }, 500);
     } catch (e: any) {
       setError(e.message || "Gagal menghapus kelas.");
     }
@@ -261,9 +266,11 @@ export default function AdminClasses() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] ml-1">Spesialisasi</Label>
-                  <Select value={formData.jurusanId} onValueChange={(val) => setFormData({...formData, jurusanId: val === 'none' ? '' : val})}>
-                    <SelectTrigger className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold"><SelectValue placeholder="Pilih..." /></SelectTrigger>
+                  <Label className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] ml-1">Jurusan / Kompetensi Keahlian</Label>
+                  <Select key={`jurusan-${formData.id}-${jurusanList.length}`} value={formData.jurusanId || 'none'} onValueChange={(val) => setFormData({...formData, jurusanId: val === 'none' ? '' : val})}>
+                    <SelectTrigger className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold">
+                      <SelectValue placeholder="Pilih..." />
+                    </SelectTrigger>
                     <SelectContent className="bg-slate-900 border-white/10">
                       <SelectItem value="none" className="text-slate-500">General</SelectItem>
                       {jurusanList.map(j => <SelectItem key={j.id} value={j.id}>{j.nama}</SelectItem>)}
@@ -274,8 +281,10 @@ export default function AdminClasses() {
 
               <div className="space-y-2">
                 <Label className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] ml-1">Wali Kelas Penanggung Jawab</Label>
-                <Select value={formData.waliKelasId} onValueChange={(val) => setFormData({...formData, waliKelasId: val === 'none' ? '' : val})}>
-                  <SelectTrigger className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold"><SelectValue placeholder="Pilih..." /></SelectTrigger>
+                <Select key={`guru-${formData.id}-${guruList.length}`} value={formData.waliKelasId || 'none'} onValueChange={(val) => setFormData({...formData, waliKelasId: val === 'none' ? '' : val})}>
+                  <SelectTrigger className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold">
+                    <SelectValue placeholder={guruList.length > 0 ? "Pilih Pengajar" : "Memuat..."} />
+                  </SelectTrigger>
                   <SelectContent className="bg-slate-900 border-white/10 max-h-48">
                     <SelectItem value="none" className="text-slate-500">-- Biarkan Kosong --</SelectItem>
                     {guruList.map(g => (

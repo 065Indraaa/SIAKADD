@@ -1,25 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Calendar, Clock, BookOpen, Sparkles, Zap } from 'lucide-react';
+import { Calendar, Clock, BookOpen, Sparkles, Zap, Loader2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { fetchJadwalKelas } from '@/lib/schoolService';
 
 export default function SiswaSchedule() {
-  const schedule = [
-    { time: '07:00 - 07:45', mon: 'Upacara', tue: 'Matematika', wed: 'Fisika', thu: 'Kimia', fri: 'Senam' },
-    { time: '07:45 - 08:30', mon: 'Agama', tue: 'Matematika', wed: 'Fisika', thu: 'Kimia', fri: 'B. Inggris' },
-    { time: '08:30 - 09:15', mon: 'Agama', tue: 'B. Indonesia', wed: 'Biologi', thu: 'Sejarah', fri: 'B. Inggris' },
-    { time: '09:15 - 09:45', mon: 'ISTIRAHAT', tue: 'ISTIRAHAT', wed: 'ISTIRAHAT', thu: 'ISTIRAHAT', fri: 'ISTIRAHAT' },
-    { time: '09:45 - 10:30', mon: 'PPKn', tue: 'B. Indonesia', wed: 'Biologi', thu: 'Sejarah', fri: 'Seni Budaya' },
-    { time: '10:30 - 11:15', mon: 'PPKn', tue: 'PJOK', wed: 'Matematika P.', thu: 'Prakarya', fri: 'Seni Budaya' },
-    { time: '11:15 - 12:00', mon: 'B. Inggris', tue: 'PJOK', wed: 'Matematika P.', thu: 'Prakarya', fri: 'Pulang' },
-  ];
+  const { user } = useAuth();
+  const [schedule, setSchedule] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadSchedule = async () => {
+      if (!user?.kelasId) return;
+      setLoading(true);
+      try {
+        const data = await fetchJadwalKelas(user.kelasId);
+        
+        // Process data into grid
+        const timeSlots = Array.from(new Set(data.map((d: any) => `${d.jamMulai} - ${d.jamSelesai}`))).sort();
+        
+        const gridData = timeSlots.map(time => {
+          const row: any = { time };
+          ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].forEach(day => {
+            const item = data.find((d: any) => `${d.jamMulai} - ${d.jamSelesai}` === time && d.hari.toLowerCase() === day.toLowerCase());
+            row[day.toLowerCase().slice(0, 3)] = item ? item.mataPelajaran?.nama : '-';
+          });
+          return row;
+        });
+
+        // insert break
+        if (gridData.length > 3) {
+          gridData.splice(3, 0, { time: 'ISTIRAHAT', sen: 'ISTIRAHAT', sel: 'ISTIRAHAT', rab: 'ISTIRAHAT', kam: 'ISTIRAHAT', jum: 'ISTIRAHAT' });
+        }
+
+        setSchedule(gridData);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadSchedule();
+  }, [user?.kelasId]);
 
   const days = [
-    { key: 'mon', label: 'Senin' },
-    { key: 'tue', label: 'Selasa' },
-    { key: 'wed', label: 'Rabu' },
-    { key: 'thu', label: 'Kamis' },
-    { key: 'fri', label: 'Jumat' },
+    { key: 'sen', label: 'Senin' },
+    { key: 'sel', label: 'Selasa' },
+    { key: 'rab', label: 'Rabu' },
+    { key: 'kam', label: 'Kamis' },
+    { key: 'jum', label: 'Jumat' },
   ];
 
   return (
@@ -66,16 +96,18 @@ export default function SiswaSchedule() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {schedule.map((row, index) => (
+                {loading ? (
+                  <TableRow><TableCell colSpan={6} className="text-center py-20"><Loader2 className="h-10 w-10 animate-spin text-indigo-500 mx-auto" /></TableCell></TableRow>
+                ) : schedule.length > 0 ? schedule.map((row, index) => (
                   <TableRow
                     key={index}
-                    className={`border-white/5 transition-all ${row.mon === 'ISTIRAHAT' ? 'bg-indigo-600/5' : 'hover:bg-white/[0.03] group'}`}
+                    className={`border-white/5 transition-all ${row.time === 'ISTIRAHAT' ? 'bg-indigo-600/5' : 'hover:bg-white/[0.03] group'}`}
                   >
                     <TableCell className="py-6 px-8 font-black text-white text-sm tracking-tight border-r border-white/5">
                       {row.time}
                     </TableCell>
 
-                    {row.mon === 'ISTIRAHAT' ? (
+                    {row.time === 'ISTIRAHAT' ? (
                       <TableCell colSpan={5} className="py-6 text-center">
                         <div className="inline-flex items-center gap-3 px-6 py-2 bg-indigo-600/20 rounded-full border border-indigo-500/20">
                           <Zap className="h-4 w-4 text-indigo-400 fill-indigo-400" />
@@ -85,24 +117,26 @@ export default function SiswaSchedule() {
                     ) : (
                       <>
                         <TableCell className="text-center py-6">
-                          <span className={`font-bold transition-colors ${row.mon === 'Upacara' || row.mon === 'Agama' ? 'text-blue-400 group-hover:text-blue-300' : 'text-slate-300 group-hover:text-white'}`}>{row.mon}</span>
+                          <span className={`font-bold transition-colors ${row.sen === 'Upacara' || row.sen === 'Agama' ? 'text-blue-400 group-hover:text-blue-300' : 'text-slate-300 group-hover:text-white'}`}>{row.sen}</span>
                         </TableCell>
                         <TableCell className="text-center py-6">
-                          <span className="font-bold text-slate-300 group-hover:text-white transition-colors">{row.tue}</span>
+                          <span className="font-bold text-slate-300 group-hover:text-white transition-colors">{row.sel}</span>
                         </TableCell>
                         <TableCell className="text-center py-6">
-                          <span className="font-bold text-slate-300 group-hover:text-white transition-colors">{row.wed}</span>
+                          <span className="font-bold text-slate-300 group-hover:text-white transition-colors">{row.rab}</span>
                         </TableCell>
                         <TableCell className="text-center py-6">
-                          <span className="font-bold text-slate-300 group-hover:text-white transition-colors">{row.thu}</span>
+                          <span className="font-bold text-slate-300 group-hover:text-white transition-colors">{row.kam}</span>
                         </TableCell>
                         <TableCell className="text-center py-6">
-                          <span className={`font-bold transition-colors ${row.fri === 'Pulang' ? 'text-emerald-400 group-hover:text-emerald-300' : 'text-slate-300 group-hover:text-white'}`}>{row.fri}</span>
+                          <span className={`font-bold transition-colors ${row.jum === 'Pulang' ? 'text-emerald-400 group-hover:text-emerald-300' : 'text-slate-300 group-hover:text-white'}`}>{row.jum}</span>
                         </TableCell>
                       </>
                     )}
                   </TableRow>
-                ))}
+                )) : (
+                  <TableRow><TableCell colSpan={6} className="text-center py-20 text-slate-500 font-bold uppercase tracking-widest text-xs">Belum ada jadwal.</TableCell></TableRow>
+                )}
               </TableBody>
             </Table>
           </div>

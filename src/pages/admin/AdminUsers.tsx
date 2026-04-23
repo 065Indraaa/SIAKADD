@@ -6,17 +6,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Edit2, Trash2, Filter, RefreshCw, Loader2, Copy, CheckCircle2, Info, User, GraduationCap, BookOpen, Phone, MapPin, Calendar, Mail, MoreVertical } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Search, Plus, Edit2, Trash2, Filter, RefreshCw, Loader2, Copy, CheckCircle2, Info, User, GraduationCap, BookOpen, Phone, MapPin, Calendar, Mail, MoreVertical, FileSpreadsheet, Eye, EyeOff, Zap } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import {
   fetchGuru, fetchSiswa, fetchAdmin,
-  createGuruWithAccount, createSiswaWithAccount,
-  updateGuruData, updateSiswaData,
-  deleteUserById,
+  createGuruWithAccount, createSiswaWithAccount, createAdminWithAccount,
+  updateGuruData, updateSiswaData, updateAdminData,
+  deleteUserById, clearAllData, seedDemoData,
   UserListItem,
 } from '@/lib/userService';
+import { fetchKelas, fetchJurusan } from '@/lib/schoolService';
 
 const JABATAN_GURU = ['Guru', 'WaliKelas', 'Kepsek', 'WakilKepsek', 'BK'];
 const JABATAN_LABELS: Record<string, string> = {
@@ -32,6 +33,7 @@ function AccountInfoModal({ info, onClose }: {
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   if (!info) return null;
 
   const handleCopy = () => {
@@ -56,9 +58,19 @@ function AccountInfoModal({ info, onClose }: {
               <span className="text-slate-500 flex-shrink-0">Email</span>
               <span className="text-white text-right break-all font-bold">{info.email}</span>
             </div>
-            <div className="flex justify-between gap-4 relative z-10">
+            <div className="flex justify-between items-center gap-4 relative z-10">
               <span className="text-slate-500 flex-shrink-0">Password</span>
-              <span className="text-yellow-400 font-bold tracking-widest">{info.password}</span>
+              <div className="flex items-center gap-2">
+                <span className={`text-yellow-400 font-bold ${!showPassword ? 'tracking-[0.3em]' : 'tracking-normal'}`}>
+                  {showPassword ? info.password : '••••••••'}
+                </span>
+                <button 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-slate-500 hover:text-slate-300 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -85,7 +97,7 @@ function FormField({ label, required, children }: { label: string; required?: bo
 }
 
 export default function AdminUsers() {
-  const [roleFilter, setRoleFilter] = useState('siswa');
+  const [roleFilter, setRoleFilter] = useState('semua');
   const [searchTerm, setSearchTerm] = useState('');
   const [tingkatFilter, setTingkatFilter] = useState('semua');
   const [users, setUsers] = useState<UserListItem[]>([]);
@@ -98,6 +110,14 @@ export default function AdminUsers() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [newAccountInfo, setNewAccountInfo] = useState<any>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [kelasList, setKelasList] = useState<any[]>([]);
+  const [jurusanList, setJurusanList] = useState<any[]>([]);
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+
+  const togglePassword = (id: string) => {
+    setVisiblePasswords(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -119,7 +139,20 @@ export default function AdminUsers() {
     }
   }, [roleFilter]);
 
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  const loadMetadata = useCallback(async () => {
+    try {
+      const [k, j] = await Promise.all([fetchKelas(), fetchJurusan()]);
+      setKelasList(k);
+      setJurusanList(j);
+    } catch (e) {
+      console.error("Failed to load classes/majors:", e);
+    }
+  }, []);
+
+  useEffect(() => { 
+    fetchUsers(); 
+    loadMetadata();
+  }, [fetchUsers, loadMetadata]);
 
   const filteredUsers = users.filter(user => {
     const low = searchTerm.toLowerCase();
@@ -142,7 +175,8 @@ export default function AdminUsers() {
       role,
       name: '', email: '', phone: '', address: '',
       gender: 'L', birthPlace: '', birthDate: '',
-      specialization: '', jabatan: 'Guru',
+      specialization: '', jabatan: 'Guru', nip: '',
+      classId: '', majorId: '', tahunMasuk: new Date().getFullYear()
     });
     setIsDialogOpen(true);
   };
@@ -152,6 +186,7 @@ export default function AdminUsers() {
     setFormData({
       ...user,
       role: user.role,
+      nip: user.nip || '',
       phone: user.phone || '',
       address: user.address || '',
       specialization: user.specialization || '',
@@ -159,6 +194,9 @@ export default function AdminUsers() {
       gender: user.gender || 'L',
       birthPlace: user.birthPlace || '',
       birthDate: user.birthDate || '',
+      classId: user.kelasId || '',
+      majorId: user.jurusanId || '',
+      tahunMasuk: user.tahunMasuk || new Date().getFullYear()
     });
     setIsDialogOpen(true);
   };
@@ -186,9 +224,18 @@ export default function AdminUsers() {
             address: formData.address,
             birthPlace: formData.birthPlace,
             birthDate: formData.birthDate,
+            classId: formData.classId || undefined,
+            majorId: formData.majorId || undefined,
+          });
+        } else if (editingUser.role === 'admin') {
+          await updateAdminData(editingUser.id, {
+            name: formData.name,
+            phone: formData.phone,
+            address: formData.address,
           });
         }
         setIsDialogOpen(false);
+        alert('Data berhasil diperbarui!');
         await fetchUsers(); // This triggers table refresh
       } else {
         if (formData.role === 'guru') {
@@ -199,10 +246,17 @@ export default function AdminUsers() {
           const result = await createSiswaWithAccount(formData);
           setIsDialogOpen(false);
           setNewAccountInfo({ email: result.email, password: result.defaultPassword, nis: result.nis });
+        } else if (formData.role === 'admin') {
+          const result = await createAdminWithAccount(formData);
+          setIsDialogOpen(false);
+          setNewAccountInfo({ email: result.email, password: result.defaultPassword });
         }
+        alert('Akun baru berhasil dibuat!');
         await fetchUsers();
       }
     } catch (e: any) {
+      console.error(e);
+      alert('Gagal menyimpan: ' + (e.message || 'Terjadi kesalahan sistem.'));
       setError(e.message || 'Terjadi kesalahan saat menyimpan.');
     } finally {
       setSaving(false);
@@ -214,8 +268,11 @@ export default function AdminUsers() {
     if (!deletingId) return;
     try { 
       await deleteUserById(deletingId); 
+      alert('Pengguna berhasil dihapus!');
       await fetchUsers(); // Refresh
     } catch (e: any) { 
+      console.error(e);
+      alert('Gagal menghapus: ' + (e.message || 'Data ini mungkin terhubung dengan data lain (seperti kelas atau nilai).'));
       setError(e.message); 
     }
     setIsAlertOpen(false);
@@ -233,8 +290,41 @@ export default function AdminUsers() {
           <Button variant="outline" onClick={fetchUsers} disabled={loading} className="w-12 h-12 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 transition-all active:scale-95">
             <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
           </Button>
+          <Button onClick={() => setIsImportModalOpen(true)} className="bg-emerald-600 hover:bg-emerald-500 h-12 px-6 rounded-2xl font-bold shadow-lg shadow-emerald-600/20 active:scale-95 transition-all text-white flex-1 md:flex-none">
+            <FileSpreadsheet className="mr-2 h-5 w-5" /> Import Excel
+          </Button>
           <Button onClick={handleOpenAdd} className="bg-blue-600 hover:bg-blue-500 h-12 px-6 rounded-2xl font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-all text-white flex-1 md:flex-none">
             <Plus className="mr-2 h-5 w-5" /> Tambah User
+          </Button>
+          <Button onClick={async () => {
+            setLoading(true);
+            try {
+              await seedDemoData();
+              alert("Data demo berhasil dibuat!");
+              await fetchUsers();
+            } catch(e: any) {
+              alert("Gagal membuat data demo: " + e.message);
+            } finally {
+              setLoading(false);
+            }
+          }} className="bg-amber-600 hover:bg-amber-500 h-12 px-6 rounded-2xl font-bold shadow-lg shadow-amber-600/20 active:scale-95 transition-all text-white flex-1 md:flex-none">
+            <Zap className="mr-2 h-5 w-5" /> Buat Data Demo
+          </Button>
+          <Button onClick={async () => {
+            if(confirm("PERINGATAN: Ini akan menghapus SELURUH data di database! Lanjutkan?")) {
+              setLoading(true);
+              try {
+                await clearAllData();
+                alert("Database berhasil dibersihkan!");
+                await fetchUsers();
+              } catch(e: any) {
+                alert("Gagal membersihkan database: " + e.message);
+              } finally {
+                setLoading(false);
+              }
+            }
+          }} className="bg-red-600 hover:bg-red-500 h-12 px-6 rounded-2xl font-bold shadow-lg shadow-red-600/20 active:scale-95 transition-all text-white flex-1 md:flex-none">
+            <Trash2 className="mr-2 h-5 w-5" /> Wipe DB
           </Button>
         </div>
       </div>
@@ -258,12 +348,16 @@ export default function AdminUsers() {
               </TabsList>
             </Tabs>
             <div className="flex gap-3">
-               <div className="relative flex-1 lg:w-80">
+              <div className="relative flex-1 lg:w-80">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                 <Input placeholder="Cari nama atau ID..."
                   className="pl-12 h-12 bg-slate-950/50 border-white/5 rounded-2xl text-white placeholder:text-slate-600 focus:ring-blue-500/20"
                   value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
               </div>
+              <Button variant="ghost" size="icon" onClick={fetchUsers} disabled={loading}
+                className="h-12 w-12 bg-slate-950/50 border border-white/5 rounded-2xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+                <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+              </Button>
               {roleFilter === 'siswa' && (
                 <Select value={tingkatFilter} onValueChange={(v) => setTingkatFilter(v ?? 'semua')}>
                   <SelectTrigger className="w-[140px] h-12 bg-slate-950/50 border-white/5 rounded-2xl text-white">
@@ -283,14 +377,14 @@ export default function AdminUsers() {
 
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-white/5">
-              <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead className="text-slate-500 font-bold p-6">Identitas</TableHead>
-                <TableHead className="text-slate-500 font-bold">Credential</TableHead>
-                <TableHead className="text-slate-500 font-bold">Metadata</TableHead>
-                <TableHead className="text-right text-slate-500 font-bold pr-8">Operasi</TableHead>
-              </TableRow>
-            </TableHeader>
+            <TableHeader className="bg-slate-950/20">
+                <TableRow className="border-white/5 hover:bg-transparent">
+                  <TableHead className="text-slate-400 font-bold uppercase tracking-widest text-[10px] p-6">Identitas Pengguna</TableHead>
+                  <TableHead className="text-slate-400 font-bold uppercase tracking-widest text-[10px] p-6">Kontak & Kelas</TableHead>
+                  <TableHead className="text-slate-400 font-bold uppercase tracking-widest text-[10px] p-6">Kredensial</TableHead>
+                  <TableHead className="text-slate-400 font-bold uppercase tracking-widest text-[10px] p-6 text-right">Manajemen</TableHead>
+                </TableRow>
+              </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
@@ -312,26 +406,31 @@ export default function AdminUsers() {
                       <div>
                         <div className="font-bold text-lg text-white tracking-tight">{user.name}</div>
                         <div className="text-xs text-slate-500 flex items-center gap-1.5 uppercase tracking-widest font-bold">
-                          {user.role === 'guru' ? <BookOpen className="h-3 w-3" /> : 
-                           user.role === 'siswa' ? <GraduationCap className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                          {user.role}
+                          {user.role === 'guru' ? `NIP ${user.nip}` : user.role === 'siswa' ? `NIS ${user.nis}` : 'Admin'}
                         </div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-1">
-                      <div className="text-white font-medium">{user.email}</div>
-                      <div className="font-mono text-[10px] uppercase text-blue-400 bg-blue-400/5 inline-block px-2 py-0.5 rounded border border-blue-400/10">
-                        {user.role === 'guru' ? `NIP ${user.nip}` : user.role === 'siswa' ? `NIS ${user.nis}` : 'SYSTEM'}
-                      </div>
+                    <div className="text-white font-medium">{user.email}</div>
+                    <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">
+                      {user.className || (user.role === 'guru' ? (JABATAN_LABELS[user.jabatan || ''] || user.role) : '-')}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="text-xs text-slate-400 grid grid-cols-1 gap-1">
-                      {user.phone && <div className="flex items-center gap-2"><Phone className="h-3 w-3" /> {user.phone}</div>}
-                      {user.jabatan && <div className="flex items-center gap-2"><div className="h-1.5 w-1.5 bg-blue-500 rounded-full"></div> {JABATAN_LABELS[user.jabatan] || user.jabatan}</div>}
-                      {user.className && <Badge className="bg-white/5 border-white/5 text-slate-300 w-fit">{user.className}</Badge>}
+                    <div className="flex items-center gap-2 group/pass">
+                      <div className="bg-slate-950/40 px-3 py-1.5 rounded-lg border border-white/5 flex items-center gap-3">
+                        <span className={`text-slate-300 font-mono text-xs min-w-[80px] ${!visiblePasswords[user.id] ? 'tracking-[0.2em] opacity-40' : 'tracking-normal opacity-100'}`}>
+                          {visiblePasswords[user.id] ? (user.password || 'no-pass') : '••••••••'}
+                        </span>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); togglePassword(user.id); }}
+                          className="text-slate-500 hover:text-blue-400 transition-colors p-1"
+                          title={visiblePasswords[user.id] ? "Sembunyikan" : "Tampilkan"}
+                        >
+                          {visiblePasswords[user.id] ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        </button>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-right pr-8">
@@ -398,6 +497,11 @@ export default function AdminUsers() {
 
               {(formData.role === 'guru' || editingUser?.role === 'guru') && (
                 <>
+                  <FormField label="Nomor Induk Pegawai (NIP)" required={!editingUser}>
+                    <Input value={formData.nip || ''} onChange={(e) => setFormData({ ...formData, nip: e.target.value })}
+                      placeholder="Masukkan NIP manual" className="h-12 bg-slate-900 border-white/5 rounded-2xl text-white" 
+                      disabled={!!editingUser} />
+                  </FormField>
                   <FormField label="Keahlian Spesifik">
                     <Input value={formData.specialization || ''} onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
                       placeholder="Contoh: Logika Matematika" className="h-12 bg-slate-900 border-white/5 rounded-2xl text-white" />
@@ -413,6 +517,74 @@ export default function AdminUsers() {
                     </Select>
                   </FormField>
                 </>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Jenis Kelamin">
+                  <Select value={formData.gender || 'L'} onValueChange={(v) => setFormData({ ...formData, gender: v })}>
+                    <SelectTrigger className="h-12 bg-slate-900 border-white/5 rounded-2xl text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-900 border-white/10">
+                      <SelectItem value="L">Laki-Laki</SelectItem>
+                      <SelectItem value="P">Perempuan</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormField>
+                <FormField label="Nomor Telepon">
+                  <Input value={formData.phone || ''} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="08123xxx" className="h-12 bg-slate-900 border-white/5 rounded-2xl text-white" />
+                </FormField>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Tempat Lahir">
+                  <Input value={formData.birthPlace || ''} onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
+                    placeholder="Contoh: Jakarta" className="h-12 bg-slate-900 border-white/5 rounded-2xl text-white" />
+                </FormField>
+                <FormField label="Tanggal Lahir">
+                  <Input type="date" value={formData.birthDate || ''} onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                    className="h-12 bg-slate-900 border-white/5 rounded-2xl text-white [color-scheme:dark]" />
+                </FormField>
+              </div>
+
+              <FormField label="Alamat Tempat Tinggal">
+                <Input value={formData.address || ''} onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Alamat lengkap..." className="h-12 bg-slate-900 border-white/5 rounded-2xl text-white" />
+              </FormField>
+
+              {(formData.role === 'siswa' || editingUser?.role === 'siswa') && (
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField label="Kelas">
+                    <Select key={`user-kelas-${editingUser?.id || 'new'}-${kelasList.length}`} value={formData.classId || 'none'} onValueChange={(v) => setFormData({ ...formData, classId: v === 'none' ? '' : v })}>
+                      <SelectTrigger className="h-12 bg-slate-900 border-white/5 rounded-2xl text-white">
+                        <SelectValue placeholder={kelasList.length > 0 ? "Pilih Kelas" : "Memuat..."} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-white/10 max-h-48">
+                        <SelectItem value="none">Belum Ada</SelectItem>
+                        {kelasList.map(k => <SelectItem key={k.id} value={k.id}>{k.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </FormField>
+                  <FormField label="Jurusan">
+                    <Select key={`user-jurusan-${editingUser?.id || 'new'}-${jurusanList.length}`} value={formData.majorId || 'none'} onValueChange={(v) => setFormData({ ...formData, majorId: v === 'none' ? '' : v })}>
+                      <SelectTrigger className="h-12 bg-slate-900 border-white/5 rounded-2xl text-white">
+                        <SelectValue placeholder={jurusanList.length > 0 ? "Pilih Jurusan" : "Memuat..."} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-white/10 max-h-48">
+                        <SelectItem value="none">Umum</SelectItem>
+                        {jurusanList.map(j => <SelectItem key={j.id} value={j.id}>{j.nama}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </FormField>
+                </div>
+              )}
+
+              {(formData.role === 'siswa' || editingUser?.role === 'siswa') && (
+                <FormField label="Tahun Masuk">
+                  <Input type="number" value={formData.tahunMasuk || ''} onChange={(e) => setFormData({ ...formData, tahunMasuk: parseInt(e.target.value) })}
+                    placeholder="2023" className="h-12 bg-slate-900 border-white/5 rounded-2xl text-white" />
+                </FormField>
               )}
 
               <FormField label="Jalur Komunikasi (Email)">
@@ -444,6 +616,40 @@ export default function AdminUsers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen}>
+        <DialogContent className="bg-slate-950 border border-emerald-500/30 max-w-md rounded-[2.5rem] shadow-2xl p-8">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black tracking-tight text-white font-heading flex items-center gap-3">
+              <FileSpreadsheet className="h-8 w-8 text-emerald-400" /> Import via Excel
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 pt-2">
+              Unggah file Excel (.xlsx) untuk memasukkan data guru atau siswa secara massal tanpa perlu input manual.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-6 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-3xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+             <div className="h-16 w-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <FileSpreadsheet className="h-8 w-8 text-emerald-400" />
+             </div>
+             <p className="text-white font-bold mb-1">Klik untuk Memilih File</p>
+             <p className="text-slate-500 text-xs">atau seret dan lepas file Anda ke sini</p>
+             <p className="text-emerald-500/50 text-[10px] uppercase font-bold tracking-widest mt-4">Logika upload menyusul</p>
+          </div>
+
+          <DialogFooter className="gap-2 sm:flex-col mt-4">
+            <Button variant="outline" onClick={() => setIsImportModalOpen(false)} className="w-full h-12 rounded-2xl border-white/5 bg-transparent text-slate-400 hover:text-white hover:bg-white/5">
+              Batal
+            </Button>
+            <Button className="w-full h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-500 font-bold shadow-xl shadow-emerald-600/20 text-white" onClick={() => {
+              alert('Fitur import akan diimplementasikan nanti.');
+              setIsImportModalOpen(false);
+            }}>
+              Mulai Import
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AccountInfoModal info={newAccountInfo} onClose={() => setNewAccountInfo(null)} />
     </div>

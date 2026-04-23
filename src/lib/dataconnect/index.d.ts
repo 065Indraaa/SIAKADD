@@ -120,12 +120,22 @@ export interface CreateKelasVariables {
   waliKelasId?: UUIDString | null;
 }
 
+export interface CreateMataPelajaranData {
+  mataPelajaran_insert: MataPelajaran_Key;
+}
+
+export interface CreateMataPelajaranVariables {
+  kode: string;
+  nama: string;
+}
+
 export interface CreatePenggunaData {
   pengguna_insert: Pengguna_Key;
 }
 
 export interface CreatePenggunaVariables {
   email: string;
+  password?: string | null;
   nama: string;
   peran: PeranPengguna;
   telepon?: string | null;
@@ -182,6 +192,14 @@ export interface DeleteAlumniVariables {
   id: UUIDString;
 }
 
+export interface DeleteGuruData {
+  guru_delete?: Guru_Key | null;
+}
+
+export interface DeleteGuruVariables {
+  id: UUIDString;
+}
+
 export interface DeleteJadwalData {
   jadwal_delete?: Jadwal_Key | null;
 }
@@ -203,6 +221,14 @@ export interface DeleteKelasData {
 }
 
 export interface DeleteKelasVariables {
+  id: UUIDString;
+}
+
+export interface DeleteMataPelajaranData {
+  mataPelajaran_delete?: MataPelajaran_Key | null;
+}
+
+export interface DeleteMataPelajaranVariables {
   id: UUIDString;
 }
 
@@ -228,6 +254,24 @@ export interface DeletePrestasiData {
 
 export interface DeletePrestasiVariables {
   id: UUIDString;
+}
+
+export interface DeleteSiswaData {
+  siswa_delete?: Siswa_Key | null;
+}
+
+export interface DeleteSiswaVariables {
+  id: UUIDString;
+}
+
+export interface GetGuruByPenggunaData {
+  gurus: ({
+    id: UUIDString;
+  } & Guru_Key)[];
+}
+
+export interface GetGuruByPenggunaVariables {
+  penggunaId: UUIDString;
 }
 
 export interface GetGuruData {
@@ -416,6 +460,16 @@ export interface GetPenggunaVariables {
   id: UUIDString;
 }
 
+export interface GetSiswaByPenggunaData {
+  siswas: ({
+    id: UUIDString;
+  } & Siswa_Key)[];
+}
+
+export interface GetSiswaByPenggunaVariables {
+  penggunaId: UUIDString;
+}
+
 export interface GetSiswaData {
   siswa?: {
     id: UUIDString;
@@ -442,6 +496,10 @@ export interface GetSiswaData {
           id: UUIDString;
           nama: string;
         } & Jurusan_Key;
+          peminatan?: {
+            id: UUIDString;
+            nama: string;
+          } & Jurusan_Key;
   } & Siswa_Key;
 }
 
@@ -507,6 +565,7 @@ export interface ListGuruData {
       id: UUIDString;
       nama: string;
       email: string;
+      password?: string | null;
       telepon?: string | null;
       alamat?: string | null;
     } & Pengguna_Key;
@@ -545,10 +604,19 @@ export interface ListKelasByTingkatVariables {
   tingkat: number;
 }
 
+export interface ListMataPelajaranData {
+  mataPelajarans: ({
+    id: UUIDString;
+    kode: string;
+    nama: string;
+  } & MataPelajaran_Key)[];
+}
+
 export interface ListPenggunaData {
   penggunas: ({
     id: UUIDString;
     email: string;
+    password?: string | null;
     nama: string;
     peran: PeranPengguna;
     telepon?: string | null;
@@ -624,6 +692,7 @@ export interface ListSemuaSiswaData {
       id: UUIDString;
       nama: string;
       email: string;
+      password?: string | null;
       telepon?: string | null;
       alamat?: string | null;
     } & Pengguna_Key;
@@ -636,6 +705,10 @@ export interface ListSemuaSiswaData {
           id: UUIDString;
           nama: string;
         } & Jurusan_Key;
+          peminatan?: {
+            id: UUIDString;
+            nama: string;
+          } & Jurusan_Key;
   } & Siswa_Key)[];
 }
 
@@ -652,6 +725,7 @@ export interface ListSiswaByKelasData {
       id: UUIDString;
       nama: string;
       email: string;
+      password?: string | null;
       telepon?: string | null;
       alamat?: string | null;
     } & Pengguna_Key;
@@ -664,6 +738,10 @@ export interface ListSiswaByKelasData {
           id: UUIDString;
           nama: string;
         } & Jurusan_Key;
+          peminatan?: {
+            id: UUIDString;
+            nama: string;
+          } & Jurusan_Key;
   } & Siswa_Key)[];
 }
 
@@ -708,6 +786,21 @@ export interface RecordKehadiranVariables {
   catatan?: string | null;
 }
 
+export interface ResetDatabaseData {
+  nilai_deleteMany: number;
+  jadwal_deleteMany: number;
+  prestasi_deleteMany: number;
+  kehadiran_deleteMany: number;
+  pengumuman_deleteMany: number;
+  alumni_deleteMany: number;
+  siswa_deleteMany: number;
+  guru_deleteMany: number;
+  kelas_deleteMany: number;
+  jurusan_deleteMany: number;
+  mataPelajaran_deleteMany: number;
+  pengguna_deleteMany: number;
+}
+
 export interface Siswa_Key {
   id: UUIDString;
   __typename?: 'Siswa_Key';
@@ -740,6 +833,16 @@ export interface UpdateGuruVariables {
   tanggalLahir?: DateString | null;
 }
 
+export interface UpdateJurusanData {
+  jurusan_update?: Jurusan_Key | null;
+}
+
+export interface UpdateJurusanVariables {
+  id: UUIDString;
+  kode?: string | null;
+  nama?: string | null;
+}
+
 export interface UpdateKelasData {
   kelas_update?: Kelas_Key | null;
 }
@@ -749,6 +852,17 @@ export interface UpdateKelasVariables {
   nama?: string | null;
   tingkat?: number | null;
   waliKelasId?: UUIDString | null;
+  jurusanId?: UUIDString | null;
+}
+
+export interface UpdateMataPelajaranData {
+  mataPelajaran_update?: MataPelajaran_Key | null;
+}
+
+export interface UpdateMataPelajaranVariables {
+  id: UUIDString;
+  kode?: string | null;
+  nama?: string | null;
 }
 
 export interface UpdatePenggunaData {
@@ -757,6 +871,7 @@ export interface UpdatePenggunaData {
 
 export interface UpdatePenggunaVariables {
   id: UUIDString;
+  password?: string | null;
   nama?: string | null;
   telepon?: string | null;
   alamat?: string | null;
@@ -765,6 +880,15 @@ export interface UpdatePenggunaVariables {
 
 export interface UpdateSiswaData {
   siswa_update?: Siswa_Key | null;
+}
+
+export interface UpdateSiswaPeminatanData {
+  siswa_update?: Siswa_Key | null;
+}
+
+export interface UpdateSiswaPeminatanVariables {
+  id: UUIDString;
+  peminatanId?: UUIDString | null;
 }
 
 export interface UpdateSiswaVariables {
@@ -851,6 +975,18 @@ export const updateGuruRef: UpdateGuruRef;
 export function updateGuru(vars: UpdateGuruVariables): MutationPromise<UpdateGuruData, UpdateGuruVariables>;
 export function updateGuru(dc: DataConnect, vars: UpdateGuruVariables): MutationPromise<UpdateGuruData, UpdateGuruVariables>;
 
+interface DeleteGuruRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteGuruVariables): MutationRef<DeleteGuruData, DeleteGuruVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeleteGuruVariables): MutationRef<DeleteGuruData, DeleteGuruVariables>;
+  operationName: string;
+}
+export const deleteGuruRef: DeleteGuruRef;
+
+export function deleteGuru(vars: DeleteGuruVariables): MutationPromise<DeleteGuruData, DeleteGuruVariables>;
+export function deleteGuru(dc: DataConnect, vars: DeleteGuruVariables): MutationPromise<DeleteGuruData, DeleteGuruVariables>;
+
 interface CreateSiswaRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: CreateSiswaVariables): MutationRef<CreateSiswaData, CreateSiswaVariables>;
@@ -874,6 +1010,30 @@ export const updateSiswaRef: UpdateSiswaRef;
 
 export function updateSiswa(vars: UpdateSiswaVariables): MutationPromise<UpdateSiswaData, UpdateSiswaVariables>;
 export function updateSiswa(dc: DataConnect, vars: UpdateSiswaVariables): MutationPromise<UpdateSiswaData, UpdateSiswaVariables>;
+
+interface UpdateSiswaPeminatanRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateSiswaPeminatanVariables): MutationRef<UpdateSiswaPeminatanData, UpdateSiswaPeminatanVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateSiswaPeminatanVariables): MutationRef<UpdateSiswaPeminatanData, UpdateSiswaPeminatanVariables>;
+  operationName: string;
+}
+export const updateSiswaPeminatanRef: UpdateSiswaPeminatanRef;
+
+export function updateSiswaPeminatan(vars: UpdateSiswaPeminatanVariables): MutationPromise<UpdateSiswaPeminatanData, UpdateSiswaPeminatanVariables>;
+export function updateSiswaPeminatan(dc: DataConnect, vars: UpdateSiswaPeminatanVariables): MutationPromise<UpdateSiswaPeminatanData, UpdateSiswaPeminatanVariables>;
+
+interface DeleteSiswaRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteSiswaVariables): MutationRef<DeleteSiswaData, DeleteSiswaVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeleteSiswaVariables): MutationRef<DeleteSiswaData, DeleteSiswaVariables>;
+  operationName: string;
+}
+export const deleteSiswaRef: DeleteSiswaRef;
+
+export function deleteSiswa(vars: DeleteSiswaVariables): MutationPromise<DeleteSiswaData, DeleteSiswaVariables>;
+export function deleteSiswa(dc: DataConnect, vars: DeleteSiswaVariables): MutationPromise<DeleteSiswaData, DeleteSiswaVariables>;
 
 interface CreateKelasRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -923,6 +1083,18 @@ export const createJurusanRef: CreateJurusanRef;
 export function createJurusan(vars: CreateJurusanVariables): MutationPromise<CreateJurusanData, CreateJurusanVariables>;
 export function createJurusan(dc: DataConnect, vars: CreateJurusanVariables): MutationPromise<CreateJurusanData, CreateJurusanVariables>;
 
+interface UpdateJurusanRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateJurusanVariables): MutationRef<UpdateJurusanData, UpdateJurusanVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateJurusanVariables): MutationRef<UpdateJurusanData, UpdateJurusanVariables>;
+  operationName: string;
+}
+export const updateJurusanRef: UpdateJurusanRef;
+
+export function updateJurusan(vars: UpdateJurusanVariables): MutationPromise<UpdateJurusanData, UpdateJurusanVariables>;
+export function updateJurusan(dc: DataConnect, vars: UpdateJurusanVariables): MutationPromise<UpdateJurusanData, UpdateJurusanVariables>;
+
 interface DeleteJurusanRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: DeleteJurusanVariables): MutationRef<DeleteJurusanData, DeleteJurusanVariables>;
@@ -934,6 +1106,42 @@ export const deleteJurusanRef: DeleteJurusanRef;
 
 export function deleteJurusan(vars: DeleteJurusanVariables): MutationPromise<DeleteJurusanData, DeleteJurusanVariables>;
 export function deleteJurusan(dc: DataConnect, vars: DeleteJurusanVariables): MutationPromise<DeleteJurusanData, DeleteJurusanVariables>;
+
+interface CreateMataPelajaranRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateMataPelajaranVariables): MutationRef<CreateMataPelajaranData, CreateMataPelajaranVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateMataPelajaranVariables): MutationRef<CreateMataPelajaranData, CreateMataPelajaranVariables>;
+  operationName: string;
+}
+export const createMataPelajaranRef: CreateMataPelajaranRef;
+
+export function createMataPelajaran(vars: CreateMataPelajaranVariables): MutationPromise<CreateMataPelajaranData, CreateMataPelajaranVariables>;
+export function createMataPelajaran(dc: DataConnect, vars: CreateMataPelajaranVariables): MutationPromise<CreateMataPelajaranData, CreateMataPelajaranVariables>;
+
+interface UpdateMataPelajaranRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateMataPelajaranVariables): MutationRef<UpdateMataPelajaranData, UpdateMataPelajaranVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateMataPelajaranVariables): MutationRef<UpdateMataPelajaranData, UpdateMataPelajaranVariables>;
+  operationName: string;
+}
+export const updateMataPelajaranRef: UpdateMataPelajaranRef;
+
+export function updateMataPelajaran(vars: UpdateMataPelajaranVariables): MutationPromise<UpdateMataPelajaranData, UpdateMataPelajaranVariables>;
+export function updateMataPelajaran(dc: DataConnect, vars: UpdateMataPelajaranVariables): MutationPromise<UpdateMataPelajaranData, UpdateMataPelajaranVariables>;
+
+interface DeleteMataPelajaranRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteMataPelajaranVariables): MutationRef<DeleteMataPelajaranData, DeleteMataPelajaranVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeleteMataPelajaranVariables): MutationRef<DeleteMataPelajaranData, DeleteMataPelajaranVariables>;
+  operationName: string;
+}
+export const deleteMataPelajaranRef: DeleteMataPelajaranRef;
+
+export function deleteMataPelajaran(vars: DeleteMataPelajaranVariables): MutationPromise<DeleteMataPelajaranData, DeleteMataPelajaranVariables>;
+export function deleteMataPelajaran(dc: DataConnect, vars: DeleteMataPelajaranVariables): MutationPromise<DeleteMataPelajaranData, DeleteMataPelajaranVariables>;
 
 interface CreateJadwalRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1067,6 +1275,18 @@ export const deleteAlumniRef: DeleteAlumniRef;
 export function deleteAlumni(vars: DeleteAlumniVariables): MutationPromise<DeleteAlumniData, DeleteAlumniVariables>;
 export function deleteAlumni(dc: DataConnect, vars: DeleteAlumniVariables): MutationPromise<DeleteAlumniData, DeleteAlumniVariables>;
 
+interface ResetDatabaseRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (): MutationRef<ResetDatabaseData, undefined>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect): MutationRef<ResetDatabaseData, undefined>;
+  operationName: string;
+}
+export const resetDatabaseRef: ResetDatabaseRef;
+
+export function resetDatabase(): MutationPromise<ResetDatabaseData, undefined>;
+export function resetDatabase(dc: DataConnect): MutationPromise<ResetDatabaseData, undefined>;
+
 interface ListPenggunaRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars?: ListPenggunaVariables): QueryRef<ListPenggunaData, ListPenggunaVariables>;
@@ -1139,6 +1359,18 @@ export const getLastNipRef: GetLastNipRef;
 export function getLastNip(): QueryPromise<GetLastNipData, undefined>;
 export function getLastNip(dc: DataConnect): QueryPromise<GetLastNipData, undefined>;
 
+interface GetGuruByPenggunaRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetGuruByPenggunaVariables): QueryRef<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetGuruByPenggunaVariables): QueryRef<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
+  operationName: string;
+}
+export const getGuruByPenggunaRef: GetGuruByPenggunaRef;
+
+export function getGuruByPengguna(vars: GetGuruByPenggunaVariables): QueryPromise<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
+export function getGuruByPengguna(dc: DataConnect, vars: GetGuruByPenggunaVariables): QueryPromise<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
+
 interface ListSemuaSiswaRef {
   /* Allow users to create refs without passing in DataConnect */
   (): QueryRef<ListSemuaSiswaData, undefined>;
@@ -1187,6 +1419,18 @@ export const getLastNisRef: GetLastNisRef;
 export function getLastNis(): QueryPromise<GetLastNisData, undefined>;
 export function getLastNis(dc: DataConnect): QueryPromise<GetLastNisData, undefined>;
 
+interface GetSiswaByPenggunaRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetSiswaByPenggunaVariables): QueryRef<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetSiswaByPenggunaVariables): QueryRef<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
+  operationName: string;
+}
+export const getSiswaByPenggunaRef: GetSiswaByPenggunaRef;
+
+export function getSiswaByPengguna(vars: GetSiswaByPenggunaVariables): QueryPromise<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
+export function getSiswaByPengguna(dc: DataConnect, vars: GetSiswaByPenggunaVariables): QueryPromise<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
+
 interface ListSemuaKelasRef {
   /* Allow users to create refs without passing in DataConnect */
   (): QueryRef<ListSemuaKelasData, undefined>;
@@ -1222,6 +1466,18 @@ export const listJurusanRef: ListJurusanRef;
 
 export function listJurusan(): QueryPromise<ListJurusanData, undefined>;
 export function listJurusan(dc: DataConnect): QueryPromise<ListJurusanData, undefined>;
+
+interface ListMataPelajaranRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListMataPelajaranData, undefined>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect): QueryRef<ListMataPelajaranData, undefined>;
+  operationName: string;
+}
+export const listMataPelajaranRef: ListMataPelajaranRef;
+
+export function listMataPelajaran(): QueryPromise<ListMataPelajaranData, undefined>;
+export function listMataPelajaran(dc: DataConnect): QueryPromise<ListMataPelajaranData, undefined>;
 
 interface GetJadwalByKelasRef {
   /* Allow users to create refs without passing in DataConnect */

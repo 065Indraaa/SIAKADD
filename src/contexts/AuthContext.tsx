@@ -18,12 +18,15 @@ interface UserData {
   className?: string;
   kelasId?: string;
   nisn?: string;
+  peminatanId?: string;
+  peminatanName?: string;
 }
 
 interface AuthContextType {
   user: UserData | null;
   loading: boolean;
   login: (role: Role) => Promise<Role | void>;
+  loginByEmail: (email: string, password?: string) => Promise<Role | void>;
   logout: () => Promise<void>;
   updateUserCache: (data: Partial<UserData>) => void;
 }
@@ -47,18 +50,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (role: Role): Promise<Role | void> => {
-    // Mock login — akan diganti Firebase Auth di fase berikutnya
-    // guruId/siswaId diset kosong; akan diisi oleh fetchGuru/fetchSiswa ketika
-    // pengguna berhasil ditemukan di Data Connect berdasarkan email
     const mockUser: UserData = {
       uid: `mock-${role}-123`,
       email: `${role}@demo.com`,
       role,
       name: `Demo ${role?.charAt(0).toUpperCase()}${role?.slice(1)}`,
-      penggunaId: undefined,
-      guruId: undefined,
-      siswaId: undefined,
     };
+    localStorage.setItem('mock_user', JSON.stringify(mockUser));
+    setUser(mockUser);
+    return role;
+  };
+
+  const loginByEmail = async (email: string, password?: string): Promise<Role | void> => {
+    // For demo: identify role from email
+    let role: Role = null;
+    const lowerEmail = email.toLowerCase();
+    
+    if (lowerEmail.includes('admin')) role = 'admin';
+    else if (lowerEmail.includes('guru')) role = 'guru';
+    else if (lowerEmail.includes('siswa')) role = 'siswa';
+    else role = 'siswa'; // Default fallback
+
+    const mockUser: UserData = {
+      uid: `user-${Date.now()}`,
+      email,
+      role,
+      name: email.split('@')[0].split('.')[0],
+    };
+    
     localStorage.setItem('mock_user', JSON.stringify(mockUser));
     setUser(mockUser);
     return role;
@@ -69,7 +88,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  // Memungkinkan komponen menyimpan guruId/siswaId setelah fetch berhasil
   const updateUserCache = (data: Partial<UserData>) => {
     setUser(prev => {
       if (!prev) return prev;
@@ -80,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateUserCache }}>
+    <AuthContext.Provider value={{ user, loading, login, loginByEmail, logout, updateUserCache }}>
       {children}
     </AuthContext.Provider>
   );

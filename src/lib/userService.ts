@@ -11,6 +11,12 @@ import {
   updateGuru,
   updateSiswa,
   deletePengguna,
+  deleteGuru,
+  deleteSiswa,
+  resetDatabase,
+  getPengguna,
+  getGuruByPengguna,
+  getSiswaByPengguna,
   listGuru,
   listSemuaSiswa,
   listSiswaByKelas,
@@ -42,6 +48,7 @@ export interface CreateGuruPayload {
   birthPlace?: string;
   birthDate?: string;       // "YYYY-MM-DD"
   jabatan?: string;         // Guru / WaliKelas / Kepsek / WakilKepsek / BK
+  nip?: string;             // Manual input
 }
 
 export interface CreateSiswaPayload {
@@ -61,6 +68,7 @@ export interface UserListItem {
   id: string;
   name: string;
   email: string;
+  password?: string;
   role: 'guru' | 'siswa' | 'admin';
   phone?: string | null;
   address?: string | null;
@@ -76,6 +84,11 @@ export interface UserListItem {
   tahunMasuk?: number | null;
   guruId?: string;
   siswaId?: string;
+  kelasId?: string | null;
+  jurusanId?: string | null;
+  jurusanName?: string | null;
+  peminatanId?: string | null;
+  peminatanName?: string | null;
 }
 
 // ============================================================
@@ -152,12 +165,13 @@ export async function createGuruWithAccount(payload: CreateGuruPayload): Promise
   email: string;
   defaultPassword: string;
 }> {
-  const nip = await generateNIP();
+  const nip = payload.nip || await generateNIP();
   const email = payload.email || generateGuruEmail(payload.name, nip);
   const defaultPassword = `Guru@${nip.slice(-5)}`;
 
   const userResult = await createPengguna(dataConnect, {
     email,
+    password: defaultPassword,
     nama: payload.name,
     peran: PeranPengguna.guru,
     telepon: payload.phone,
@@ -170,10 +184,10 @@ export async function createGuruWithAccount(payload: CreateGuruPayload): Promise
     penggunaId: userId,
     nip,
     jenisKelamin: payload.gender === 'P' ? JenisKelamin.P : JenisKelamin.L,
-    tempatLahir: payload.birthPlace,
-    tanggalLahir: payload.birthDate,
+    tempatLahir: payload.birthPlace || undefined,
+    tanggalLahir: payload.birthDate || undefined,
     jabatan: toJabatanGuru(payload.jabatan),
-    spesialisasi: payload.specialization,
+    spesialisasi: payload.specialization || undefined,
   });
 
   const guruId = guruResult.data.guru_insert.id;
@@ -198,6 +212,7 @@ export async function createSiswaWithAccount(payload: CreateSiswaPayload): Promi
 
   const userResult = await createPengguna(dataConnect, {
     email,
+    password: defaultPassword,
     nama: payload.name,
     peran: PeranPengguna.siswa,
     telepon: payload.phone,
@@ -210,17 +225,43 @@ export async function createSiswaWithAccount(payload: CreateSiswaPayload): Promi
     penggunaId: userId,
     nis,
     jenisKelamin: payload.gender === 'L' ? JenisKelamin.L : JenisKelamin.P,
-    tempatLahir: payload.birthPlace,
-    tanggalLahir: payload.birthDate,
-    alamat: payload.address,
-    jurusanId: payload.majorId,
-    kelasId: payload.classId,
+    tempatLahir: payload.birthPlace || undefined,
+    tanggalLahir: payload.birthDate || undefined,
+    alamat: payload.address || undefined,
+    jurusanId: payload.majorId || undefined,
+    kelasId: payload.classId || undefined,
     tahunMasuk: payload.tahunMasuk ?? new Date().getFullYear(),
   });
 
   const siswaId = siswaResult.data.siswa_insert.id;
 
   return { userId, siswaId, nis, email, defaultPassword };
+}
+
+// ============================================================
+// CREATE ADMIN
+// ============================================================
+
+export async function createAdminWithAccount(payload: { name: string; email?: string; phone?: string; address?: string }): Promise<{
+  userId: string;
+  email: string;
+  defaultPassword: string;
+}> {
+  const email = payload.email || `${payload.name.toLowerCase().replace(/\s+/g, '')}@admin.sma.sch.id`;
+  const defaultPassword = `Admin@123`;
+
+  const userResult = await createPengguna(dataConnect, {
+    email,
+    password: defaultPassword,
+    nama: payload.name,
+    peran: PeranPengguna.admin,
+    telepon: payload.phone || undefined,
+    alamat: payload.address || undefined,
+  });
+
+  const userId = userResult.data.pengguna_insert.id;
+
+  return { userId, email, defaultPassword };
 }
 
 // ============================================================
@@ -234,6 +275,7 @@ export async function fetchGuru(): Promise<UserListItem[]> {
     guruId: t.id,
     name: t.pengguna.nama,
     email: t.pengguna.email,
+    password: (t.pengguna as any).password,
     role: 'guru' as const,
     phone: t.pengguna.telepon,
     address: t.pengguna.alamat,
@@ -255,6 +297,7 @@ export async function fetchSiswa(classId?: string): Promise<UserListItem[]> {
     siswaId: s.id,
     name: s.pengguna.nama,
     email: s.pengguna.email,
+    password: (s.pengguna as any).password,
     role: 'siswa' as const,
     phone: s.pengguna.telepon,
     address: s.alamat,
@@ -263,8 +306,13 @@ export async function fetchSiswa(classId?: string): Promise<UserListItem[]> {
     birthPlace: s.tempatLahir,
     birthDate: s.tanggalLahir ? String(s.tanggalLahir) : null,
     className: s.kelas?.nama ?? null,
+    kelasId: s.kelas?.id ?? null,
     gradeLevel: s.kelas?.tingkat ?? null,
     tahunMasuk: s.tahunMasuk ?? null,
+    jurusanId: (s as any).jurusan?.id ?? null,
+    jurusanName: (s as any).jurusan?.nama ?? null,
+    peminatanId: (s as any).peminatan?.id ?? null,
+    peminatanName: (s as any).peminatan?.nama ?? null,
   }));
 }
 
@@ -274,6 +322,7 @@ export async function fetchAdmin(): Promise<UserListItem[]> {
     id: u.id,
     name: u.nama,
     email: u.email,
+    password: (u as any).password,
     role: 'admin' as const,
     phone: u.telepon,
     address: u.alamat,
@@ -297,9 +346,9 @@ export async function updateGuruData(userId: string, guruId: string, data: {
   await updateGuru(dataConnect, {
     id: guruId,
     jabatan: data.jabatan ? toJabatanGuru(data.jabatan) : undefined,
-    spesialisasi: data.specialization,
-    tempatLahir: data.birthPlace,
-    tanggalLahir: data.birthDate,
+    spesialisasi: data.specialization || undefined,
+    tempatLahir: data.birthPlace || undefined,
+    tanggalLahir: data.birthDate || undefined,
   });
 }
 
@@ -315,12 +364,16 @@ export async function updateSiswaData(userId: string, siswaId: string, data: {
   await updatePengguna(dataConnect, { id: userId, nama: data.name, telepon: data.phone, alamat: data.address });
   await updateSiswa(dataConnect, {
     id: siswaId,
-    kelasId: data.classId,
-    jurusanId: data.majorId,
-    tempatLahir: data.birthPlace,
-    tanggalLahir: data.birthDate,
-    alamat: data.address,
+    kelasId: data.classId || undefined,
+    jurusanId: data.majorId || undefined,
+    tempatLahir: data.birthPlace || undefined,
+    tanggalLahir: data.birthDate || undefined,
+    alamat: data.address || undefined,
   });
+}
+
+export async function updateAdminData(userId: string, data: { name?: string; phone?: string; address?: string }) {
+  await updatePengguna(dataConnect, { id: userId, nama: data.name, telepon: data.phone || undefined, alamat: data.address || undefined });
 }
 
 // ============================================================
@@ -328,5 +381,71 @@ export async function updateSiswaData(userId: string, siswaId: string, data: {
 // ============================================================
 
 export async function deleteUserById(userId: string) {
-  await deletePengguna(dataConnect, { id: userId });
+  try {
+    // 1. Fetch the user to determine role
+    const userRes = await getPengguna(dataConnect, { id: userId });
+    if (!userRes.data.pengguna) return;
+    
+    const user = userRes.data.pengguna;
+    
+    // 2. Delete related records based on role
+    if (user.peran === PeranPengguna.guru) {
+      const gurus = await getGuruByPengguna(dataConnect, { penggunaId: userId });
+      if (gurus.data.gurus.length > 0) {
+        await deleteGuru(dataConnect, { id: gurus.data.gurus[0].id });
+      }
+    } else if (user.peran === PeranPengguna.siswa) {
+      const siswas = await getSiswaByPengguna(dataConnect, { penggunaId: userId });
+      if (siswas.data.siswas.length > 0) {
+        await deleteSiswa(dataConnect, { id: siswas.data.siswas[0].id });
+      }
+    }
+
+    // 3. Finally delete the Pengguna record
+    await deletePengguna(dataConnect, { id: userId });
+  } catch (e) {
+    console.error("Error deleting user:", e);
+    throw e;
+  }
+}
+
+/**
+ * MENGHAPUS SELURUH DATA DARI DATABASE
+ * Gunakan dengan sangat hati-hati!
+ */
+export async function clearAllData() {
+  return await resetDatabase(dataConnect);
+}
+
+export async function seedDemoData() {
+  try {
+    // 1. Create Admin
+    await createAdminWithAccount({
+      name: "Super Admin",
+      email: "admin@demo.com",
+    });
+
+    // 2. Create Guru
+    await createGuruWithAccount({
+      name: "Budi Santoso, M.Pd",
+      email: "guru@demo.com",
+      gender: 'L',
+      jabatan: 'WaliKelas',
+      specialization: 'Matematika',
+    });
+
+    // 3. Create Siswa
+    await createSiswaWithAccount({
+      name: "Siswa Teladan",
+      email: "siswa@demo.com",
+      gender: 'L',
+      birthPlace: 'Jakarta',
+      birthDate: '2008-05-15',
+    });
+
+    return true;
+  } catch (e) {
+    console.error("Error seeding demo data:", e);
+    throw e;
+  }
 }

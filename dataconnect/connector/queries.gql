@@ -10,6 +10,7 @@ query ListPengguna($peran: PeranPengguna) @auth(level: PUBLIC) {
   penggunas(where: { peran: { eq: $peran } }, orderBy: { nama: ASC }) {
     id
     email
+    password
     nama
     peran
     telepon
@@ -57,6 +58,7 @@ query ListGuru @auth(level: PUBLIC) {
       id
       nama
       email
+      password
       telepon
       alamat
     }
@@ -89,6 +91,12 @@ query GetLastNIP @auth(level: PUBLIC) {
   }
 }
 
+query GetGuruByPengguna($penggunaId: UUID!) @auth(level: PUBLIC) {
+  gurus(where: { penggunaId: { eq: $penggunaId } }) {
+    id
+  }
+}
+
 # -------------------------------------------------------
 # SISWA QUERIES
 # -------------------------------------------------------
@@ -106,6 +114,7 @@ query ListSemuaSiswa @auth(level: PUBLIC) {
       id
       nama
       email
+      password
       telepon
       alamat
     }
@@ -115,6 +124,10 @@ query ListSemuaSiswa @auth(level: PUBLIC) {
       tingkat
     }
     jurusan {
+      id
+      nama
+    }
+    peminatan {
       id
       nama
     }
@@ -134,6 +147,7 @@ query ListSiswaByKelas($kelasId: UUID!) @auth(level: PUBLIC) {
       id
       nama
       email
+      password
       telepon
       alamat
     }
@@ -143,6 +157,10 @@ query ListSiswaByKelas($kelasId: UUID!) @auth(level: PUBLIC) {
       tingkat
     }
     jurusan {
+      id
+      nama
+    }
+    peminatan {
       id
       nama
     }
@@ -175,12 +193,22 @@ query GetSiswa($id: UUID!) @auth(level: PUBLIC) {
       id
       nama
     }
+    peminatan {
+      id
+      nama
+    }
   }
 }
 
 query GetLastNIS @auth(level: PUBLIC) {
   siswas(orderBy: { nis: DESC }, limit: 1) {
     nis
+  }
+}
+
+query GetSiswaByPengguna($penggunaId: UUID!) @auth(level: PUBLIC) {
+  siswas(where: { penggunaId: { eq: $penggunaId } }) {
+    id
   }
 }
 
@@ -230,6 +258,14 @@ query ListKelasByTingkat($tingkat: Int!) @auth(level: PUBLIC) {
 
 query ListJurusan @auth(level: PUBLIC) {
   jurusans(orderBy: { kode: ASC }) {
+    id
+    kode
+    nama
+  }
+}
+
+query ListMataPelajaran @auth(level: PUBLIC) {
+  mataPelajarans(orderBy: { nama: ASC }) {
     id
     kode
     nama

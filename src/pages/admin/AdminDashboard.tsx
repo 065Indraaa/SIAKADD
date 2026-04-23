@@ -1,11 +1,15 @@
 import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
-import { Users, BookOpen, GraduationCap, Award, Activity, Clock, ArrowUpRight, TrendingUp } from 'lucide-react';
+import { Users, BookOpen, GraduationCap, Award, Activity, Clock, ArrowUpRight, TrendingUp, Book, MoveRight, Loader2 } from 'lucide-react';
 import AdminUsers from './AdminUsers';
 import AdminClasses from './AdminClasses';
-import AdminMajors from './AdminMajors';
 import AdminAlumni from './AdminAlumni';
+import AdminMajors from './AdminMajors';
+import AdminPenjuruan from './AdminPenjuruan';
 import AdminSchedules from './AdminSchedules';
+import AdminSubjects from './AdminSubjects';
+import { fetchSiswa, fetchGuru } from '@/lib/userService';
+import { fetchKelas, fetchAlumni } from '@/lib/schoolService';
 
 const stats = [
   {
@@ -65,6 +69,81 @@ const pendingAccounts = [
 ];
 
 function AdminOverview() {
+  const [loading, setLoading] = React.useState(true);
+  const [data, setData] = React.useState({
+    siswa: 0,
+    guru: 0,
+    kelas: 0,
+    alumni: 0
+  });
+
+  React.useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const [s, g, k, a] = await Promise.all([
+          fetchSiswa(),
+          fetchGuru(),
+          fetchKelas(),
+          fetchAlumni()
+        ]);
+        setData({
+          siswa: s.length,
+          guru: g.length,
+          kelas: k.length,
+          alumni: a.length
+        });
+      } catch (e) {
+        console.error("Failed to load dashboard stats:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadStats();
+  }, []);
+
+  const statsList = [
+    {
+      title: 'Total Siswa',
+      value: loading ? '...' : data.siswa.toLocaleString(),
+      change: '+12%',
+      trend: 'up',
+      sub: 'dari database',
+      icon: Users,
+      accent: 'text-blue-400',
+      bg: 'bg-blue-500/10',
+    },
+    {
+      title: 'Total Guru',
+      value: loading ? '...' : data.guru.toLocaleString(),
+      change: '+2',
+      trend: 'up',
+      sub: 'pengajar aktif',
+      icon: Users,
+      accent: 'text-emerald-400',
+      bg: 'bg-emerald-500/10',
+    },
+    {
+      title: 'Total Kelas',
+      value: loading ? '...' : data.kelas.toLocaleString(),
+      change: '12',
+      trend: 'neutral',
+      sub: 'ruang belajar',
+      icon: BookOpen,
+      accent: 'text-violet-400',
+      bg: 'bg-violet-500/10',
+    },
+    {
+      title: 'Alumni Terdaftar',
+      value: loading ? '...' : data.alumni.toLocaleString(),
+      change: '+320',
+      trend: 'up',
+      sub: 'lulusan terekam',
+      icon: Award,
+      accent: 'text-amber-400',
+      bg: 'bg-amber-500/10',
+    },
+  ];
+
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
 
@@ -76,16 +155,18 @@ function AdminOverview() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, i) => (
+        {statsList.map((stat, i) => (
           <div key={i} className="scola-stat-card p-5">
             <div className="flex items-center justify-between mb-4">
               <div className={`w-9 h-9 rounded-xl ${stat.bg} flex items-center justify-center`}>
                 <stat.icon className={`w-4 h-4 ${stat.accent}`} />
               </div>
-              {stat.trend === 'up' && (
-                <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                  <TrendingUp className="w-3 h-3" /> {stat.change}
-                </span>
+              {loading ? <Loader2 className="w-3 h-3 animate-spin text-slate-500" /> : (
+                stat.trend === 'up' && (
+                  <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                    <TrendingUp className="w-3 h-3" /> {stat.change}
+                  </span>
+                )
               )}
             </div>
             <p className="text-2xl font-bold text-white">{stat.value}</p>
@@ -161,6 +242,9 @@ function AdminOverview() {
             {[
               { label: 'Kelola Pengguna', href: '/admin/users', icon: Users },
               { label: 'Manajemen Kelas', href: '/admin/classes', icon: BookOpen },
+              { label: 'Mata Pelajaran', href: '/admin/subjects', icon: Book },
+              { label: 'Data Jurusan', href: '/admin/majors', icon: Award },
+              { label: 'Penjuruan Siswa', href: '/admin/penjuruan', icon: MoveRight },
               { label: 'Data Alumni', href: '/admin/alumni', icon: GraduationCap },
             ].map((link, i) => (
               <Link key={i} to={link.href} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-white/[0.05] text-slate-400 hover:text-slate-200 transition-colors group">
@@ -184,7 +268,9 @@ export default function AdminDashboard() {
       <Route path="/classes" element={<AdminClasses />} />
       <Route path="/schedules" element={<AdminSchedules />} />
       <Route path="/majors" element={<AdminMajors />} />
+      <Route path="/penjuruan" element={<AdminPenjuruan />} />
       <Route path="/alumni" element={<AdminAlumni />} />
+      <Route path="/subjects" element={<AdminSubjects />} />
       <Route path="/settings" element={
         <div className="p-8">
           <div className="scola-card p-8 text-slate-400 text-sm">

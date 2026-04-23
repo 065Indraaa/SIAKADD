@@ -2,33 +2,71 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { BookOpen, Award, Calendar, TrendingUp, CheckCircle, Users, ArrowUpRight, Clock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { fetchJadwalKelas, fetchNilaiSiswa, fetchPrestasiSiswa } from '@/lib/schoolService';
 import SiswaProfile from './SiswaProfile';
 import SiswaGrades from './SiswaGrades';
 import SiswaSchedule from './SiswaSchedule';
 import SiswaAchievements from './SiswaAchievements';
+import SiswaMajoring from './SiswaMajoring';
 
 function SiswaOverview() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    rataNilai: '0',
+    kehadiran: '100%',
+    prestasi: 0
+  });
 
-  const stats = [
-    { title: 'Kelas', value: user?.className || 'X-MIPA-1', sub: 'Tahun Ajaran 2024/2025', icon: BookOpen, accent: 'text-blue-400', bg: 'bg-blue-500/10' },
-    { title: 'Rata-rata Nilai', value: '88.5', sub: 'Semester Aktif', icon: TrendingUp, accent: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { title: 'Kehadiran', value: '98%', sub: 'Tingkat Presensi', icon: CheckCircle, accent: 'text-violet-400', bg: 'bg-violet-500/10' },
-    { title: 'Prestasi', value: '4', sub: 'Total Pencapaian', icon: Award, accent: 'text-amber-400', bg: 'bg-amber-500/10' },
-  ];
-
-  const todaySchedule = [
-    { time: '07:30', subject: 'Matematika Peminatan', teacher: 'Ibu Siti Aminah', room: 'R.302' },
-    { time: '09:00', subject: 'Bahasa Inggris', teacher: 'Mr. James Wilson', room: 'Lab Bahasa' },
-    { time: '10:30', subject: 'Fisika', teacher: 'Pak Bambang', room: 'R.302' },
-    { time: '13:00', subject: 'Kimia', teacher: 'Ibu Rini', room: 'Lab IPA' },
+  const statsCard = [
+    { title: 'Kelas', value: user?.className || 'Belum Diatur', sub: 'Tahun Ajaran Aktif', icon: BookOpen, accent: 'text-blue-400', bg: 'bg-blue-500/10' },
+    { title: 'Rata-rata Nilai', value: stats.rataNilai, sub: 'Semester Aktif', icon: TrendingUp, accent: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    { title: 'Kehadiran', value: stats.kehadiran, sub: 'Tingkat Presensi', icon: CheckCircle, accent: 'text-violet-400', bg: 'bg-violet-500/10' },
+    { title: 'Prestasi', value: stats.prestasi.toString(), sub: 'Total Pencapaian', icon: Award, accent: 'text-amber-400', bg: 'bg-amber-500/10' },
   ];
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(t);
-  }, []);
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        if (user?.siswaId) {
+          // Fetch data from Firebase Data Connect
+          const [jadwal, nilai, prestasi] = await Promise.all([
+            user.kelasId ? fetchJadwalKelas(user.kelasId) : Promise.resolve([]),
+            fetchNilaiSiswa(user.siswaId, 'Genap', '2024/2025'),
+            fetchPrestasiSiswa(user.siswaId)
+          ]);
+          
+          const hariIni = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
+          const jadwalHariIni = jadwal.filter((j: any) => j.hari.toLowerCase() === hariIni.toLowerCase());
+          setTodaySchedule(jadwalHariIni.slice(0, 4));
+
+          let avg = 0;
+          if (nilai && nilai.length > 0) {
+            const sum = nilai.reduce((acc: number, cur: any) => acc + (cur.nilaiUas || 0), 0);
+            avg = sum / nilai.length;
+          }
+
+          setStats({
+            rataNilai: avg > 0 ? avg.toFixed(1) : '0',
+            kehadiran: '100%', // Placeholder for now
+            prestasi: prestasi ? prestasi.length : 0
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load siswa dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (user && user.role === 'siswa') {
+      loadData();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -64,7 +102,7 @@ function SiswaOverview() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, i) => (
+        {statsCard.map((stat, i) => (
           <div key={i} className="scola-stat-card p-5">
             <div className={`w-9 h-9 rounded-xl ${stat.bg} flex items-center justify-center mb-4`}>
               <stat.icon className={`w-4 h-4 ${stat.accent}`} />
@@ -91,22 +129,26 @@ function SiswaOverview() {
             </Link>
           </div>
           <div className="divide-y divide-white/[0.04]">
-            {todaySchedule.map((s, i) => (
+            {todaySchedule.length > 0 ? todaySchedule.map((s, i) => (
               <div key={i} className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors">
                 <div className="w-14 text-center flex-shrink-0">
-                  <p className="text-sm font-semibold text-white">{s.time}</p>
+                  <p className="text-sm font-semibold text-white">{s.jamMulai || '07:30'}</p>
                   <p className="text-[10px] text-slate-500 mt-0.5">WIB</p>
                 </div>
                 <div className="w-px h-10 bg-white/10 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white leading-tight">{s.subject}</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{s.teacher}</p>
+                  <p className="text-sm font-medium text-white leading-tight">{s.mataPelajaran?.nama || s.subject}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{s.guru?.pengguna?.nama || s.teacher}</p>
                 </div>
                 <span className="text-[11px] font-semibold text-slate-400 bg-white/5 border border-white/8 px-2.5 py-1 rounded-lg flex-shrink-0">
-                  {s.room}
+                  {s.ruangan || s.room}
                 </span>
               </div>
-            ))}
+            )) : (
+              <div className="py-8 text-center">
+                <p className="text-sm text-slate-500">Tidak ada jadwal hari ini</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -119,7 +161,10 @@ function SiswaOverview() {
           <div className="p-4 space-y-2">
             {[
               { label: 'Lihat Nilai & Rapor', sub: 'Semester aktif', href: 'grades', icon: BookOpen, accent: 'text-blue-400', bg: 'bg-blue-500/10' },
-              { label: 'Pencapaian Saya', sub: 'Sertifikat & Prestasi', href: 'achievements', icon: Award, accent: 'text-amber-400', bg: 'bg-amber-500/10' },
+              ...(user?.className?.includes('10') || user?.className?.includes('X') ? [
+                { label: 'Peminatan Jurusan', sub: 'Pilih jurusan kls 11', href: 'majoring', icon: TrendingUp, accent: 'text-amber-400', bg: 'bg-amber-500/10' }
+              ] : []),
+              { label: 'Pencapaian Saya', sub: 'Sertifikat & Prestasi', href: 'achievements', icon: Award, accent: 'text-emerald-400', bg: 'bg-emerald-500/10' },
               { label: 'Profil Siswa', sub: 'Informasi pribadi', href: 'profile', icon: Users, accent: 'text-violet-400', bg: 'bg-violet-500/10' },
               { label: 'Jadwal Pelajaran', sub: 'Timeline mingguan', href: 'schedule', icon: Calendar, accent: 'text-emerald-400', bg: 'bg-emerald-500/10' },
             ].map((item, i) => (
@@ -160,6 +205,7 @@ export default function SiswaDashboard() {
       <Route path="/grades" element={<SiswaGrades />} />
       <Route path="/schedule" element={<SiswaSchedule />} />
       <Route path="/achievements" element={<SiswaAchievements />} />
+      <Route path="/majoring" element={<SiswaMajoring />} />
     </Routes>
   );
 }

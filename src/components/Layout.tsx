@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   LogOut, LayoutDashboard, Users, GraduationCap, BookOpen,
   Award, Settings, Menu, X, MessageSquare, Bell, Calendar,
-  ChevronRight, Zap
+  ChevronRight, Zap, Book, MoveRight
 } from 'lucide-react';
 import Chatbot from './Chatbot';
 
@@ -27,9 +27,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       { label: 'Beranda', href: '/admin', icon: LayoutDashboard },
       { label: 'Pengguna', href: '/admin/users', icon: Users },
       { label: 'Kelas', href: '/admin/classes', icon: BookOpen },
+      { label: 'Mata Pelajaran', href: '/admin/subjects', icon: Book },
       { label: 'Jadwal', href: '/admin/schedules', icon: Calendar },
-      { label: 'Jurusan', href: '/admin/majors', icon: GraduationCap },
-      { label: 'Alumni', href: '/admin/alumni', icon: Award },
+      { label: 'Jurusan', href: '/admin/majors', icon: Award },
+      { label: 'Penjuruan', href: '/admin/penjuruan', icon: MoveRight },
+      { label: 'Alumni', href: '/admin/alumni', icon: GraduationCap },
       { label: 'Pengaturan', href: '/admin/settings', icon: Settings },
     ];
     if (user?.role === 'guru') return [

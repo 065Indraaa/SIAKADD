@@ -1,14 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Award, Calendar, Trophy, Sparkles, Zap, ChevronRight } from 'lucide-react';
+import { Award, Calendar, Trophy, Sparkles, Zap, ChevronRight, Loader2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { fetchPrestasiSiswa } from '@/lib/schoolService';
 
 export default function SiswaAchievements() {
-  const achievements = [
-    { id: 1, name: 'Olimpiade Matematika Nasional', type: 'Akademik', level: 'Nasional', rank: 'Juara 1', date: '15 Agustus 2024', desc: 'Meraih medali emas pada Olimpiade Sains Nasional bidang Matematika.' },
-    { id: 2, name: 'Lomba Debat Bahasa Inggris', type: 'Non-Akademik', level: 'Provinsi', rank: 'Juara 2', date: '10 September 2024', desc: 'Mewakili sekolah dalam kompetisi debat tingkat provinsi.' },
-    { id: 3, name: 'Kompetisi Pemrograman Siswa', type: 'Akademik', level: 'Kota', rank: 'Juara 1', date: '5 Mei 2024', desc: 'Membuat aplikasi pembelajaran interaktif.' },
-  ];
+  const { user } = useAuth();
+  const [achievements, setAchievements] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadAchievements = async () => {
+      if (!user?.siswaId) return;
+      setLoading(true);
+      try {
+        const data = await fetchPrestasiSiswa(user.siswaId);
+        setAchievements(data || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAchievements();
+  }, [user?.siswaId]);
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -38,14 +54,16 @@ export default function SiswaAchievements() {
       </div>
 
       <div className="grid gap-8">
-        {achievements.map((ach, idx) => (
+        {loading ? (
+          <div className="flex justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-amber-500" /></div>
+        ) : achievements.map((ach, idx) => (
           <Card key={ach.id} className="bg-slate-900/40 border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl group hover:-translate-y-1 transition-all duration-500">
             <div className="flex flex-col lg:flex-row h-full">
               {/* Prize Side */}
               <div className="relative bg-slate-950/40 p-10 flex flex-col items-center justify-center lg:w-64 border-b lg:border-b-0 lg:border-r border-white/5 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative h-24 w-24 bg-slate-900 rounded-[2rem] flex items-center justify-center mb-4 shadow-2xl border border-white/5 transform group-hover:scale-110 transition-transform duration-500">
-                  {ach.rank.includes('1') ? (
+                  {ach.peringkat.includes('1') || ach.peringkat.toLowerCase().includes('emas') ? (
                     <Trophy className="h-12 w-12 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.4)]" />
                   ) : (
                     <Award className="h-12 w-12 text-blue-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.4)]" />
@@ -53,7 +71,7 @@ export default function SiswaAchievements() {
                 </div>
                 <div className="relative text-center">
                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Peringkat</p>
-                   <p className="font-black text-2xl text-white tracking-tighter italic">{ach.rank}</p>
+                   <p className="font-black text-2xl text-white tracking-tighter italic">{ach.peringkat}</p>
                 </div>
               </div>
               
@@ -62,17 +80,17 @@ export default function SiswaAchievements() {
                 <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
                   <div className="space-y-2">
                     <div className="flex gap-2">
-                      <Badge className={ach.type === 'Akademik' ? 'bg-blue-600/20 text-blue-400 border-blue-500/20 px-3 py-1 font-bold' : 'bg-purple-600/20 text-purple-400 border-purple-500/20 px-3 py-1 font-bold'}>
-                        {ach.type}
+                      <Badge className={ach.tipe === 'Akademik' ? 'bg-blue-600/20 text-blue-400 border-blue-500/20 px-3 py-1 font-bold' : 'bg-purple-600/20 text-purple-400 border-purple-500/20 px-3 py-1 font-bold'}>
+                        {ach.tipe}
                       </Badge>
                       <Badge variant="outline" className="bg-white/5 text-slate-400 border-white/5 px-3 py-1 font-bold">
-                        TINGKAT {ach.level}
+                        TINGKAT {ach.tingkat}
                       </Badge>
                     </div>
-                    <h3 className="text-3xl font-black text-white tracking-tighter group-hover:text-blue-400 transition-colors">{ach.name}</h3>
+                    <h3 className="text-3xl font-black text-white tracking-tighter group-hover:text-blue-400 transition-colors">{ach.nama}</h3>
                     <div className="flex items-center text-slate-500 gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">{ach.date}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">{new Date(ach.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                     </div>
                   </div>
                   
@@ -81,18 +99,20 @@ export default function SiswaAchievements() {
                   </div>
                 </div>
                 
-                <div className="mt-6 p-6 bg-white/[0.02] rounded-3xl border border-white/5 relative overflow-hidden">
-                   <div className="absolute top-0 left-0 w-1 h-full bg-blue-600/40" />
-                   <p className="text-slate-400 text-lg font-medium leading-relaxed italic">
-                     "{ach.desc}"
-                   </p>
-                </div>
+                {ach.deskripsi && (
+                  <div className="mt-6 p-6 bg-white/[0.02] rounded-3xl border border-white/5 relative overflow-hidden">
+                     <div className="absolute top-0 left-0 w-1 h-full bg-blue-600/40" />
+                     <p className="text-slate-400 text-lg font-medium leading-relaxed italic">
+                       "{ach.deskripsi}"
+                     </p>
+                  </div>
+                )}
               </div>
             </div>
           </Card>
         ))}
 
-        {achievements.length === 0 && (
+        {!loading && achievements.length === 0 && (
           <div className="text-center py-32 bg-slate-900/20 border-2 border-dashed border-white/5 rounded-[3rem]">
             <Award className="mx-auto h-20 w-20 text-slate-800 animate-pulse" />
             <h3 className="mt-6 text-2xl font-black text-slate-700 uppercase tracking-tighter">Belum Ada Catatan Prestasi</h3>

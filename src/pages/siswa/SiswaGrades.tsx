@@ -1,26 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Download, BookOpen, Search, Filter, Sparkles, FileText, TrendingUp } from 'lucide-react';
+import { Download, BookOpen, Search, Filter, Sparkles, FileText, TrendingUp, Loader2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { fetchNilaiSiswa } from '@/lib/schoolService';
 
 export default function SiswaGrades() {
-  const grades = [
-    { id: 1, subject: 'Pendidikan Agama', nh: 85, uts: 88, uas: 90, final: 88.3 },
-    { id: 2, subject: 'PPKn', nh: 90, uts: 85, uas: 88, final: 87.7 },
-    { id: 3, subject: 'Bahasa Indonesia', nh: 88, uts: 90, uas: 85, final: 87.4 },
-    { id: 4, subject: 'Matematika Wajib', nh: 95, uts: 92, uas: 96, final: 94.5 },
-    { id: 5, subject: 'Sejarah Indonesia', nh: 82, uts: 80, uas: 85, final: 82.6 },
-    { id: 6, subject: 'Bahasa Inggris', nh: 88, uts: 92, uas: 90, final: 90.0 },
-    { id: 7, subject: 'Seni Budaya', nh: 90, uts: 88, uas: 92, final: 90.2 },
-    { id: 8, subject: 'PJOK', nh: 95, uts: 90, uas: 95, final: 93.5 },
-    { id: 9, subject: 'Prakarya', nh: 85, uts: 88, uas: 90, final: 87.9 },
-    { id: 10, subject: 'Matematika Peminatan', nh: 92, uts: 88, uas: 94, final: 91.6 },
-    { id: 11, subject: 'Fisika', nh: 88, uts: 85, uas: 90, final: 87.9 },
-    { id: 12, subject: 'Kimia', nh: 85, uts: 82, uas: 88, final: 85.3 },
-    { id: 13, subject: 'Biologi', nh: 90, uts: 88, uas: 92, final: 90.2 },
-  ];
+  const { user } = useAuth();
+  const [grades, setGrades] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [semester, setSemester] = useState('Ganjil');
+
+  useEffect(() => {
+    const loadGrades = async () => {
+      if (!user?.siswaId) return;
+      setLoading(true);
+      try {
+        const data = await fetchNilaiSiswa(user.siswaId, semester, '2024/2025');
+        setGrades(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadGrades();
+  }, [user?.siswaId, semester]);
+
+  const avgIpk = grades.length > 0 
+    ? (grades.reduce((acc, curr) => acc + (curr.nilaiAkhir || 0), 0) / grades.length).toFixed(2)
+    : '0.00';
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -57,14 +68,13 @@ export default function SiswaGrades() {
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <Select defaultValue="2024-1">
+              <Select value={semester} onValueChange={setSemester}>
                 <SelectTrigger className="w-full sm:w-[220px] bg-slate-950/50 border-white/10 text-white rounded-2xl h-12 font-bold focus:ring-blue-600">
                   <SelectValue placeholder="Pilih Semester" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-900 border-white/10 text-white rounded-2xl overflow-hidden">
-                  <SelectItem value="2024-1" className="focus:bg-blue-600">2024/2025 • Ganjil</SelectItem>
-                  <SelectItem value="2023-2" className="focus:bg-blue-600">2023/2024 • Genap</SelectItem>
-                  <SelectItem value="2023-1" className="focus:bg-blue-600">2023/2024 • Ganjil</SelectItem>
+                  <SelectItem value="Ganjil" className="focus:bg-blue-600">2024/2025 • Ganjil</SelectItem>
+                  <SelectItem value="Genap" className="focus:bg-blue-600">2024/2025 • Genap</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -84,31 +94,37 @@ export default function SiswaGrades() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {grades.map((grade, idx) => (
-                  <TableRow key={grade.id} className="border-white/5 hover:bg-white/[0.03] transition-all group">
-                    <TableCell className="py-5 px-8">
-                      <p className="font-black text-white text-lg tracking-tight group-hover:translate-x-1 transition-transform">{grade.subject}</p>
-                      <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Kategori Umum</p>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className="font-bold text-slate-300 text-lg">{grade.nh}</span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className="font-bold text-slate-300 text-lg">{grade.uts}</span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className="font-bold text-slate-300 text-lg">{grade.uas}</span>
-                    </TableCell>
-                    <TableCell className="text-right pr-8">
-                      <div className="inline-flex items-center gap-3">
-                        <div className={`h-2 w-2 rounded-full ${grade.final >= 80 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-amber-500'}`}></div>
-                        <span className={`text-2xl font-black tracking-tighter ${grade.final >= 80 ? 'text-emerald-400' : 'text-blue-400'}`}>
-                          {grade.final.toFixed(1)}
-                        </span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {loading ? (
+                  <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-500" /></TableCell></TableRow>
+                ) : grades.length > 0 ? (
+                  grades.map((grade, idx) => (
+                    <TableRow key={grade.id} className="border-white/5 hover:bg-white/[0.03] transition-all group">
+                      <TableCell className="py-5 px-8">
+                        <p className="font-black text-white text-lg tracking-tight group-hover:translate-x-1 transition-transform">{grade.mataPelajaran?.nama}</p>
+                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Kategori Umum</p>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-bold text-slate-300 text-lg">{grade.nilaiHarian}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-bold text-slate-300 text-lg">{grade.nilaiUts}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-bold text-slate-300 text-lg">{grade.nilaiUas}</span>
+                      </TableCell>
+                      <TableCell className="text-right pr-8">
+                        <div className="inline-flex items-center gap-3">
+                          <div className={`h-2 w-2 rounded-full ${(grade.nilaiAkhir || 0) >= 80 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-amber-500'}`}></div>
+                          <span className={`text-2xl font-black tracking-tighter ${(grade.nilaiAkhir || 0) >= 80 ? 'text-emerald-400' : 'text-blue-400'}`}>
+                            {(grade.nilaiAkhir || 0).toFixed(1)}
+                          </span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow><TableCell colSpan={5} className="text-center py-10 text-slate-500 font-bold uppercase tracking-widest text-[10px]">Belum ada nilai terinput.</TableCell></TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
@@ -120,7 +136,7 @@ export default function SiswaGrades() {
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Rata-rata IPK</p>
-                <p className="text-3xl font-black text-white tracking-tighter">88.52 <span className="text-sm font-bold text-emerald-500 uppercase ml-2 tracking-widest">Excellent</span></p>
+                <p className="text-3xl font-black text-white tracking-tighter">{avgIpk} <span className="text-sm font-bold text-emerald-500 uppercase ml-2 tracking-widest">{parseFloat(avgIpk) >= 80 ? 'Excellent' : 'Good'}</span></p>
               </div>
             </div>
 
