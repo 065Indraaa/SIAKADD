@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { fetchSiswa } from '@/lib/userService';
 import { fetchJurusan, savePeminatan } from '@/lib/schoolService';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 interface StudentRow {
   siswaId: string;
@@ -59,6 +60,8 @@ export default function AdminPenjuruan() {
   };
 
   useEffect(() => { loadData(); }, []);
+
+  useAutoRefresh(loadData, 20_000);
 
   const handleAssignmentChange = (siswaId: string, newAssignment: string) => {
     setStudents(prev => prev.map(s => s.siswaId === siswaId ? { ...s, assigned: newAssignment } : s));

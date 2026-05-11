@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { fetchAlumni, addAlumniData, editAlumniData, removeAlumniData } from '@/lib/schoolService';
 import { Loader2, RefreshCw } from 'lucide-react';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 export default function AdminAlumni() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,6 +40,8 @@ export default function AdminAlumni() {
   React.useEffect(() => {
     loadData();
   }, []);
+
+  useAutoRefresh(loadData, 20_000);
 
   const filteredAlumni = alumni.filter(alum => 
     alum.name.toLowerCase().includes(searchTerm.toLowerCase()) || 

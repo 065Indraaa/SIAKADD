@@ -9,6 +9,7 @@ import { LookupSelect } from '@/components/ui/lookup-select';
 import { Search, Loader2, Phone, MapPin, RefreshCw, User, Info, Users } from 'lucide-react';
 import { fetchSiswa, UserListItem } from '@/lib/userService';
 import { fetchKelas } from '@/lib/schoolService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 export default function GuruStudents() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,6 +48,8 @@ export default function GuruStudents() {
   }, [selectedKelasId]);
 
   useEffect(() => { loadStudents(); }, [loadStudents]);
+
+  useAutoRefresh(loadStudents, 20_000);
 
   const filtered = students.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

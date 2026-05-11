@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { ScrollArea } from './ui/scroll-area';
 import { useAuth } from '../contexts/AuthContext';
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY ;
@@ -178,9 +177,13 @@ PANDUAN JAWABAN:
   ];
 
   return (
-    <div className="flex flex-col h-full bg-card">
-      <ScrollArea className="flex-1 p-4">
-        <div ref={scrollRef} className="space-y-3">
+    <div className="flex flex-col h-full bg-card overflow-hidden">
+      {/* Area pesan — scroll native */}
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0"
+        style={{ scrollBehavior: 'smooth' }}
+      >
           {messages.map((msg, index) => (
             <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
@@ -209,8 +212,7 @@ PANDUAN JAWABAN:
               </div>
             </div>
           )}
-        </div>
-      </ScrollArea>
+      </div>
 
       {messages.length <= 1 && (
         <div className="px-4 pb-2">

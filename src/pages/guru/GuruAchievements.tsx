@@ -14,6 +14,7 @@ import { addPrestasi } from '@/lib/schoolService';
 import { fetchSiswa, UserListItem } from '@/lib/userService';
 import { listPrestasi, deletePrestasi } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 interface Prestasi {
   id: string;
@@ -78,6 +79,8 @@ export default function GuruAchievements() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  useAutoRefresh(loadData, 20_000);
 
   const filtered = achievements.filter(a =>
     a.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||

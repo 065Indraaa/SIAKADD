@@ -1,48 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Calendar, Clock, BookOpen, Sparkles, Zap, Loader2 } from 'lucide-react';
+import { Calendar, Clock, Sparkles, Zap, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchJadwalKelas } from '@/lib/schoolService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 export default function SiswaSchedule() {
   const { user } = useAuth();
   const [schedule, setSchedule] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const loadSchedule = async () => {
-      if (!user?.kelasId) return;
-      setLoading(true);
-      try {
-        const data = await fetchJadwalKelas(user.kelasId);
-        
-        // Process data into grid
-        const timeSlots = Array.from(new Set(data.map((d: any) => `${d.jamMulai} - ${d.jamSelesai}`))).sort();
-        
-        const gridData = timeSlots.map(time => {
-          const row: any = { time };
-          ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].forEach(day => {
-            const item = data.find((d: any) => `${d.jamMulai} - ${d.jamSelesai}` === time && d.hari.toLowerCase() === day.toLowerCase());
-            row[day.toLowerCase().slice(0, 3)] = item ? item.mataPelajaran?.nama : '-';
-          });
-          return row;
+  const loadSchedule = useCallback(async () => {
+    if (!user?.kelasId) return;
+    setLoading(true);
+    try {
+      const data = await fetchJadwalKelas(user.kelasId);
+      const timeSlots = Array.from(new Set(data.map((d: any) => `${d.jamMulai} - ${d.jamSelesai}`))).sort();
+      const gridData = timeSlots.map(time => {
+        const row: any = { time };
+        ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].forEach(day => {
+          const item = data.find((d: any) => `${d.jamMulai} - ${d.jamSelesai}` === time && d.hari.toLowerCase() === day.toLowerCase());
+          row[day.toLowerCase().slice(0, 3)] = item ? item.mataPelajaran?.nama : '-';
         });
-
-        // insert break
-        if (gridData.length > 3) {
-          gridData.splice(3, 0, { time: 'ISTIRAHAT', sen: 'ISTIRAHAT', sel: 'ISTIRAHAT', rab: 'ISTIRAHAT', kam: 'ISTIRAHAT', jum: 'ISTIRAHAT' });
-        }
-
-        setSchedule(gridData);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
+        return row;
+      });
+      if (gridData.length > 3) {
+        gridData.splice(3, 0, { time: 'ISTIRAHAT', sen: 'ISTIRAHAT', sel: 'ISTIRAHAT', rab: 'ISTIRAHAT', kam: 'ISTIRAHAT', jum: 'ISTIRAHAT' });
       }
-    };
-    loadSchedule();
+      setSchedule(gridData);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   }, [user?.kelasId]);
+
+  useEffect(() => { loadSchedule(); }, [loadSchedule]);
+
+  useAutoRefresh(loadSchedule, 20_000);
 
   const days = [
     { key: 'sen', label: 'Senin' },

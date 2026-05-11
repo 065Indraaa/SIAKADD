@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Download, BookOpen, Search, Filter, Sparkles, FileText, TrendingUp, Loader2 } from 'lucide-react';
+import { Download, BookOpen, Sparkles, TrendingUp, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchNilaiSiswa } from '@/lib/schoolService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 export default function SiswaGrades() {
   const { user } = useAuth();
@@ -13,21 +14,22 @@ export default function SiswaGrades() {
   const [loading, setLoading] = useState(false);
   const [semester, setSemester] = useState('Ganjil');
 
-  useEffect(() => {
-    const loadGrades = async () => {
-      if (!user?.siswaId) return;
-      setLoading(true);
-      try {
-        const data = await fetchNilaiSiswa(user.siswaId, semester, '2024/2025');
-        setGrades(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadGrades();
+  const loadGrades = useCallback(async () => {
+    if (!user?.siswaId) return;
+    setLoading(true);
+    try {
+      const data = await fetchNilaiSiswa(user.siswaId, semester, '2024/2025');
+      setGrades(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   }, [user?.siswaId, semester]);
+
+  useEffect(() => { loadGrades(); }, [loadGrades]);
+
+  useAutoRefresh(loadGrades, 20_000);
 
   const calculateNilaiAkhir = (g: any) => {
     const nh = g.nilaiHarian || 0;

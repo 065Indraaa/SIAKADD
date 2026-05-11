@@ -13,6 +13,7 @@ import { fetchSiswa } from '@/lib/userService';
 import { upsertNilai, getNilaiByKelas } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 interface SiswaGrade {
   siswaId: string;
@@ -99,6 +100,8 @@ export default function GuruGrades() {
   }, [selectedKelasId, selectedMapelId]);
 
   useEffect(() => { loadStudentsWithGrades(); }, [loadStudentsWithGrades]);
+
+  useAutoRefresh(loadStudentsWithGrades, 20_000);
 
   const handleNilaiChange = (siswaId: string, field: keyof SiswaGrade, val: string) => {
     setStudents(prev => prev.map(s => s.siswaId === siswaId ? { ...s, [field]: val } : s));

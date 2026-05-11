@@ -18,6 +18,7 @@ import {
   UserListItem,
 } from '@/lib/userService';
 import { fetchKelas, fetchJurusan } from '@/lib/schoolService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
@@ -213,6 +214,12 @@ export default function AdminUsers() {
   }, []);
 
   useEffect(() => { fetchUsersData(); loadMetadata(); }, [fetchUsersData, loadMetadata]);
+
+  // Auto-refresh setiap 20 detik + saat tab kembali aktif
+  useAutoRefresh(() => {
+    fetchUsersData();
+    loadMetadata();
+  }, 20_000);
 
   const filteredUsers = users.filter(user => {
     const low = searchTerm.toLowerCase();

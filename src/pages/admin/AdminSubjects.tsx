@@ -13,6 +13,7 @@ import {
   editMataPelajaran,
   removeMataPelajaran,
 } from '@/lib/schoolService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 // Mata Pelajaran Preset — Kurikulum Merdeka
 const MAPEL_PRESET = {
@@ -70,6 +71,8 @@ export default function AdminSubjects() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  useAutoRefresh(loadData, 20_000);
 
   const handleOpenAdd = () => {
     setEditingSubject(null);

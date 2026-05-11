@@ -1,30 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Award, Calendar, Trophy, Sparkles, Zap, ChevronRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchPrestasiSiswa } from '@/lib/schoolService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 export default function SiswaAchievements() {
   const { user } = useAuth();
   const [achievements, setAchievements] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const loadAchievements = async () => {
-      if (!user?.siswaId) return;
-      setLoading(true);
-      try {
-        const data = await fetchPrestasiSiswa(user.siswaId);
-        setAchievements(data || []);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadAchievements();
+  const loadAchievements = useCallback(async () => {
+    if (!user?.siswaId) return;
+    setLoading(true);
+    try {
+      const data = await fetchPrestasiSiswa(user.siswaId);
+      setAchievements(data || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   }, [user?.siswaId]);
+
+  useEffect(() => { loadAchievements(); }, [loadAchievements]);
+
+  useAutoRefresh(loadAchievements, 20_000);
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">

@@ -13,6 +13,7 @@ import {
   editJurusan,
   removeJurusan,
 } from '@/lib/schoolService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 // Preset berdasarkan Kurikulum Merdeka — SMA & SMK umum
 const JURUSAN_PRESET = {
@@ -59,6 +60,8 @@ export default function AdminMajors() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  useAutoRefresh(loadData, 20_000);
 
   const handleOpenAdd = () => {
     setEditingMajor(null);

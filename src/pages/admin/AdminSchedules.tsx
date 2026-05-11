@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { fetchKelas, fetchJadwalKelas, addJadwalData, removeJadwalData, fetchMataPelajaran } from '@/lib/schoolService';
 import { fetchGuru } from '@/lib/userService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 const HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 const SEMESTER = ['Ganjil', 'Genap'];
@@ -75,6 +76,8 @@ export default function AdminSchedules() {
   }, [kelasFilter, tahunAjaran]);
 
   useEffect(() => { loadSchedules(); }, [loadSchedules]);
+
+  useAutoRefresh(loadSchedules, 20_000);
 
   const filteredSchedules = schedules
     .filter(s => hariFilter === 'semua' || s.hari.toLowerCase() === hariFilter.toLowerCase())

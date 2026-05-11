@@ -1,33 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { User, Mail, MapPin, Phone, GraduationCap, Zap, Shield, Calendar, BookOpen } from 'lucide-react';
 import { getSiswa } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
 import { Loader2 } from 'lucide-react';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 export default function SiswaProfile() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      if (!user?.siswaId) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const res = await getSiswa(dataConnect, { id: user.siswaId });
-        setProfile(res.data.siswa);
-      } catch (e) {
-        console.error('Failed to load profile:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadProfile();
+  const loadProfile = useCallback(async () => {
+    if (!user?.siswaId) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await getSiswa(dataConnect, { id: user.siswaId });
+      setProfile(res.data.siswa);
+    } catch (e) {
+      console.error('Failed to load profile:', e);
+    } finally {
+      setLoading(false);
+    }
   }, [user?.siswaId]);
+
+  useEffect(() => { loadProfile(); }, [loadProfile]);
+
+  useAutoRefresh(loadProfile, 30_000);
 
   if (loading) {
     return (

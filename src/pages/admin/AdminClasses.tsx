@@ -14,6 +14,7 @@ import { fetchKelas, addKelas, editKelas, fetchJurusan } from '@/lib/schoolServi
 import { fetchGuru, UserListItem } from '@/lib/userService';
 import { deleteKelas } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
 // Kurikulum Merdeka — Fase E (Kelas 10), Fase F (Kelas 11-12)
 const TINGKAT_OPTIONS = [
@@ -70,6 +71,8 @@ export default function AdminClasses() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  useAutoRefresh(loadData, 20_000);
 
   const filteredClasses = classes.filter(cls =>
     cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
