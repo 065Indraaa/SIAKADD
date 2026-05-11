@@ -294,7 +294,7 @@ PANDUAN JAWABAN:
           </Button>
         </form>
         <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
-          Powered by Groq AI (Llama 3.3) • SMAIT Nur Hidayah Sukoharjo
+          Asisten otomatis. Jawaban dapat meleset; untuk info akurat hubungi TU sekolah.
         </p>
       </div>
     </div>

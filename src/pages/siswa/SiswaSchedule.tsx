@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, Sparkles, Zap, Loader2 } from 'lucide-react';
+import { Clock, Zap, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchJadwalKelas } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
@@ -81,55 +81,52 @@ export default function SiswaSchedule() {
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h2 className="text-5xl font-black tracking-tighter text-white font-heading leading-none">
+          <h2 className="text-3xl font-bold tracking-tight text-white">
             Jadwal Pelajaran
           </h2>
-          <p className="text-slate-400 font-medium mt-4 text-lg max-w-xl">
-            Rencana pembelajaran mingguan untuk kelas <span className="text-white font-bold">{user?.className || '—'}</span>. Pastikan hadir tepat waktu.
+          <p className="text-slate-400 mt-2 text-sm max-w-xl">
+            Rencana pembelajaran mingguan untuk kelas <span className="text-white font-semibold">{user?.className || '—'}</span>.
           </p>
         </div>
 
-        <div className="bg-white/5 border border-white/5 p-4 rounded-3xl flex items-center gap-4 backdrop-blur-2xl">
-          <div className="h-12 w-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
-            <Clock className="h-6 w-6" />
-          </div>
+        <div className="bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl flex items-center gap-3">
+          <Clock className="h-4 w-4 text-slate-400" />
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Waktu Sekarang</p>
-            <p className="text-white font-bold">{clock.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Jam saat ini</p>
+            <p className="text-white text-sm font-semibold">{clock.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</p>
           </div>
         </div>
       </div>
 
-      <Card className="bg-slate-900/40 border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden backdrop-blur-xl">
-        <CardHeader className="p-8 border-b border-white/5 bg-white/[0.02] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <Card className="bg-slate-900/40 border-white/10 rounded-2xl overflow-hidden">
+        <CardHeader className="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-white font-heading font-black text-2xl italic leading-none">Semester {semester}</CardTitle>
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Tahun Ajaran {tahunAjaran}</p>
+            <CardTitle className="text-white text-lg font-bold">Semester {semester}</CardTitle>
+            <p className="text-slate-400 text-xs mt-0.5">Tahun Ajaran {tahunAjaran}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Select value={semester} onValueChange={(v) => { if (v === 'Ganjil' || v === 'Genap') setSemester(v); }}>
-              <SelectTrigger className="w-[140px] bg-slate-950/50 border-white/10 text-white rounded-2xl h-11 font-bold">
+              <SelectTrigger className="w-[130px] bg-slate-950 border-white/10 text-white rounded-lg h-10 text-sm font-medium">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-white/10 text-white rounded-2xl">
+              <SelectContent className="bg-slate-900 border-white/10 text-white rounded-lg">
                 {SEMESTER_OPTIONS.map(s => (
                   <SelectItem key={s} value={s} className="focus:bg-blue-600">{s}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={tahunAjaran} onValueChange={(v) => { if (v) setTahunAjaran(v); }}>
-              <SelectTrigger className="w-[150px] bg-slate-950/50 border-white/10 text-white rounded-2xl h-11 font-bold">
+              <SelectTrigger className="w-[140px] bg-slate-950 border-white/10 text-white rounded-lg h-10 text-sm font-medium">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-white/10 text-white rounded-2xl">
+              <SelectContent className="bg-slate-900 border-white/10 text-white rounded-lg">
                 {tahunAjaranOptions.map(ta => (
                   <SelectItem key={ta} value={ta} className="focus:bg-blue-600">{ta}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Sparkles className="h-6 w-6 text-indigo-500 hidden sm:block" />
           </div>
         </CardHeader>
 
@@ -184,10 +181,10 @@ export default function SiswaSchedule() {
             </Table>
           </div>
 
-          <div className="p-8 bg-white/[0.01] border-t border-white/5 flex items-center gap-4">
-            <div className="h-2 w-2 rounded-full bg-indigo-500 animate-ping" />
-            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
-              Sistem sinkronisasi otomatis aktif · diperbarui {new Date().toLocaleDateString('id-ID')}
+          <div className="p-6 bg-white/[0.02] border-t border-white/10 flex items-center gap-3">
+            <div className="h-2 w-2 rounded-full bg-emerald-500" />
+            <p className="text-xs text-slate-500">
+              Data diperbarui otomatis. Konfirmasikan ke wali kelas jika jadwal belum sesuai.
             </p>
           </div>
         </CardContent>

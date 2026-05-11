@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Download, BookOpen, Sparkles, TrendingUp, Loader2 } from 'lucide-react';
+import { Download, BookOpen, TrendingUp, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchNilaiSiswa } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
@@ -64,55 +64,55 @@ export default function SiswaGrades() {
     : '0.00';
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h2 className="text-5xl font-black tracking-tighter text-white font-heading leading-none">
+          <h2 className="text-3xl font-bold tracking-tight text-white">
             Nilai & Rapor
           </h2>
-          <p className="text-slate-400 font-medium mt-4 text-lg max-w-xl">
-            Pantau progres akademik Anda secara real-time. Data diperbarui secara otomatis oleh sistem.
+          <p className="text-slate-400 mt-2 text-sm max-w-xl">
+            Nilai semester yang telah diinput guru mata pelajaran. Rapot final akan terbuka setelah administrasi lunas.
           </p>
         </div>
 
         <Button
           variant="outline"
-          className="bg-blue-600 hover:bg-blue-700 text-white border-none rounded-2xl px-6 py-6 h-auto font-bold shadow-xl shadow-blue-600/20 transition-all hover:scale-105 active:scale-95"
-          onClick={() => alert('Fitur unduh rapor sedang disiapkan...')}
+          className="bg-blue-600 hover:bg-blue-500 text-white border-none rounded-xl px-5 h-11 font-semibold text-sm"
+          onClick={() => alert('Fitur unduh rapor sedang disiapkan.')}
         >
-          <Download className="mr-2 h-5 w-5" /> Unduh Rapor PDF
+          <Download className="mr-2 h-4 w-4" /> Unduh rapor (PDF)
         </Button>
       </div>
 
-      <Card className="bg-slate-900/40 border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden backdrop-blur-xl">
-        <CardHeader className="p-8 border-b border-white/5 bg-white/[0.02]">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-400">
-                <Sparkles className="h-5 w-5" />
+      <Card className="bg-slate-900/40 border-white/10 rounded-2xl overflow-hidden">
+        <CardHeader className="p-6 border-b border-white/10">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-blue-600/10 flex items-center justify-center text-blue-400">
+                <BookOpen className="h-5 w-5" />
               </div>
               <div>
-                <CardTitle className="text-white font-heading font-black text-2xl italic leading-none">Rincian Semester</CardTitle>
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Transkrip Nilai Akademik</p>
+                <CardTitle className="text-white text-lg font-bold">Rincian Semester {semester}</CardTitle>
+                <p className="text-slate-500 text-xs mt-0.5">Tahun Ajaran {tahunAjaran}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <Select value={tahunAjaran} onValueChange={(v) => { if (v) setTahunAjaran(v); }}>
-                <SelectTrigger className="w-full sm:w-[160px] bg-slate-950/50 border-white/10 text-white rounded-2xl h-12 font-bold focus:ring-blue-600">
+                <SelectTrigger className="w-full sm:w-[140px] bg-slate-950 border-white/10 text-white rounded-lg h-10 text-sm font-medium">
                   <SelectValue placeholder="Tahun Ajaran" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-white rounded-2xl overflow-hidden">
+                <SelectContent className="bg-slate-900 border-white/10 text-white rounded-lg">
                   {tahunAjaranOptions.map(ta => (
                     <SelectItem key={ta} value={ta} className="focus:bg-blue-600">{ta}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <Select value={semester} onValueChange={(v) => { if (v) setSemester(v); }}>
-                <SelectTrigger className="w-full sm:w-[160px] bg-slate-950/50 border-white/10 text-white rounded-2xl h-12 font-bold focus:ring-blue-600">
+                <SelectTrigger className="w-full sm:w-[130px] bg-slate-950 border-white/10 text-white rounded-lg h-10 text-sm font-medium">
                   <SelectValue placeholder="Semester" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-white rounded-2xl overflow-hidden">
+                <SelectContent className="bg-slate-900 border-white/10 text-white rounded-lg">
                   {SEMESTER_OPTIONS.map(s => (
                     <SelectItem key={s} value={s} className="focus:bg-blue-600">Semester {s}</SelectItem>
                   ))}
@@ -125,67 +125,78 @@ export default function SiswaGrades() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-slate-950/20">
-                <TableRow className="border-white/5 hover:bg-transparent">
-                  <TableHead className="py-6 px-8 text-slate-500 font-black uppercase tracking-widest text-[10px]">Mata Pelajaran</TableHead>
-                  <TableHead className="text-center text-slate-500 font-black uppercase tracking-widest text-[10px]">Harian</TableHead>
-                  <TableHead className="text-center text-slate-500 font-black uppercase tracking-widest text-[10px]">UTS</TableHead>
-                  <TableHead className="text-center text-slate-500 font-black uppercase tracking-widest text-[10px]">UAS</TableHead>
-                  <TableHead className="text-right pr-8 text-slate-500 font-black uppercase tracking-widest text-[10px]">Akhir</TableHead>
+              <TableHeader className="bg-slate-950/30">
+                <TableRow className="border-white/10 hover:bg-transparent">
+                  <TableHead className="py-4 pl-6 text-slate-300 font-semibold uppercase tracking-wider text-[11px]">Mata Pelajaran</TableHead>
+                  <TableHead className="text-center text-slate-300 font-semibold uppercase tracking-wider text-[11px]">Harian</TableHead>
+                  <TableHead className="text-center text-slate-300 font-semibold uppercase tracking-wider text-[11px]">UTS</TableHead>
+                  <TableHead className="text-center text-slate-300 font-semibold uppercase tracking-wider text-[11px]">UAS</TableHead>
+                  <TableHead className="text-right pr-6 text-slate-300 font-semibold uppercase tracking-wider text-[11px]">Akhir</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-500" /></TableCell></TableRow>
                 ) : grades.length > 0 ? (
-                  grades.map((grade, idx) => (
-                    <TableRow key={grade.id} className="border-white/5 hover:bg-white/[0.03] transition-all group">
-                      <TableCell className="py-5 px-8">
-                        <p className="font-black text-white text-lg tracking-tight group-hover:translate-x-1 transition-transform">{grade.mataPelajaran?.nama}</p>
-                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Kategori Umum</p>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="font-bold text-slate-300 text-lg">{grade.nilaiHarian}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="font-bold text-slate-300 text-lg">{grade.nilaiUts}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="font-bold text-slate-300 text-lg">{grade.nilaiUas}</span>
-                      </TableCell>
-                      <TableCell className="text-right pr-8">
-                        <div className="inline-flex items-center gap-3">
-                          <div className={`h-2 w-2 rounded-full ${calculateNilaiAkhir(grade) >= 80 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-amber-500'}`}></div>
-                          <span className={`text-2xl font-black tracking-tighter ${calculateNilaiAkhir(grade) >= 80 ? 'text-emerald-400' : 'text-blue-400'}`}>
-                            {calculateNilaiAkhir(grade).toFixed(1)}
+                  grades.map((grade) => {
+                    const akhir = calculateNilaiAkhir(grade);
+                    const color = akhir >= 85 ? 'text-emerald-400' : akhir >= 75 ? 'text-blue-400' : akhir >= 60 ? 'text-amber-400' : 'text-red-400';
+                    return (
+                      <TableRow key={grade.id} className="border-white/10 hover:bg-white/5">
+                        <TableCell className="py-4 pl-6">
+                          <p className="font-semibold text-white">{grade.mataPelajaran?.nama || '-'}</p>
+                          {grade.mataPelajaran?.kode && (
+                            <p className="text-[11px] text-slate-500 font-mono mt-0.5">{grade.mataPelajaran.kode}</p>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center text-slate-300 font-medium tabular-nums">{grade.nilaiHarian ?? '—'}</TableCell>
+                        <TableCell className="text-center text-slate-300 font-medium tabular-nums">{grade.nilaiUts ?? '—'}</TableCell>
+                        <TableCell className="text-center text-slate-300 font-medium tabular-nums">{grade.nilaiUas ?? '—'}</TableCell>
+                        <TableCell className="text-right pr-6">
+                          <span className={`text-lg font-bold tabular-nums ${color}`}>
+                            {akhir > 0 ? akhir.toFixed(1) : '—'}
                           </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 ) : (
-                  <TableRow><TableCell colSpan={5} className="text-center py-10 text-slate-500 font-bold uppercase tracking-widest text-[10px]">Belum ada nilai terinput.</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-10 text-slate-500 text-sm">
+                      Belum ada nilai untuk Semester {semester} T.A. {tahunAjaran}.
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </Table>
           </div>
 
-          <div className="p-8 bg-white/[0.01] border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl bg-emerald-600/10 flex items-center justify-center text-emerald-400">
-                <TrendingUp className="h-7 w-7" />
+          <div className="p-6 bg-white/[0.02] border-t border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-emerald-600/10 flex items-center justify-center text-emerald-400">
+                <TrendingUp className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Rata-rata IPK</p>
-                <p className="text-3xl font-black text-white tracking-tighter">{avgIpk} <span className="text-sm font-bold text-emerald-500 uppercase ml-2 tracking-widest">{parseFloat(avgIpk) >= 80 ? 'Sangat Baik' : 'Baik'}</span></p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Rata-rata nilai akhir</p>
+                <p className="text-2xl font-bold text-white tabular-nums">
+                  {avgIpk}
+                  <span className={`text-xs font-semibold uppercase ml-2 tracking-wider ${
+                    parseFloat(avgIpk) >= 85 ? 'text-emerald-400'
+                      : parseFloat(avgIpk) >= 75 ? 'text-blue-400'
+                      : parseFloat(avgIpk) >= 60 ? 'text-amber-400'
+                      : 'text-slate-500'
+                  }`}>
+                    {parseFloat(avgIpk) >= 85 ? 'sangat baik'
+                      : parseFloat(avgIpk) >= 75 ? 'baik'
+                      : parseFloat(avgIpk) >= 60 ? 'cukup'
+                      : 'belum terinput'}
+                  </span>
+                </p>
               </div>
             </div>
-
-            <div className="flex gap-2">
-              {[1, 2, 3].map(i => (
-                <div key={i} className={`h-1.5 w-${i === 1 ? '8' : '2'} rounded-full bg-blue-600${i > 1 ? '/20' : ''}`}></div>
-              ))}
-            </div>
+            <p className="text-xs text-slate-500 leading-relaxed max-w-md">
+              Nilai akhir dihitung 30% harian + 30% UTS + 40% UAS. KKM sekolah 75.
+            </p>
           </div>
         </CardContent>
       </Card>

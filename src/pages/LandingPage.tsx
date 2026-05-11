@@ -2,25 +2,21 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
-  GraduationCap, Shield, Users, BookOpen, Award, Target,
-  Building2, Star, MapPin, Phone, Mail, ChevronRight,
+  GraduationCap, Shield, Users, BookOpen, Target,
+  Building2, MapPin, Phone, Mail, ChevronRight,
   Microscope, Dumbbell, Globe, MessageCircle, X,
-  Sun, Moon, Menu, ArrowRight, Calendar, Sparkles,
+  Sun, Moon, Menu, ArrowRight, Sparkles,
   LineChart, ClipboardList, FileSpreadsheet, CalendarClock,
-  Trophy, UserCog, Tablet, FileCheck2,
+  Trophy, UserCog, Tablet, FileCheck2, Info,
 } from 'lucide-react';
 import Chatbot from '../components/Chatbot';
 import { useTheme } from '@/contexts/ThemeContext';
 
-// ═════════════════════════════════════════════
-// DATA SEKOLAH — SMAIT Nur Hidayah Sukoharjo
-// Sumber: Wawancara Bapak Nur Suci Aprilianto S.Pd. Gr.
-// (Wakil Kepala Bidang Kehumasan) — 15 Maret 2026
-// ═════════════════════════════════════════════
+// Data sekolah — disusun berdasarkan wawancara dengan pihak SMAIT Nur Hidayah
+// (Bapak Nur Suci Aprilianto S.Pd. Gr. — Wakasek Humas, 15 Maret 2026)
 const SCHOOL = {
   name: 'SMAIT Nur Hidayah',
   fullName: 'Sekolah Menengah Atas Islam Terpadu Nur Hidayah',
-  nickname: 'SMAIT NH',
   tagline: 'Membentuk Generasi Rabbani yang Berprestasi',
   founded: 2005,
   address: 'Jl. Pandawa No.10, Dusun III, Kel. Pucangan, Kec. Kartasura, Kab. Sukoharjo, Jawa Tengah 57168',
@@ -31,12 +27,6 @@ const SCHOOL = {
   npsn: '20363244',
   yayasan: 'Yayasan Nur Hidayah Surakarta',
   jaringan: 'Jaringan Sekolah Islam Terpadu (JSIT) Indonesia',
-  stats: {
-    siswa: '300+',
-    guru: '60+',
-    alumni: '2.500+',
-    tahun: 20,
-  },
 };
 
 const JURUSAN = [
@@ -44,7 +34,7 @@ const JURUSAN = [
     icon: Microscope,
     kode: 'Rumpun A',
     nama: 'Kelompok Kesehatan',
-    desc: 'Mendalami Matematika, Fisika, Kimia, dan Biologi. Diarahkan untuk jalur kedokteran, farmasi, keperawatan, dan ilmu kesehatan lainnya. Kelas paling diminati dengan seleksi ketat berdasarkan minat dan nilai.',
+    desc: 'Mendalami Matematika, Fisika, Kimia, dan Biologi. Diarahkan untuk jalur kedokteran, farmasi, keperawatan, dan ilmu kesehatan lainnya.',
     tags: ['Matematika', 'Fisika', 'Kimia', 'Biologi'],
     color: 'blue',
     kelas: '2 kelas',
@@ -53,7 +43,7 @@ const JURUSAN = [
     icon: Globe,
     kode: 'Rumpun B',
     nama: 'Kelompok Teknik',
-    desc: 'Fokus pada Fisika, Matematika Tingkat Lanjut, Biologi, dan Kimia dengan orientasi teknik. Disiapkan untuk jalur teknik informatika, teknik sipil, arsitektur, dan rekayasa industri.',
+    desc: 'Fokus pada Matematika Tingkat Lanjut, Fisika, Kimia, dan Biologi dengan orientasi teknik. Disiapkan untuk jalur teknik informatika, sipil, arsitektur, dan rekayasa industri.',
     tags: ['Matematika Lanjut', 'Fisika', 'Kimia', 'Biologi'],
     color: 'emerald',
     kelas: '1 kelas',
@@ -62,7 +52,7 @@ const JURUSAN = [
     icon: BookOpen,
     kode: 'Rumpun C',
     nama: 'Kelompok Sosial & Humaniora',
-    desc: 'Mendalami Ekonomi, Sosiologi, Geografi, dan Sejarah. Diarahkan untuk jalur hukum, bisnis Islam, hubungan internasional, ilmu komunikasi, dan dakwah.',
+    desc: 'Mendalami Ekonomi, Sosiologi, Geografi, dan Sejarah. Diarahkan untuk jalur hukum, bisnis, hubungan internasional, komunikasi, dan dakwah.',
     tags: ['Ekonomi', 'Sosiologi', 'Geografi', 'Sejarah'],
     color: 'purple',
     kelas: '2 kelas',
@@ -70,64 +60,46 @@ const JURUSAN = [
 ];
 
 const FASILITAS = [
-  { icon: Microscope, label: 'Lab IPA Lengkap', desc: 'Fisika, Kimia, Biologi' },
-  { icon: BookOpen, label: 'Perpustakaan Islami', desc: 'Kitab, buku, e-resource' },
-  { icon: Building2, label: 'Masjid Sekolah', desc: 'Pusat kegiatan ibadah & halaqah' },
-  { icon: Dumbbell, label: 'Lapangan Olahraga', desc: 'Basket, futsal, voli, panahan' },
-  { icon: Globe, label: 'Lab Komputer', desc: 'Koneksi internet cepat' },
-  { icon: Tablet, label: 'Akses via Tablet', desc: 'Perangkat resmi yang diizinkan di sekolah' },
+  { icon: Microscope, label: 'Laboratorium IPA', desc: 'Fisika, Kimia, dan Biologi' },
+  { icon: BookOpen, label: 'Perpustakaan', desc: 'Buku, kitab, dan referensi digital' },
+  { icon: Building2, label: 'Masjid Sekolah', desc: 'Ibadah harian dan kegiatan halaqah' },
+  { icon: Dumbbell, label: 'Lapangan Olahraga', desc: 'Basket, futsal, voli, dan panahan' },
+  { icon: Globe, label: 'Laboratorium Komputer', desc: 'Penunjang mata pelajaran Informatika' },
+  { icon: Tablet, label: 'Akses Tablet', desc: 'Perangkat sekolah untuk mengakses portal' },
 ];
 
-const PRESTASI = [
-  { year: '2024', title: 'Juara Olimpiade Sains Nasional (KSN)', cat: 'Matematika', level: 'Nasional' },
-  { year: '2024', title: 'Juara 1 Lomba Tahfidz Al-Quran', cat: 'Keagamaan', level: 'Jawa Tengah' },
-  { year: '2024', title: 'Juara 1 MTQ Pelajar', cat: 'Keagamaan', level: 'Karesidenan Surakarta' },
-  { year: '2023', title: 'Medali Perunggu KSN Biologi', cat: 'Sains', level: 'Nasional' },
-  { year: '2023', title: 'Juara Kompetisi Robotik JSIT', cat: 'Teknologi', level: 'Nasional' },
-  { year: '2023', title: 'Juara Debat Bahasa Arab', cat: 'Bahasa', level: 'Provinsi' },
-];
-
-// Fitur sistem akademik (disarikan dari notulen)
+// Fitur portal akademik, menyelaraskan dengan kebutuhan yang disampaikan pihak sekolah.
 const FITUR_SISTEM = [
   {
     icon: FileSpreadsheet,
     title: 'Input Nilai Terintegrasi',
-    desc: 'Guru mata pelajaran menginput nilai harian ke sistem. Wali kelas memantau dan memverifikasi nilai seluruh siswa tanpa perlu setoran file manual.',
+    desc: 'Guru mata pelajaran menginput nilai langsung ke sistem. Wali kelas memantau dan memverifikasi tanpa perlu setoran file manual.',
   },
   {
     icon: LineChart,
     title: 'Rapot Online Semesteran',
-    desc: 'Siswa dapat mengakses nilai dan melihat tren naik/turun setiap semester. Rapot daring aktif setelah administrasi sekolah lunas.',
+    desc: 'Siswa mengakses nilai dan tren perkembangan setiap semester. Rapot online terbuka setelah administrasi lunas.',
   },
   {
     icon: Trophy,
-    title: 'Pencatatan Prestasi & BK',
-    desc: 'Sistem mencatat prestasi (cabor, akademik, keagamaan), pelanggaran, frekuensi bimbingan konseling, hingga keanggotaan ekstrakurikuler.',
+    title: 'Prestasi, BK, & Ekstrakurikuler',
+    desc: 'Satu tempat untuk catatan prestasi, pelanggaran, kunjungan BK, dan keanggotaan ekstrakurikuler.',
   },
   {
     icon: UserCog,
-    title: 'Pembagian Kelas Otomatis',
-    desc: 'Penempatan kelas 10 berdasarkan nilai tes masuk dan nilai rapot. Kelas 11 dibagi berdasarkan rumpun peminatan A, B, atau C.',
+    title: 'Pembagian Kelas & Peminatan',
+    desc: 'Penempatan kelas 10 berdasarkan nilai tes dan rapot. Kelas 11 dikelompokkan menurut rumpun A, B, atau C.',
   },
   {
     icon: CalendarClock,
-    title: 'Penjadwalan Anti-Bentrok',
-    desc: 'Jadwal pelajaran disusun menggunakan sistem penjadwalan akademik agar tidak terjadi bentrok antar guru maupun antar kelas.',
+    title: 'Jadwal Pelajaran Terpusat',
+    desc: 'Penyusunan jadwal terpusat untuk menghindari bentrok guru maupun ruang kelas.',
   },
   {
     icon: ClipboardList,
-    title: 'Persaingan Jurusan Kampus',
-    desc: 'Siswa dapat melihat peta persaingan nilai dengan siswa lain yang menargetkan jurusan kampus yang sama untuk mempersiapkan diri lebih matang.',
+    title: 'Pantauan Seleksi Perguruan Tinggi',
+    desc: 'Siswa dapat melihat peta persaingan nilai dengan siswa lain yang menargetkan kampus dan jurusan serupa.',
   },
-];
-
-const ALUMNI = [
-  { name: 'dr. Ahmad Fauzi', pos: 'Dokter Umum', univ: 'Alumni 2014 → FK UNS Solo' },
-  { name: 'Siti Khadijah, S.T.', pos: 'Software Engineer', univ: 'Alumni 2017 → Teknik Informatika UGM' },
-  { name: 'Muhammad Ibrahim, Lc.', pos: 'Pendidik & Da\'i', univ: 'Alumni 2010 → LIPIA Jakarta' },
-  { name: 'Fatimah Az-Zahra, S.Farm.', pos: 'Apoteker', univ: 'Alumni 2019 → Farmasi UNS Solo' },
-  { name: 'Rizky Ramadhan, S.T.', pos: 'Insinyur Sipil', univ: 'Alumni 2018 → Teknik Sipil UGM' },
-  { name: 'Aisyah Putri, S.E.', pos: 'Analis Keuangan', univ: 'Alumni 2020 → Ekonomi Islam UNS' },
 ];
 
 export default function LandingPage() {
@@ -186,7 +158,6 @@ export default function LandingPage() {
               <a href="#jurusan" className="hover:text-blue-500 transition-colors">Jurusan</a>
               <a href="#sistem" className="hover:text-blue-500 transition-colors">Sistem</a>
               <a href="#fasilitas" className="hover:text-blue-500 transition-colors">Fasilitas</a>
-              <a href="#prestasi" className="hover:text-blue-500 transition-colors">Prestasi</a>
               <a href="#alumni" className="hover:text-blue-500 transition-colors">Alumni</a>
             </div>
 
@@ -216,7 +187,7 @@ export default function LandingPage() {
           {isMobileMenuOpen && (
             <div className={`md:hidden py-4 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
               <div className="flex flex-col gap-3">
-                {['Profil', 'Jurusan', 'Sistem', 'Fasilitas', 'Prestasi', 'Alumni'].map(item => (
+                {['Profil', 'Jurusan', 'Sistem', 'Fasilitas', 'Alumni'].map(item => (
                   <a key={item} href={`#${item.toLowerCase()}`}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
@@ -235,60 +206,40 @@ export default function LandingPage() {
       </header>
 
       {/* ═══ HERO ═══ */}
-      <section className="relative min-h-[88vh] flex items-center justify-center pt-24 pb-16 px-4">
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-xs font-semibold rounded-full border bg-blue-500/10 border-blue-500/30 text-blue-500">
-            <Sparkles className="h-3 w-3" />
-            Akreditasi {SCHOOL.accreditation} • Berdiri {SCHOOL.founded} • {SCHOOL.stats.tahun} tahun mendidik
+      <section className="relative min-h-[72vh] flex items-center justify-center pt-28 pb-20 px-4">
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <div className={`inline-flex items-center gap-2 px-3 py-1 mb-6 text-xs font-medium rounded-full border ${
+            isDark ? 'bg-white/5 border-white/10 text-slate-300' : 'bg-white border-slate-200 text-slate-600'
+          }`}>
+            Akreditasi {SCHOOL.accreditation} · Berdiri {SCHOOL.founded} · NPSN {SCHOOL.npsn}
           </div>
 
-          <h1 className={`text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.05] ${
+          <h1 className={`text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight ${
             isDark ? 'text-white' : 'text-slate-900'
           }`} style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            Pendidikan Bermutu di{' '}
-            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              {SCHOOL.name}
-            </span>
+            Portal akademik resmi {SCHOOL.name}
           </h1>
 
-          <p className={`text-lg md:text-xl max-w-3xl mx-auto mb-8 leading-relaxed ${
+          <p className={`text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed ${
             isDark ? 'text-slate-300' : 'text-slate-600'
           }`}>
-            Sekolah Menengah Atas Islam Terpadu unggulan di Sukoharjo yang berkomitmen mencetak generasi {SCHOOL.tagline.toLowerCase()}.
-            Kelas 10 campur dengan kurikulum umum, tiga rumpun peminatan di kelas 11, dan portal akademik online untuk nilai, prestasi, bimbingan konseling, dan ekstrakurikuler.
+            Satu tempat untuk mengakses nilai, jadwal pelajaran, catatan prestasi, bimbingan konseling, dan ekstrakurikuler.
+            Dapat diakses siswa, guru, dan staf administrasi.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link to="/login">
-              <Button className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-8 h-12 text-base font-semibold shadow-xl shadow-blue-600/30">
-                Masuk Portal <ArrowRight className="ml-2 h-5 w-5" />
+              <Button className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-7 h-11 text-sm font-semibold">
+                Masuk Portal <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <a href="#profil">
-              <Button variant="outline" className={`rounded-xl px-8 h-12 text-base font-semibold ${
-                isDark ? 'border-white/20 bg-white/5 text-white hover:bg-white/10' : 'border-slate-300 bg-white hover:bg-slate-50 text-slate-900'
+              <Button variant="outline" className={`rounded-xl px-7 h-11 text-sm font-semibold ${
+                isDark ? 'border-white/15 bg-transparent text-white hover:bg-white/5' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-900'
               }`}>
-                Pelajari Lebih Lanjut
+                Pelajari sekolah
               </Button>
             </a>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {[
-              { label: 'Siswa Aktif', val: SCHOOL.stats.siswa, icon: Users },
-              { label: 'Guru & Staf', val: SCHOOL.stats.guru, icon: GraduationCap },
-              { label: 'Alumni', val: SCHOOL.stats.alumni, icon: Award },
-              { label: 'Tahun Berkarya', val: `${SCHOOL.stats.tahun}`, icon: Calendar },
-            ].map((s, i) => (
-              <div key={i} className={`p-5 rounded-2xl border transition-all hover:scale-105 ${
-                isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-sm'
-              }`}>
-                <s.icon className="h-5 w-5 text-blue-500 mx-auto mb-2" />
-                <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{s.val}</div>
-                <div className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{s.label}</div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -298,17 +249,19 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500">
+              <div className={`inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-full ${
+                isDark ? 'bg-white/5 text-slate-300 border border-white/10' : 'bg-white text-slate-600 border border-slate-200'
+              }`}>
                 <Target className="h-3 w-3" /> Profil Sekolah
               </div>
-              <h2 className={`text-4xl md:text-5xl font-bold leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}
+              <h2 className={`text-3xl md:text-4xl font-bold leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}
                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                Sekolah Berstandar Nasional dengan Tradisi Panjang
+                Sekolah Islam Terpadu di Kartasura, Sukoharjo
               </h2>
               <p className={`text-base leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                {SCHOOL.name} — disingkat <strong>{SCHOOL.nickname}</strong> — berdiri sejak tahun {SCHOOL.founded} di Kecamatan Kartasura, Kabupaten Sukoharjo.
-                Sebagai bagian dari Yayasan Nur Hidayah dan Jaringan Sekolah Islam Terpadu (JSIT), sekolah kami telah meluluskan ribuan alumni
-                yang berkiprah di berbagai bidang dengan bekal keilmuan dan karakter islami yang kuat.
+                {SCHOOL.name} berdiri sejak tahun {SCHOOL.founded} di Kecamatan Kartasura, Kabupaten Sukoharjo.
+                Berada di bawah {SCHOOL.yayasan} dan tergabung dalam {SCHOOL.jaringan}, sekolah menyelenggarakan
+                pendidikan tingkat SMA dengan pendekatan akademik dan keislaman yang terintegrasi.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -324,7 +277,7 @@ export default function LandingPage() {
                     <BookOpen className="h-4 w-4 text-blue-500" />
                     <h4 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Kurikulum</h4>
                   </div>
-                  <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>Kurikulum Merdeka (Fase E & F)</p>
+                  <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>Kurikulum Merdeka — Fase E & F</p>
                 </div>
                 <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200'}`}>
                   <div className="flex items-center gap-2 mb-1">
@@ -335,10 +288,10 @@ export default function LandingPage() {
                 </div>
                 <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200'}`}>
                   <div className="flex items-center gap-2 mb-1">
-                    <Sparkles className="h-4 w-4 text-amber-500" />
-                    <h4 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Sistem Kelas</h4>
+                    <Users className="h-4 w-4 text-amber-500" />
+                    <h4 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Struktur Kelas</h4>
                   </div>
-                  <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>10 kelas per angkatan — sekitar 30 siswa/kelas</p>
+                  <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>10 kelas per angkatan · ±30 siswa/kelas</p>
                 </div>
               </div>
             </div>
@@ -372,41 +325,44 @@ export default function LandingPage() {
       <section id="jurusan" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-semibold rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500">
-              <BookOpen className="h-3 w-3" /> Program Peminatan
+            <div className={`inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-medium rounded-full ${
+              isDark ? 'bg-white/5 text-slate-300 border border-white/10' : 'bg-white text-slate-600 border border-slate-200'
+            }`}>
+              <BookOpen className="h-3 w-3" /> Rumpun Peminatan
             </div>
-            <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Tiga Rumpun Peminatan
+              Tiga rumpun peminatan di kelas 11
             </h2>
             <p className={`text-base ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-              Siswa memilih rumpun peminatan mulai kelas 10 semester 2 berdasarkan minat, bakat, dan target kampus. Penempatan mempertimbangkan pilihan, nilai, dan kuota masing-masing kelas.
+              Siswa memilih rumpun peminatan mulai kelas 10 semester 2 berdasarkan minat, bakat, dan target kampus.
+              Penempatan mempertimbangkan pilihan, nilai, dan kuota tiap rumpun.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {JURUSAN.map((j, idx) => {
               const colorMap: Record<string, string> = {
-                blue: 'from-blue-500 to-blue-700',
-                emerald: 'from-emerald-500 to-emerald-700',
-                purple: 'from-purple-500 to-purple-700',
+                blue: isDark ? 'bg-blue-500/15 text-blue-300' : 'bg-blue-50 text-blue-600',
+                emerald: isDark ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-50 text-emerald-600',
+                purple: isDark ? 'bg-purple-500/15 text-purple-300' : 'bg-purple-50 text-purple-600',
               };
               return (
-                <div key={idx} className={`p-8 rounded-2xl border transition-all hover:-translate-y-1 ${
-                  isDark ? 'bg-white/5 border-white/10 hover:border-white/20' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-lg'
+                <div key={idx} className={`p-7 rounded-2xl border transition-colors ${
+                  isDark ? 'bg-white/5 border-white/10 hover:border-white/20' : 'bg-white border-slate-200 hover:border-slate-300'
                 }`}>
-                  <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${colorMap[j.color]} flex items-center justify-center mb-6 shadow-lg`}>
-                    <j.icon className="h-7 w-7 text-white" />
+                  <div className={`h-11 w-11 rounded-xl flex items-center justify-center mb-5 ${colorMap[j.color]}`}>
+                    <j.icon className="h-5 w-5" />
                   </div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded-md ${
+                    <span className={`text-[11px] font-semibold font-mono px-2 py-0.5 rounded-md ${
                       isDark ? 'bg-white/10 text-slate-300' : 'bg-slate-100 text-slate-700'
                     }`}>{j.kode}</span>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${
-                      isDark ? 'bg-blue-500/15 text-blue-300 border border-blue-500/25' : 'bg-blue-50 text-blue-700 border border-blue-100'
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md ${
+                      isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-50 text-slate-600'
                     }`}>{j.kelas}</span>
                   </div>
-                  <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}
+                  <h3 className={`text-lg font-bold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}
                     style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                     {j.nama}
                   </h3>
@@ -415,8 +371,8 @@ export default function LandingPage() {
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {j.tags.map(t => (
-                      <span key={t} className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${
-                        isDark ? 'bg-white/5 text-slate-300 border border-white/10' : 'bg-slate-100 text-slate-700 border border-slate-200'
+                      <span key={t} className={`text-[11px] font-medium px-2 py-0.5 rounded-md ${
+                        isDark ? 'bg-white/5 text-slate-300 border border-white/10' : 'bg-slate-50 text-slate-700 border border-slate-200'
                       }`}>{t}</span>
                     ))}
                   </div>
@@ -431,27 +387,32 @@ export default function LandingPage() {
       <section id="sistem" className={`py-20 ${isDark ? 'bg-slate-900/30' : 'bg-slate-50'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-semibold rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-medium rounded-full ${
+              isDark ? 'bg-white/5 text-slate-300 border border-white/10' : 'bg-white text-slate-600 border border-slate-200'
+            }`}>
               <FileCheck2 className="h-3 w-3" /> Fitur Portal Akademik
             </div>
-            <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Satu Sistem untuk Seluruh Aktivitas Akademik
+              Aktivitas akademik dalam satu sistem
             </h2>
             <p className={`text-base ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-              Administrasi guru, pembagian kelas, bimbingan konseling, dan kesiswaan terintegrasi dalam satu sistem. Siswa, guru, dan admin mengakses data yang sama secara real-time.
+              Administrasi guru, pembagian kelas, bimbingan konseling, dan kesiswaan terhubung dalam satu portal.
+              Siswa, guru, dan admin mengakses data yang sama.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {FITUR_SISTEM.map((f, i) => (
-              <div key={i} className={`p-6 rounded-2xl border transition-all hover:-translate-y-1 ${
-                isDark ? 'bg-white/5 border-white/10 hover:border-white/20' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md'
+              <div key={i} className={`p-6 rounded-2xl border transition-colors ${
+                isDark ? 'bg-white/5 border-white/10 hover:border-white/20' : 'bg-white border-slate-200 hover:border-slate-300'
               }`}>
-                <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-600/20">
-                  <f.icon className="h-5 w-5 text-white" />
+                <div className={`h-10 w-10 rounded-xl flex items-center justify-center mb-4 ${
+                  isDark ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-50 text-emerald-600'
+                }`}>
+                  <f.icon className="h-5 w-5" />
                 </div>
-                <h4 className={`font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}
+                <h4 className={`font-semibold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                   {f.title}
                 </h4>
@@ -463,18 +424,21 @@ export default function LandingPage() {
           </div>
 
           {/* Catatan kebijakan akses sistem */}
-          <div className={`mt-10 p-5 rounded-2xl border flex flex-col md:flex-row items-start gap-4 ${
+          <div className={`mt-10 p-5 rounded-xl border flex flex-col md:flex-row items-start gap-4 ${
             isDark ? 'bg-amber-500/5 border-amber-500/20' : 'bg-amber-50 border-amber-200'
           }`}>
-            <div className="h-10 w-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-              <Tablet className="h-5 w-5 text-amber-500" />
+            <div className={`h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+              isDark ? 'bg-amber-500/15 text-amber-300' : 'bg-amber-100 text-amber-600'
+            }`}>
+              <Tablet className="h-4 w-4" />
             </div>
             <div className="flex-1">
               <h5 className={`font-semibold text-sm mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Akses Dibatasi di Lingkungan Sekolah
+                Akses terbatas di lingkungan sekolah
               </h5>
-              <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                Di area sekolah, siswa tidak diperbolehkan membawa ponsel maupun laptop. Portal akademik dapat diakses melalui tablet resmi yang diizinkan sekolah, atau dari perangkat pribadi di luar jam sekolah.
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                Siswa tidak diperkenankan membawa ponsel atau laptop pribadi ke sekolah. Portal dapat diakses melalui
+                tablet sekolah pada jam sekolah, atau perangkat pribadi di luar jam sekolah.
               </p>
             </div>
           </div>
@@ -482,72 +446,36 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ FASILITAS ═══ */}
-      <section id="fasilitas" className={`py-20 ${isDark ? 'bg-slate-900/30' : 'bg-slate-50'}`}>
+      <section id="fasilitas" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-semibold rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-medium rounded-full ${
+              isDark ? 'bg-white/5 text-slate-300 border border-white/10' : 'bg-white text-slate-600 border border-slate-200'
+            }`}>
               <Building2 className="h-3 w-3" /> Sarana & Prasarana
             </div>
-            <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Fasilitas Modern & Lengkap
+              Fasilitas sekolah
             </h2>
             <p className={`text-base ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-              Mendukung pembelajaran aktif, kreatif, dan inovatif dengan infrastruktur yang terus berkembang.
+              Sarana pendukung kegiatan belajar, ibadah, olahraga, dan kegiatan ekstrakurikuler.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FASILITAS.map((f, i) => (
-              <div key={i} className={`p-5 rounded-xl border flex items-center gap-4 transition-all hover:scale-[1.02] ${
-                isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-sm'
+              <div key={i} className={`p-5 rounded-xl border flex items-center gap-4 transition-colors ${
+                isDark ? 'bg-white/5 border-white/10 hover:border-white/20' : 'bg-white border-slate-200 hover:border-slate-300'
               }`}>
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
-                  <f.icon className="h-6 w-6 text-white" />
+                <div className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  isDark ? 'bg-blue-500/15 text-blue-300' : 'bg-blue-50 text-blue-600'
+                }`}>
+                  <f.icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{f.label}</h4>
-                  <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{f.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ PRESTASI ═══ */}
-      <section id="prestasi" className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-semibold rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500">
-              <Award className="h-3 w-3" /> Prestasi Terkini
-            </div>
-            <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Raihan Akademik & Non-Akademik
-            </h2>
-            <p className={`text-base ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-              Konsisten meraih prestasi tingkat daerah, nasional, bahkan internasional.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {PRESTASI.map((p, i) => (
-              <div key={i} className={`p-5 rounded-xl border flex items-start gap-4 ${
-                isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-sm'
-              }`}>
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
-                  <Award className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-bold text-amber-500">{p.year}</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-md ${
-                      isDark ? 'bg-white/10 text-slate-300' : 'bg-slate-100 text-slate-700'
-                    }`}>{p.level}</span>
-                  </div>
-                  <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{p.title}</h4>
-                  <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Kategori: {p.cat}</p>
+                  <h4 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{f.label}</h4>
+                  <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{f.desc}</p>
                 </div>
               </div>
             ))}
@@ -557,65 +485,89 @@ export default function LandingPage() {
 
       {/* ═══ ALUMNI ═══ */}
       <section id="alumni" className={`py-20 ${isDark ? 'bg-slate-900/30' : 'bg-slate-50'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-semibold rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-500">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-medium rounded-full ${
+              isDark ? 'bg-white/5 text-slate-300 border border-white/10' : 'bg-white text-slate-600 border border-slate-200'
+            }`}>
               <Users className="h-3 w-3" /> Jejak Alumni
             </div>
-            <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Alumni yang Menginspirasi
+              Pendataan alumni
             </h2>
-            <p className={`text-base ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-              Lulusan kami tersebar di berbagai profesi dan universitas ternama di Indonesia maupun luar negeri. Data alumni terekam mulai angkatan 2023.
+            <p className={`text-base leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+              Data track record alumni mulai dirapikan sejak angkatan 2023. Sekolah mendata ke mana alumni
+              melanjutkan studi atau berkarir, untuk kepentingan bimbingan karir siswa aktif.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {ALUMNI.map((a, i) => (
-              <div key={i} className={`p-6 rounded-2xl border ${
-                isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-sm'
-              }`}>
-                <div className="flex items-center gap-1 mb-4">
-                  {[1, 2, 3, 4, 5].map(s => <Star key={s} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
+          <div className={`rounded-2xl border p-6 md:p-8 ${
+            isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200'
+          }`}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <div className={`text-xs font-medium uppercase tracking-wider mb-2 ${
+                  isDark ? 'text-slate-400' : 'text-slate-500'
+                }`}>Periode Data</div>
+                <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Sejak 2023
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                    {a.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h4 className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{a.name}</h4>
-                    <p className="text-xs text-blue-500 font-semibold">{a.pos}</p>
-                    <p className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{a.univ}</p>
-                  </div>
+                <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Data angkatan sebelumnya sedang diarsipkan.
+                </p>
+              </div>
+              <div>
+                <div className={`text-xs font-medium uppercase tracking-wider mb-2 ${
+                  isDark ? 'text-slate-400' : 'text-slate-500'
+                }`}>Jenis Data</div>
+                <div className={`text-base font-semibold leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Institusi studi lanjut, profesi, dan kontak alumni
                 </div>
               </div>
-            ))}
+              <div>
+                <div className={`text-xs font-medium uppercase tracking-wider mb-2 ${
+                  isDark ? 'text-slate-400' : 'text-slate-500'
+                }`}>Akses</div>
+                <div className={`text-base font-semibold leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Hanya admin & BK sekolah
+                </div>
+                <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Data pribadi alumni tidak dipublikasikan.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ═══ CTA ═══ */}
       <section className="py-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl p-10 md:p-16 text-center overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 shadow-2xl shadow-blue-600/30">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-[100px] -mr-40 -mt-40 rounded-full" />
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                Siap Bergabung dengan Kami?
-              </h2>
-              <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-                Akses portal akademik untuk melihat jadwal, nilai, dan informasi sekolah secara real-time.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-3">
-                <Link to="/login">
-                  <Button className="bg-white text-blue-600 hover:bg-slate-50 rounded-xl px-8 h-12 font-semibold shadow-lg">
-                    Masuk Portal <ChevronRight className="ml-2 h-5 w-5" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className={`rounded-2xl p-8 md:p-12 border ${
+            isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200'
+          }`}>
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div>
+                <h2 className={`text-2xl md:text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}
+                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                  Masuk ke portal akademik
+                </h2>
+                <p className={`text-sm md:text-base ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Akun dibuat oleh admin sekolah. Gunakan email dan kata sandi yang sudah diberikan.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <Link to="/login" className="w-full sm:w-auto">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-6 h-11 text-sm font-semibold">
+                    Masuk portal <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <a href={`https://${SCHOOL.website}`} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="border-white/40 bg-white/10 hover:bg-white/20 text-white rounded-xl px-8 h-12 font-semibold">
-                    Website Resmi
+                <a href={`https://${SCHOOL.website}`} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                  <Button variant="outline" className={`w-full rounded-xl px-6 h-11 text-sm font-semibold ${
+                    isDark ? 'border-white/15 bg-transparent text-white hover:bg-white/5' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-900'
+                  }`}>
+                    Website resmi
                   </Button>
                 </a>
               </div>
@@ -672,7 +624,7 @@ export default function LandingPage() {
                 <li><a href="#profil" className="hover:text-blue-500">Profil Sekolah</a></li>
                 <li><a href="#jurusan" className="hover:text-blue-500">Jurusan</a></li>
                 <li><a href="#sistem" className="hover:text-blue-500">Fitur Portal</a></li>
-                <li><a href="#prestasi" className="hover:text-blue-500">Prestasi</a></li>
+                <li><a href="#alumni" className="hover:text-blue-500">Alumni</a></li>
                 <li><Link to="/login" className="hover:text-blue-500">Portal Akademik</Link></li>
               </ul>
             </div>
@@ -699,8 +651,8 @@ export default function LandingPage() {
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold leading-none">SCOLA AI</p>
-                  <p className="text-[11px] text-white/80 mt-0.5">Tanya apa saja tentang sekolah</p>
+                  <p className="text-sm font-semibold leading-none">Asisten SCOLA</p>
+                  <p className="text-[11px] text-white/80 mt-0.5">Tanya seputar sekolah & portal</p>
                 </div>
               </div>
               <button onClick={() => setIsChatOpen(false)} className="w-7 h-7 rounded-lg hover:bg-white/20 flex items-center justify-center">
