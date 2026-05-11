@@ -14,8 +14,9 @@ import {
   removeMataPelajaran,
 } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 
-// Mata Pelajaran Preset — Kurikulum Merdeka
+// Mata Pelajaran Preset — Kurikulum Merdeka (disesuaikan dengan Rumpun A/B/C SMAIT Nur Hidayah)
 const MAPEL_PRESET = {
   Umum: [
     { kode: 'PAI', nama: 'Pendidikan Agama dan Budi Pekerti' },
@@ -28,22 +29,23 @@ const MAPEL_PRESET = {
     { kode: 'INF', nama: 'Informatika' },
     { kode: 'SEJ', nama: 'Sejarah' },
   ],
-  MIPA: [
+  RumpunA: [
+    { kode: 'MTK-L', nama: 'Matematika Tingkat Lanjut' },
     { kode: 'FIS', nama: 'Fisika' },
     { kode: 'KIM', nama: 'Kimia' },
     { kode: 'BIO', nama: 'Biologi' },
-    { kode: 'MTK-L', nama: 'Matematika Tingkat Lanjut' },
   ],
-  IPS: [
-    { kode: 'GEO', nama: 'Geografi' },
+  RumpunB: [
+    { kode: 'MTK-L', nama: 'Matematika Tingkat Lanjut' },
+    { kode: 'FIS', nama: 'Fisika' },
+    { kode: 'KIM', nama: 'Kimia' },
+    { kode: 'BIO', nama: 'Biologi' },
+  ],
+  RumpunC: [
     { kode: 'EKO', nama: 'Ekonomi' },
     { kode: 'SOS', nama: 'Sosiologi' },
-    { kode: 'ANT', nama: 'Antropologi' },
-  ],
-  Bahasa: [
-    { kode: 'BIN-L', nama: 'Bahasa Indonesia Tingkat Lanjut' },
-    { kode: 'BIG-L', nama: 'Bahasa Inggris Tingkat Lanjut' },
-    { kode: 'BAS', nama: 'Bahasa Asing (Mandarin/Jepang/Arab)' },
+    { kode: 'GEO', nama: 'Geografi' },
+    { kode: 'SEJ-L', nama: 'Sejarah Tingkat Lanjut' },
   ],
 };
 
@@ -73,6 +75,8 @@ export default function AdminSubjects() {
   useEffect(() => { loadData(); }, [loadData]);
 
   useAutoRefresh(loadData, 20_000);
+
+  const [refreshing, refreshAll] = useManualRefresh(loadData);
 
   const handleOpenAdd = () => {
     setEditingSubject(null);
@@ -122,9 +126,18 @@ export default function AdminSubjects() {
   };
 
   const handleSeedAll = async () => {
-    if (!confirm('Tambahkan semua mata pelajaran Kurikulum Merdeka (Umum + MIPA + IPS + Bahasa)?')) return;
+    if (!confirm('Tambahkan semua mata pelajaran Kurikulum Merdeka (Umum + Rumpun A + Rumpun B + Rumpun C)?')) return;
     setSeedingCategory('ALL');
-    const all = [...MAPEL_PRESET.Umum, ...MAPEL_PRESET.MIPA, ...MAPEL_PRESET.IPS, ...MAPEL_PRESET.Bahasa];
+    // Gabung + dedup by kode karena mapel seperti MTK-L dipakai Rumpun A & B
+    const combined = [
+      ...MAPEL_PRESET.Umum,
+      ...MAPEL_PRESET.RumpunA,
+      ...MAPEL_PRESET.RumpunB,
+      ...MAPEL_PRESET.RumpunC,
+    ];
+    const uniqMap = new Map<string, { kode: string; nama: string }>();
+    for (const m of combined) if (!uniqMap.has(m.kode)) uniqMap.set(m.kode, m);
+    const all = Array.from(uniqMap.values());
     const existing = new Set(subjects.map(s => s.kode));
     let added = 0, skipped = 0;
     for (const m of all) {
@@ -160,9 +173,10 @@ export default function AdminSubjects() {
           <p className="text-slate-300 mt-1">Kelola daftar mata pelajaran sesuai Kurikulum Merdeka.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={loadData}
-            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0">
-            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0"
+            title="Segarkan data">
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={() => setIsPresetOpen(true)}
             className="bg-amber-600 hover:bg-amber-500 h-11 px-5 rounded-xl font-semibold text-white">
@@ -301,28 +315,37 @@ export default function AdminSubjects() {
             <div className="text-center text-xs text-slate-400 py-1">atau per kategori:</div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {(Object.keys(MAPEL_PRESET) as Array<keyof typeof MAPEL_PRESET>).map(cat => (
-                <div key={cat} className="p-4 rounded-xl bg-slate-900 border border-white/10">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-white font-bold">{cat}</h3>
-                    <Badge variant="outline" className="text-xs text-slate-300 border-white/20">
-                      {MAPEL_PRESET[cat].length} mapel
-                    </Badge>
+              {(Object.keys(MAPEL_PRESET) as Array<keyof typeof MAPEL_PRESET>).map(cat => {
+                const labelMap: Record<string, string> = {
+                  Umum: 'Mapel Umum',
+                  RumpunA: 'Rumpun A — Kesehatan',
+                  RumpunB: 'Rumpun B — Teknik',
+                  RumpunC: 'Rumpun C — Sosial',
+                };
+                const label = labelMap[cat] || cat;
+                return (
+                  <div key={cat} className="p-4 rounded-xl bg-slate-900 border border-white/10">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-white font-bold">{label}</h3>
+                      <Badge variant="outline" className="text-xs text-slate-300 border-white/20">
+                        {MAPEL_PRESET[cat].length} mapel
+                      </Badge>
+                    </div>
+                    <div className="space-y-1 text-xs mb-3 max-h-32 overflow-y-auto">
+                      {MAPEL_PRESET[cat].map(m => (
+                        <div key={m.kode} className="flex items-center gap-2">
+                          <span className="font-mono text-blue-300">{m.kode}</span>
+                          <span className="text-slate-300">{m.nama}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Button onClick={() => handleSeedCategory(cat)} disabled={seedingCategory !== null}
+                      className="w-full h-9 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">
+                      {seedingCategory === cat ? <Loader2 className="h-4 w-4 animate-spin" /> : `Tambah ${label}`}
+                    </Button>
                   </div>
-                  <div className="space-y-1 text-xs mb-3 max-h-32 overflow-y-auto">
-                    {MAPEL_PRESET[cat].map(m => (
-                      <div key={m.kode} className="flex items-center gap-2">
-                        <span className="font-mono text-blue-300">{m.kode}</span>
-                        <span className="text-slate-300">{m.nama}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button onClick={() => handleSeedCategory(cat)} disabled={seedingCategory !== null}
-                    className="w-full h-9 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">
-                    {seedingCategory === cat ? <Loader2 className="h-4 w-4 animate-spin" /> : `Tambah ${cat}`}
-                  </Button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </DialogContent>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,24 +8,44 @@ import { useAuth } from '../../contexts/AuthContext';
 import { fetchNilaiSiswa } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 
+const SEMESTER_OPTIONS = ['Ganjil', 'Genap'];
+
+function currentTahunAjaran(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  return now.getMonth() >= 6 ? `${y}/${y + 1}` : `${y - 1}/${y}`;
+}
+
+function buildTahunAjaranOptions(): string[] {
+  const now = new Date();
+  const y = now.getFullYear();
+  return [`${y - 2}/${y - 1}`, `${y - 1}/${y}`, `${y}/${y + 1}`];
+}
+
 export default function SiswaGrades() {
   const { user } = useAuth();
   const [grades, setGrades] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [semester, setSemester] = useState('Ganjil');
+  const [tahunAjaran, setTahunAjaran] = useState(currentTahunAjaran());
+
+  const tahunAjaranOptions = useMemo(() => buildTahunAjaranOptions(), []);
 
   const loadGrades = useCallback(async () => {
-    if (!user?.siswaId) return;
+    if (!user?.siswaId) {
+      setGrades([]);
+      return;
+    }
     setLoading(true);
     try {
-      const data = await fetchNilaiSiswa(user.siswaId, semester, '2024/2025');
-      setGrades(data);
+      const data = await fetchNilaiSiswa(user.siswaId, semester, tahunAjaran);
+      setGrades(data || []);
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
-  }, [user?.siswaId, semester]);
+  }, [user?.siswaId, semester, tahunAjaran]);
 
   useEffect(() => { loadGrades(); }, [loadGrades]);
 
@@ -78,13 +98,24 @@ export default function SiswaGrades() {
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <Select value={semester} onValueChange={(v) => { if (v) setSemester(v); }}>
-                <SelectTrigger className="w-full sm:w-[220px] bg-slate-950/50 border-white/10 text-white rounded-2xl h-12 font-bold focus:ring-blue-600">
-                  <SelectValue placeholder="Pilih Semester" />
+              <Select value={tahunAjaran} onValueChange={(v) => { if (v) setTahunAjaran(v); }}>
+                <SelectTrigger className="w-full sm:w-[160px] bg-slate-950/50 border-white/10 text-white rounded-2xl h-12 font-bold focus:ring-blue-600">
+                  <SelectValue placeholder="Tahun Ajaran" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-900 border-white/10 text-white rounded-2xl overflow-hidden">
-                  <SelectItem value="Ganjil" className="focus:bg-blue-600">2024/2025 • Ganjil</SelectItem>
-                  <SelectItem value="Genap" className="focus:bg-blue-600">2024/2025 • Genap</SelectItem>
+                  {tahunAjaranOptions.map(ta => (
+                    <SelectItem key={ta} value={ta} className="focus:bg-blue-600">{ta}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={semester} onValueChange={(v) => { if (v) setSemester(v); }}>
+                <SelectTrigger className="w-full sm:w-[160px] bg-slate-950/50 border-white/10 text-white rounded-2xl h-12 font-bold focus:ring-blue-600">
+                  <SelectValue placeholder="Semester" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-white/10 text-white rounded-2xl overflow-hidden">
+                  {SEMESTER_OPTIONS.map(s => (
+                    <SelectItem key={s} value={s} className="focus:bg-blue-600">Semester {s}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

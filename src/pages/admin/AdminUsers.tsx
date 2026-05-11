@@ -19,6 +19,7 @@ import {
 } from '@/lib/userService';
 import { fetchKelas, fetchJurusan } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
@@ -220,6 +221,8 @@ export default function AdminUsers() {
     fetchUsersData();
     loadMetadata();
   }, 20_000);
+
+  const [refreshing, refreshAll] = useManualRefresh(fetchUsersData, loadMetadata);
 
   const filteredUsers = users.filter(user => {
     const low = searchTerm.toLowerCase();
@@ -454,9 +457,10 @@ export default function AdminUsers() {
           className="bg-rose-600 hover:bg-rose-500 h-11 px-5 rounded-xl font-bold text-white">
           <FileText className="mr-2 h-4 w-4" /> Ekspor PDF
         </Button>
-        <Button variant="outline" onClick={fetchUsersData} disabled={loading}
-          className="h-11 w-11 rounded-xl border-white/5 bg-white/5 p-0">
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+          className="h-11 w-11 rounded-xl border-white/5 bg-white/5 p-0"
+          title="Segarkan data">
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
         </Button>
 
         <div className="ml-auto flex gap-2">

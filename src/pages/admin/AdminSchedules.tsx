@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { fetchKelas, fetchJadwalKelas, addJadwalData, removeJadwalData, fetchMataPelajaran } from '@/lib/schoolService';
 import { fetchGuru } from '@/lib/userService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 
 const HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 const SEMESTER = ['Ganjil', 'Genap'];
@@ -78,6 +79,8 @@ export default function AdminSchedules() {
   useEffect(() => { loadSchedules(); }, [loadSchedules]);
 
   useAutoRefresh(loadSchedules, 20_000);
+
+  const [refreshing, refreshAll] = useManualRefresh(loadMetadata, loadSchedules);
 
   const filteredSchedules = schedules
     .filter(s => hariFilter === 'semua' || s.hari.toLowerCase() === hariFilter.toLowerCase())
@@ -159,9 +162,10 @@ export default function AdminSchedules() {
           <p className="text-slate-300 mt-1">Susun jadwal mingguan per kelas, per semester, dan per tahun ajaran.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={loadSchedules} disabled={loading}
-            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0">
-            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0"
+            title="Segarkan data">
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={handleOpenDialog} disabled={!kelasFilter}
             className="bg-blue-600 hover:bg-blue-500 h-11 px-5 rounded-xl font-semibold text-white">

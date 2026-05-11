@@ -6,13 +6,16 @@ import {
   Building2, Star, MapPin, Phone, Mail, ChevronRight,
   Microscope, Dumbbell, Globe, MessageCircle, X,
   Sun, Moon, Menu, ArrowRight, Calendar, Sparkles,
+  LineChart, ClipboardList, FileSpreadsheet, CalendarClock,
+  Trophy, UserCog, Tablet, FileCheck2,
 } from 'lucide-react';
 import Chatbot from '../components/Chatbot';
 import { useTheme } from '@/contexts/ThemeContext';
 
 // ═════════════════════════════════════════════
 // DATA SEKOLAH — SMAIT Nur Hidayah Sukoharjo
-// Sumber: Publikasi akademik UMS & UMPR, JSIT Indonesia
+// Sumber: Wawancara Bapak Nur Suci Aprilianto S.Pd. Gr.
+// (Wakil Kepala Bidang Kehumasan) — 15 Maret 2026
 // ═════════════════════════════════════════════
 const SCHOOL = {
   name: 'SMAIT Nur Hidayah',
@@ -20,7 +23,7 @@ const SCHOOL = {
   nickname: 'SMAIT NH',
   tagline: 'Membentuk Generasi Rabbani yang Berprestasi',
   founded: 2005,
-  address: 'Jl. Pisang Raya, Sonosaren, Gumpang, Kec. Kartasura, Kab. Sukoharjo, Jawa Tengah 57552',
+  address: 'Jl. Pandawa No.10, Dusun III, Kel. Pucangan, Kec. Kartasura, Kab. Sukoharjo, Jawa Tengah 57168',
   phone: '(0271) 741-3222',
   email: 'info@smaitnurhidayah.sch.id',
   website: 'smaitnurhidayah.sch.id',
@@ -29,7 +32,7 @@ const SCHOOL = {
   yayasan: 'Yayasan Nur Hidayah Surakarta',
   jaringan: 'Jaringan Sekolah Islam Terpadu (JSIT) Indonesia',
   stats: {
-    siswa: '650+',
+    siswa: '300+',
     guru: '60+',
     alumni: '2.500+',
     tahun: 20,
@@ -39,27 +42,30 @@ const SCHOOL = {
 const JURUSAN = [
   {
     icon: Microscope,
-    kode: 'MIPA',
-    nama: 'Matematika & IPA',
-    desc: 'Fokus pada Fisika, Kimia, Biologi, dan Matematika Tingkat Lanjut. Cocok untuk jalur kedokteran, teknik, farmasi, dan sains terapan.',
-    tags: ['Fisika', 'Kimia', 'Biologi', 'Matematika Lanjut'],
+    kode: 'Rumpun A',
+    nama: 'Kelompok Kesehatan',
+    desc: 'Mendalami Matematika, Fisika, Kimia, dan Biologi. Diarahkan untuk jalur kedokteran, farmasi, keperawatan, dan ilmu kesehatan lainnya. Kelas paling diminati dengan seleksi ketat berdasarkan minat dan nilai.',
+    tags: ['Matematika', 'Fisika', 'Kimia', 'Biologi'],
     color: 'blue',
+    kelas: '2 kelas',
   },
   {
     icon: Globe,
-    kode: 'IPS',
-    nama: 'Ilmu Pengetahuan Sosial',
-    desc: 'Mendalami Ekonomi, Sosiologi, Geografi, dan Antropologi. Cocok untuk jalur hukum, bisnis Islam, hubungan internasional, dan dakwah.',
-    tags: ['Ekonomi', 'Sosiologi', 'Geografi', 'Antropologi'],
+    kode: 'Rumpun B',
+    nama: 'Kelompok Teknik',
+    desc: 'Fokus pada Fisika, Matematika Tingkat Lanjut, Biologi, dan Kimia dengan orientasi teknik. Disiapkan untuk jalur teknik informatika, teknik sipil, arsitektur, dan rekayasa industri.',
+    tags: ['Matematika Lanjut', 'Fisika', 'Kimia', 'Biologi'],
     color: 'emerald',
+    kelas: '1 kelas',
   },
   {
     icon: BookOpen,
-    kode: 'TAHFIDZ',
-    nama: 'Program Tahfidz Al-Quran',
-    desc: 'Program unggulan berbasis hafalan Al-Quran yang terintegrasi dengan seluruh peminatan akademik. Target minimal 5 juz.',
-    tags: ['Hafalan 5 Juz', 'Tahsin', 'Bahasa Arab', 'Ulumul Qur\'an'],
+    kode: 'Rumpun C',
+    nama: 'Kelompok Sosial & Humaniora',
+    desc: 'Mendalami Ekonomi, Sosiologi, Geografi, dan Sejarah. Diarahkan untuk jalur hukum, bisnis Islam, hubungan internasional, ilmu komunikasi, dan dakwah.',
+    tags: ['Ekonomi', 'Sosiologi', 'Geografi', 'Sejarah'],
     color: 'purple',
+    kelas: '2 kelas',
   },
 ];
 
@@ -69,7 +75,7 @@ const FASILITAS = [
   { icon: Building2, label: 'Masjid Sekolah', desc: 'Pusat kegiatan ibadah & halaqah' },
   { icon: Dumbbell, label: 'Lapangan Olahraga', desc: 'Basket, futsal, voli, panahan' },
   { icon: Globe, label: 'Lab Komputer', desc: 'Koneksi internet cepat' },
-  { icon: Users, label: 'Asrama Putra & Putri', desc: 'Sistem boarding school' },
+  { icon: Tablet, label: 'Akses via Tablet', desc: 'Perangkat resmi yang diizinkan di sekolah' },
 ];
 
 const PRESTASI = [
@@ -81,10 +87,47 @@ const PRESTASI = [
   { year: '2023', title: 'Juara Debat Bahasa Arab', cat: 'Bahasa', level: 'Provinsi' },
 ];
 
+// Fitur sistem akademik (disarikan dari notulen)
+const FITUR_SISTEM = [
+  {
+    icon: FileSpreadsheet,
+    title: 'Input Nilai Terintegrasi',
+    desc: 'Guru mata pelajaran menginput nilai harian ke sistem. Wali kelas memantau dan memverifikasi nilai seluruh siswa tanpa perlu setoran file manual.',
+  },
+  {
+    icon: LineChart,
+    title: 'Rapot Online Semesteran',
+    desc: 'Siswa dapat mengakses nilai dan melihat tren naik/turun setiap semester. Rapot daring aktif setelah administrasi sekolah lunas.',
+  },
+  {
+    icon: Trophy,
+    title: 'Pencatatan Prestasi & BK',
+    desc: 'Sistem mencatat prestasi (cabor, akademik, keagamaan), pelanggaran, frekuensi bimbingan konseling, hingga keanggotaan ekstrakurikuler.',
+  },
+  {
+    icon: UserCog,
+    title: 'Pembagian Kelas Otomatis',
+    desc: 'Penempatan kelas 10 berdasarkan nilai tes masuk dan nilai rapot. Kelas 11 dibagi berdasarkan rumpun peminatan A, B, atau C.',
+  },
+  {
+    icon: CalendarClock,
+    title: 'Penjadwalan Anti-Bentrok',
+    desc: 'Jadwal pelajaran disusun menggunakan sistem penjadwalan akademik agar tidak terjadi bentrok antar guru maupun antar kelas.',
+  },
+  {
+    icon: ClipboardList,
+    title: 'Persaingan Jurusan Kampus',
+    desc: 'Siswa dapat melihat peta persaingan nilai dengan siswa lain yang menargetkan jurusan kampus yang sama untuk mempersiapkan diri lebih matang.',
+  },
+];
+
 const ALUMNI = [
   { name: 'dr. Ahmad Fauzi', pos: 'Dokter Umum', univ: 'Alumni 2014 → FK UNS Solo' },
   { name: 'Siti Khadijah, S.T.', pos: 'Software Engineer', univ: 'Alumni 2017 → Teknik Informatika UGM' },
   { name: 'Muhammad Ibrahim, Lc.', pos: 'Pendidik & Da\'i', univ: 'Alumni 2010 → LIPIA Jakarta' },
+  { name: 'Fatimah Az-Zahra, S.Farm.', pos: 'Apoteker', univ: 'Alumni 2019 → Farmasi UNS Solo' },
+  { name: 'Rizky Ramadhan, S.T.', pos: 'Insinyur Sipil', univ: 'Alumni 2018 → Teknik Sipil UGM' },
+  { name: 'Aisyah Putri, S.E.', pos: 'Analis Keuangan', univ: 'Alumni 2020 → Ekonomi Islam UNS' },
 ];
 
 export default function LandingPage() {
@@ -141,6 +184,7 @@ export default function LandingPage() {
             }`}>
               <a href="#profil" className="hover:text-blue-500 transition-colors">Profil</a>
               <a href="#jurusan" className="hover:text-blue-500 transition-colors">Jurusan</a>
+              <a href="#sistem" className="hover:text-blue-500 transition-colors">Sistem</a>
               <a href="#fasilitas" className="hover:text-blue-500 transition-colors">Fasilitas</a>
               <a href="#prestasi" className="hover:text-blue-500 transition-colors">Prestasi</a>
               <a href="#alumni" className="hover:text-blue-500 transition-colors">Alumni</a>
@@ -172,7 +216,7 @@ export default function LandingPage() {
           {isMobileMenuOpen && (
             <div className={`md:hidden py-4 border-t ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
               <div className="flex flex-col gap-3">
-                {['Profil', 'Jurusan', 'Fasilitas', 'Prestasi', 'Alumni'].map(item => (
+                {['Profil', 'Jurusan', 'Sistem', 'Fasilitas', 'Prestasi', 'Alumni'].map(item => (
                   <a key={item} href={`#${item.toLowerCase()}`}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
@@ -211,7 +255,7 @@ export default function LandingPage() {
             isDark ? 'text-slate-300' : 'text-slate-600'
           }`}>
             Sekolah Menengah Atas Islam Terpadu unggulan di Sukoharjo yang berkomitmen mencetak generasi {SCHOOL.tagline.toLowerCase()}.
-            Menjalankan Kurikulum Merdeka berpadu kurikulum khas JSIT dengan sistem asrama dan tenaga pendidik profesional.
+            Kelas 10 campur dengan kurikulum umum, tiga rumpun peminatan di kelas 11, dan portal akademik online untuk nilai, prestasi, bimbingan konseling, dan ekstrakurikuler.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
@@ -292,9 +336,9 @@ export default function LandingPage() {
                 <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200'}`}>
                   <div className="flex items-center gap-2 mb-1">
                     <Sparkles className="h-4 w-4 text-amber-500" />
-                    <h4 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Status</h4>
+                    <h4 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Sistem Kelas</h4>
                   </div>
-                  <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>Sekolah Negeri Rujukan</p>
+                  <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>10 kelas per angkatan — sekitar 30 siswa/kelas</p>
                 </div>
               </div>
             </div>
@@ -333,10 +377,10 @@ export default function LandingPage() {
             </div>
             <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Tiga Program Peminatan
+              Tiga Rumpun Peminatan
             </h2>
             <p className={`text-base ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-              Sesuai Kurikulum Merdeka, siswa memilih peminatan di kelas 11 (Fase F) berdasarkan minat, bakat, dan rencana studi lanjut.
+              Siswa memilih rumpun peminatan mulai kelas 10 semester 2 berdasarkan minat, bakat, dan target kampus. Penempatan mempertimbangkan pilihan, nilai, dan kuota masing-masing kelas.
             </p>
           </div>
 
@@ -358,6 +402,9 @@ export default function LandingPage() {
                     <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded-md ${
                       isDark ? 'bg-white/10 text-slate-300' : 'bg-slate-100 text-slate-700'
                     }`}>{j.kode}</span>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${
+                      isDark ? 'bg-blue-500/15 text-blue-300 border border-blue-500/25' : 'bg-blue-50 text-blue-700 border border-blue-100'
+                    }`}>{j.kelas}</span>
                   </div>
                   <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}
                     style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -376,6 +423,60 @@ export default function LandingPage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ SISTEM AKADEMIK ═══ */}
+      <section id="sistem" className={`py-20 ${isDark ? 'bg-slate-900/30' : 'bg-slate-50'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-semibold rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
+              <FileCheck2 className="h-3 w-3" /> Fitur Portal Akademik
+            </div>
+            <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              Satu Sistem untuk Seluruh Aktivitas Akademik
+            </h2>
+            <p className={`text-base ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+              Administrasi guru, pembagian kelas, bimbingan konseling, dan kesiswaan terintegrasi dalam satu sistem. Siswa, guru, dan admin mengakses data yang sama secara real-time.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {FITUR_SISTEM.map((f, i) => (
+              <div key={i} className={`p-6 rounded-2xl border transition-all hover:-translate-y-1 ${
+                isDark ? 'bg-white/5 border-white/10 hover:border-white/20' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md'
+              }`}>
+                <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-600/20">
+                  <f.icon className="h-5 w-5 text-white" />
+                </div>
+                <h4 className={`font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}
+                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                  {f.title}
+                </h4>
+                <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  {f.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Catatan kebijakan akses sistem */}
+          <div className={`mt-10 p-5 rounded-2xl border flex flex-col md:flex-row items-start gap-4 ${
+            isDark ? 'bg-amber-500/5 border-amber-500/20' : 'bg-amber-50 border-amber-200'
+          }`}>
+            <div className="h-10 w-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+              <Tablet className="h-5 w-5 text-amber-500" />
+            </div>
+            <div className="flex-1">
+              <h5 className={`font-semibold text-sm mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Akses Dibatasi di Lingkungan Sekolah
+              </h5>
+              <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                Di area sekolah, siswa tidak diperbolehkan membawa ponsel maupun laptop. Portal akademik dapat diakses melalui tablet resmi yang diizinkan sekolah, atau dari perangkat pribadi di luar jam sekolah.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -466,7 +567,7 @@ export default function LandingPage() {
               Alumni yang Menginspirasi
             </h2>
             <p className={`text-base ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-              Lulusan kami tersebar di berbagai profesi dan universitas ternama di Indonesia maupun luar negeri.
+              Lulusan kami tersebar di berbagai profesi dan universitas ternama di Indonesia maupun luar negeri. Data alumni terekam mulai angkatan 2023.
             </p>
           </div>
 
@@ -570,6 +671,7 @@ export default function LandingPage() {
               <ul className={`space-y-2 text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                 <li><a href="#profil" className="hover:text-blue-500">Profil Sekolah</a></li>
                 <li><a href="#jurusan" className="hover:text-blue-500">Jurusan</a></li>
+                <li><a href="#sistem" className="hover:text-blue-500">Fitur Portal</a></li>
                 <li><a href="#prestasi" className="hover:text-blue-500">Prestasi</a></li>
                 <li><Link to="/login" className="hover:text-blue-500">Portal Akademik</Link></li>
               </ul>

@@ -15,6 +15,7 @@ import { fetchSiswa, UserListItem } from '@/lib/userService';
 import { listPrestasi, deletePrestasi } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 
 interface Prestasi {
   id: string;
@@ -82,6 +83,8 @@ export default function GuruAchievements() {
 
   useAutoRefresh(loadData, 20_000);
 
+  const [refreshing, refreshAll] = useManualRefresh(loadData);
+
   const filtered = achievements.filter(a =>
     a.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (a.siswaName || '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -137,8 +140,9 @@ export default function GuruAchievements() {
           <p className="text-slate-400 font-medium mt-3">Arsip penghargaan dan pencapaian luar biasa siswa SMA.</p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
-          <Button variant="outline" onClick={loadData} className="h-14 px-6 rounded-2xl border-white/5 bg-white/5 text-slate-300">
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+            className="h-14 px-6 rounded-2xl border-white/5 bg-white/5 text-slate-300" title="Segarkan data">
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={() => setIsDialogOpen(true)} className="bg-emerald-600 hover:bg-emerald-500 h-14 px-8 rounded-2xl font-black shadow-xl shadow-emerald-600/20 text-white flex-1 md:flex-none transition-all active:scale-95">
             <Plus className="mr-2 h-5 w-5" /> Catat Prestasi

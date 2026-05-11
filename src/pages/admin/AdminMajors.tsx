@@ -14,25 +14,15 @@ import {
   removeJurusan,
 } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 
-// Preset berdasarkan Kurikulum Merdeka — SMA & SMK umum
+// Preset peminatan SMAIT Nur Hidayah — Rumpun A/B/C (kelas 11, Kurikulum Merdeka)
+// Sumber: notulensi wawancara 15 Maret 2026
 const JURUSAN_PRESET = {
-  SMA: [
-    { kode: 'MIPA', nama: 'Matematika dan Ilmu Pengetahuan Alam' },
-    { kode: 'IPS', nama: 'Ilmu Pengetahuan Sosial' },
-    { kode: 'BHS', nama: 'Bahasa dan Budaya' },
-  ],
-  SMK: [
-    { kode: 'RPL', nama: 'Rekayasa Perangkat Lunak' },
-    { kode: 'TKJ', nama: 'Teknik Komputer dan Jaringan' },
-    { kode: 'MM', nama: 'Multimedia' },
-    { kode: 'AKL', nama: 'Akuntansi dan Keuangan Lembaga' },
-    { kode: 'OTKP', nama: 'Otomatisasi Tata Kelola Perkantoran' },
-    { kode: 'BDP', nama: 'Bisnis Daring dan Pemasaran' },
-    { kode: 'TKR', nama: 'Teknik Kendaraan Ringan' },
-    { kode: 'TPM', nama: 'Teknik Pemesinan' },
-    { kode: 'FAR', nama: 'Farmasi Klinis dan Komunitas' },
-    { kode: 'KUL', nama: 'Kuliner' },
+  SMAIT: [
+    { kode: 'A', nama: 'Rumpun A — Kelompok Kesehatan (MTK, Fisika, Kimia, Biologi)' },
+    { kode: 'B', nama: 'Rumpun B — Kelompok Teknik (MTK Lanjut, Fisika, Kimia, Biologi)' },
+    { kode: 'C', nama: 'Rumpun C — Kelompok Sosial (Ekonomi, Sosiologi, Geografi, Sejarah)' },
   ],
 };
 
@@ -45,7 +35,7 @@ export default function AdminMajors() {
   const [editingMajor, setEditingMajor] = useState<any>(null);
   const [formData, setFormData] = useState({ kode: '', nama: '' });
   const [saving, setSaving] = useState(false);
-  const [seedingPreset, setSeedingPreset] = useState<'SMA' | 'SMK' | null>(null);
+  const [seedingPreset, setSeedingPreset] = useState<'SMAIT' | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -62,6 +52,8 @@ export default function AdminMajors() {
   useEffect(() => { loadData(); }, [loadData]);
 
   useAutoRefresh(loadData, 20_000);
+
+  const [refreshing, refreshAll] = useManualRefresh(loadData);
 
   const handleOpenAdd = () => {
     setEditingMajor(null);
@@ -96,7 +88,7 @@ export default function AdminMajors() {
     }
   };
 
-  const handleSeedPreset = async (type: 'SMA' | 'SMK') => {
+  const handleSeedPreset = async (type: 'SMAIT') => {
     setSeedingPreset(type);
     const preset = JURUSAN_PRESET[type];
     const existingKodes = new Set(majors.map(m => m.kode));
@@ -112,7 +104,7 @@ export default function AdminMajors() {
     setSeedingPreset(null);
     setIsPresetOpen(false);
     await loadData();
-    alert(`Preset ${type} diterapkan.\n${added} jurusan ditambahkan, ${skipped} dilewati (sudah ada).`);
+    alert(`Preset diterapkan.\n${added} rumpun ditambahkan, ${skipped} dilewati (sudah ada).`);
   };
 
   const handleDelete = async (id: string, nama: string) => {
@@ -135,21 +127,22 @@ export default function AdminMajors() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-white">Manajemen Jurusan</h2>
-          <p className="text-slate-300 mt-1">Kelola daftar jurusan dan program keahlian sesuai Kurikulum Merdeka.</p>
+          <h2 className="text-3xl font-bold text-white">Manajemen Rumpun Peminatan</h2>
+          <p className="text-slate-300 mt-1">Kelola daftar rumpun peminatan SMAIT Nur Hidayah (A/B/C) yang dipilih siswa mulai kelas 11.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={loadData}
-            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0">
-            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0"
+            title="Segarkan data">
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={() => setIsPresetOpen(true)}
             className="bg-amber-600 hover:bg-amber-500 h-11 px-5 rounded-xl font-semibold text-white">
-            <Zap className="mr-2 h-4 w-4" /> Preset Kurikulum Merdeka
+            <Zap className="mr-2 h-4 w-4" /> Preset Rumpun SMAIT
           </Button>
           <Button onClick={handleOpenAdd}
             className="bg-blue-600 hover:bg-blue-500 h-11 px-5 rounded-xl font-semibold text-white">
-            <Plus className="mr-2 h-4 w-4" /> Tambah Jurusan
+            <Plus className="mr-2 h-4 w-4" /> Tambah Rumpun
           </Button>
         </div>
       </div>
@@ -159,11 +152,11 @@ export default function AdminMajors() {
         <CardHeader className="p-5 border-b border-white/10">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <CardTitle className="flex items-center gap-2 text-white text-lg font-bold">
-              <Award className="h-5 w-5 text-amber-400" /> Daftar Jurusan ({majors.length})
+              <Award className="h-5 w-5 text-amber-400" /> Daftar Rumpun ({majors.length})
             </CardTitle>
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input placeholder="Cari kode atau nama jurusan..."
+              <Input placeholder="Cari kode atau nama rumpun..."
                 className="pl-10 h-11 bg-slate-950 border-white/10 text-white placeholder:text-slate-400 rounded-xl"
                 value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
@@ -211,8 +204,8 @@ export default function AdminMajors() {
                   <TableCell colSpan={3} className="h-32 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400 gap-2">
                       <Award className="h-10 w-10 opacity-40" />
-                      <p className="font-semibold text-slate-200">Belum ada jurusan</p>
-                      <p className="text-sm">Gunakan preset atau tambah manual.</p>
+                      <p className="font-semibold text-slate-200">Belum ada rumpun peminatan</p>
+                      <p className="text-sm">Gunakan preset Rumpun SMAIT atau tambah manual.</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -227,20 +220,20 @@ export default function AdminMajors() {
         <DialogContent className="bg-slate-950 border border-white/10 text-white rounded-2xl p-0 overflow-hidden max-w-md">
           <DialogHeader className="p-6 bg-white/5 border-b border-white/10">
             <DialogTitle className="text-xl font-bold">
-              {editingMajor ? 'Ubah Jurusan' : 'Tambah Jurusan'}
+              {editingMajor ? 'Ubah Rumpun' : 'Tambah Rumpun'}
             </DialogTitle>
           </DialogHeader>
           <div className="p-6 space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="kode" className="text-slate-200 text-xs font-semibold">Kode Jurusan</Label>
+              <Label htmlFor="kode" className="text-slate-200 text-xs font-semibold">Kode Rumpun</Label>
               <Input
                 id="kode"
                 value={formData.kode}
                 onChange={(e) => setFormData({ ...formData, kode: e.target.value.toUpperCase() })}
-                placeholder="Contoh: MIPA, RPL, TKJ"
+                placeholder="Contoh: A, B, C"
                 className="h-11 bg-slate-900 border-white/10 rounded-lg text-white placeholder:text-slate-500 font-mono uppercase"
               />
-              <p className="text-[10px] text-slate-400">Kode singkat berupa huruf besar (3-6 karakter).</p>
+              <p className="text-[10px] text-slate-400">Kode singkat berupa huruf besar (1-6 karakter).</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="nama" className="text-slate-200 text-xs font-semibold">Nama Lengkap</Label>
@@ -248,7 +241,7 @@ export default function AdminMajors() {
                 id="nama"
                 value={formData.nama}
                 onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
-                placeholder="Contoh: Rekayasa Perangkat Lunak"
+                placeholder="Contoh: Rumpun A — Kelompok Kesehatan"
                 className="h-11 bg-slate-900 border-white/10 rounded-lg text-white placeholder:text-slate-500"
               />
             </div>
@@ -266,51 +259,30 @@ export default function AdminMajors() {
 
       {/* Preset Dialog */}
       <Dialog open={isPresetOpen} onOpenChange={setIsPresetOpen}>
-        <DialogContent className="bg-slate-950 border border-white/10 text-white rounded-2xl p-0 overflow-hidden max-w-2xl">
+        <DialogContent className="bg-slate-950 border border-white/10 text-white rounded-2xl p-0 overflow-hidden max-w-lg">
           <DialogHeader className="p-6 border-b border-white/10 bg-gradient-to-br from-amber-600/10 to-transparent">
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              <Zap className="h-5 w-5 text-amber-400" /> Preset Jurusan Kurikulum Merdeka
+              <Zap className="h-5 w-5 text-amber-400" /> Preset Rumpun Peminatan SMAIT Nur Hidayah
             </DialogTitle>
-            <p className="text-sm text-slate-300 mt-1">Tambahkan jurusan standar sesuai Kurikulum Merdeka. Jurusan yang sudah ada akan dilewati.</p>
+            <p className="text-sm text-slate-300 mt-1">Tambahkan tiga rumpun peminatan (A, B, C) sesuai kebijakan sekolah. Rumpun yang sudah ada akan dilewati.</p>
           </DialogHeader>
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* SMA Preset */}
+          <div className="p-6">
             <div className="p-5 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-3">
               <div>
-                <h3 className="text-white font-bold text-lg">SMA</h3>
-                <p className="text-xs text-slate-300">Sekolah Menengah Atas — 3 peminatan</p>
+                <h3 className="text-white font-bold text-lg">SMAIT Nur Hidayah</h3>
+                <p className="text-xs text-slate-300">3 rumpun peminatan — dipilih siswa mulai kelas 10 semester 2</p>
               </div>
               <div className="space-y-1.5 text-sm">
-                {JURUSAN_PRESET.SMA.map(j => (
+                {JURUSAN_PRESET.SMAIT.map(j => (
                   <div key={j.kode} className="flex items-center gap-2 bg-slate-950/50 p-2 rounded-lg">
-                    <Badge className="bg-blue-600 text-white text-xs font-mono">{j.kode}</Badge>
-                    <span className="text-slate-200">{j.nama}</span>
-                  </div>
-                ))}
-              </div>
-              <Button onClick={() => handleSeedPreset('SMA')} disabled={seedingPreset !== null}
-                className="w-full h-11 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">
-                {seedingPreset === 'SMA' ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Terapkan Preset SMA'}
-              </Button>
-            </div>
-
-            {/* SMK Preset */}
-            <div className="p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-3">
-              <div>
-                <h3 className="text-white font-bold text-lg">SMK</h3>
-                <p className="text-xs text-slate-300">Sekolah Menengah Kejuruan — 10 kompetensi keahlian</p>
-              </div>
-              <div className="space-y-1.5 text-sm max-h-60 overflow-y-auto">
-                {JURUSAN_PRESET.SMK.map(j => (
-                  <div key={j.kode} className="flex items-center gap-2 bg-slate-950/50 p-2 rounded-lg">
-                    <Badge className="bg-emerald-600 text-white text-xs font-mono">{j.kode}</Badge>
+                    <Badge className="bg-blue-600 text-white text-xs font-mono px-2">Rumpun {j.kode}</Badge>
                     <span className="text-slate-200 text-xs">{j.nama}</span>
                   </div>
                 ))}
               </div>
-              <Button onClick={() => handleSeedPreset('SMK')} disabled={seedingPreset !== null}
-                className="w-full h-11 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
-                {seedingPreset === 'SMK' ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Terapkan Preset SMK'}
+              <Button onClick={() => handleSeedPreset('SMAIT')} disabled={seedingPreset !== null}
+                className="w-full h-11 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">
+                {seedingPreset === 'SMAIT' ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Terapkan Preset Rumpun A/B/C'}
               </Button>
             </div>
           </div>

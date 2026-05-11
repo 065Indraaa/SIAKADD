@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,13 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { LookupSelect } from '@/components/ui/lookup-select';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Save, Loader2, RefreshCw, CheckCircle2, Info, BookOpen, Calculator } from 'lucide-react';
-import { fetchKelas, fetchMataPelajaran } from '@/lib/schoolService';
+import { Save, Loader2, RefreshCw, CheckCircle2, Info, BookOpen, Calculator, AlertTriangle } from 'lucide-react';
+import { fetchJadwalGuru } from '@/lib/schoolService';
 import { fetchSiswa } from '@/lib/userService';
 import { upsertNilai, getNilaiByKelas } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 
 interface SiswaGrade {
   siswaId: string;
@@ -25,6 +27,16 @@ interface SiswaGrade {
   existingId?: string;
 }
 
+interface TeachingAssignment {
+  key: string;          // `${kelasId}__${mapelId}`
+  kelasId: string;
+  kelasNama: string;
+  kelasLevel?: number | string;
+  mataPelajaranId: string;
+  mataPelajaranKode: string;
+  mataPelajaranNama: string;
+}
+
 const SEMESTER = ['Ganjil', 'Genap'];
 
 function generateTahunAjaran(): string {
@@ -34,49 +46,91 @@ function generateTahunAjaran(): string {
 }
 
 export default function GuruGrades() {
+  const { user } = useAuth();
   const { add: addNotif } = useNotifications();
-  const [kelasList, setKelasList] = useState<any[]>([]);
-  const [mapelList, setMapelList] = useState<any[]>([]);
-  const [selectedKelasId, setSelectedKelasId] = useState('');
-  const [selectedMapelId, setSelectedMapelId] = useState('');
-  const [students, setStudents] = useState<SiswaGrade[]>([]);
+
   const [semester, setSemester] = useState('Ganjil');
   const [tahunAjaran, setTahunAjaran] = useState(generateTahunAjaran());
+
+  const [assignments, setAssignments] = useState<TeachingAssignment[]>([]);
+  const [selectedKey, setSelectedKey] = useState('');
+  const [students, setStudents] = useState<SiswaGrade[]>([]);
+
+  const [loadingAssignments, setLoadingAssignments] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadMetadata = useCallback(async () => {
+  // Ambil daftar kelas+mapel yang benar-benar diajar guru ini
+  // berdasarkan jadwal yang sudah dibuat oleh admin.
+  const loadAssignments = useCallback(async () => {
+    if (!user?.guruId) return;
+    setLoadingAssignments(true);
+    setError(null);
     try {
-      const [kelasData, mapelData] = await Promise.all([fetchKelas(), fetchMataPelajaran()]);
-      setKelasList(kelasData);
-      setMapelList(mapelData);
-      if (kelasData.length > 0 && !selectedKelasId) setSelectedKelasId(kelasData[0].id);
-      if (mapelData.length > 0 && !selectedMapelId) setSelectedMapelId(mapelData[0].id);
+      const jadwalData = await fetchJadwalGuru(user.guruId, tahunAjaran);
+      const filtered = (jadwalData || []).filter((j: any) => !j.semester || j.semester === semester);
+      const uniq = new Map<string, TeachingAssignment>();
+      filtered.forEach((j: any) => {
+        const kelasId = j.kelas?.id;
+        const mapelId = j.mataPelajaran?.id;
+        if (!kelasId || !mapelId) return;
+        const key = `${kelasId}__${mapelId}`;
+        if (!uniq.has(key)) {
+          uniq.set(key, {
+            key,
+            kelasId,
+            kelasNama: j.kelas?.nama || '-',
+            kelasLevel: j.kelas?.tingkat,
+            mataPelajaranId: mapelId,
+            mataPelajaranKode: j.mataPelajaran?.kode || '',
+            mataPelajaranNama: j.mataPelajaran?.nama || '-',
+          });
+        }
+      });
+      const list = Array.from(uniq.values()).sort((a, b) =>
+        a.kelasNama.localeCompare(b.kelasNama) || a.mataPelajaranNama.localeCompare(b.mataPelajaranNama),
+      );
+      setAssignments(list);
+      // Jika pilihan lama tidak ada lagi, pilih pertama (kalau ada).
+      if (list.length === 0) {
+        setSelectedKey('');
+      } else if (!list.find(a => a.key === selectedKey)) {
+        setSelectedKey(list[0].key);
+      }
     } catch (e: any) {
-      setError(e.message);
+      setError(e.message || 'Gagal memuat daftar kelas & mata pelajaran yang Anda ampu.');
+    } finally {
+      setLoadingAssignments(false);
     }
-  }, [selectedKelasId, selectedMapelId]);
+  }, [user?.guruId, semester, tahunAjaran, selectedKey]);
 
-  useEffect(() => { loadMetadata(); }, [loadMetadata]);
+  useEffect(() => { loadAssignments(); }, [loadAssignments]);
+
+  const selectedAssignment = useMemo(
+    () => assignments.find(a => a.key === selectedKey) || null,
+    [assignments, selectedKey],
+  );
 
   const loadStudentsWithGrades = useCallback(async () => {
-    if (!selectedKelasId || !selectedMapelId) return;
+    if (!selectedAssignment) {
+      setStudents([]);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      // 1. Fetch students in this class
-      const siswaData = await fetchSiswa(selectedKelasId);
+      const { kelasId, mataPelajaranId } = selectedAssignment;
+      const siswaData = await fetchSiswa(kelasId);
 
-      // 2. Fetch existing grades for this class + mapel
       const gradesRes = await getNilaiByKelas(dataConnect, {
-        kelasId: selectedKelasId,
-        mataPelajaranId: selectedMapelId,
+        kelasId,
+        mataPelajaranId,
       });
       const gradesMap = new Map<string, any>();
       gradesRes.data.nilais.forEach((n: any) => {
-        // Match by NIS (since we don't have siswaId in the response of getNilaiByKelas)
+        if (n.semester !== semester || n.tahunAjaran !== tahunAjaran) return;
         if (n.siswa?.nis) gradesMap.set(n.siswa.nis, n);
       });
 
@@ -97,11 +151,13 @@ export default function GuruGrades() {
     } finally {
       setLoading(false);
     }
-  }, [selectedKelasId, selectedMapelId]);
+  }, [selectedAssignment, semester, tahunAjaran]);
 
   useEffect(() => { loadStudentsWithGrades(); }, [loadStudentsWithGrades]);
 
   useAutoRefresh(loadStudentsWithGrades, 20_000);
+
+  const [refreshing, refreshAll] = useManualRefresh(loadAssignments, loadStudentsWithGrades);
 
   const handleNilaiChange = (siswaId: string, field: keyof SiswaGrade, val: string) => {
     setStudents(prev => prev.map(s => s.siswaId === siswaId ? { ...s, [field]: val } : s));
@@ -117,8 +173,8 @@ export default function GuruGrades() {
   };
 
   const handleSave = async () => {
-    if (!selectedKelasId || !selectedMapelId) {
-      setError('Pilih kelas dan mata pelajaran terlebih dahulu.');
+    if (!selectedAssignment) {
+      setError('Pilih kelas dan mata pelajaran yang Anda ampu terlebih dahulu.');
       return;
     }
     setSaving(true);
@@ -130,14 +186,13 @@ export default function GuruGrades() {
         const nh = parseFloat(String(s.nilaiHarian));
         const uts = parseFloat(String(s.nilaiUts));
         const uas = parseFloat(String(s.nilaiUas));
-        // Skip if all empty
         if (isNaN(nh) && isNaN(uts) && isNaN(uas)) continue;
 
         try {
           await upsertNilai(dataConnect, {
             siswaId: s.siswaId,
-            kelasId: selectedKelasId,
-            mataPelajaranId: selectedMapelId,
+            kelasId: selectedAssignment.kelasId,
+            mataPelajaranId: selectedAssignment.mataPelajaranId,
             semester,
             tahunAjaran,
             nilaiHarian: isNaN(nh) ? null : nh,
@@ -153,8 +208,9 @@ export default function GuruGrades() {
         setError(`${successCount} berhasil disimpan, ${errors.length} gagal. Detail: ${errors.slice(0, 3).join('; ')}`);
         addNotif({
           type: 'warning', kind: 'akademik',
+          targetRoles: ['guru'],
           title: 'Penyimpanan Nilai Sebagian Gagal',
-          body: `${successCount} nilai tersimpan, ${errors.length} gagal. Silakan periksa kembali.`,
+          body: `${successCount} nilai tersimpan, ${errors.length} gagal untuk ${selectedAssignment.mataPelajaranNama} — ${selectedAssignment.kelasNama}.`,
         });
       } else {
         setSaved(true);
@@ -162,8 +218,9 @@ export default function GuruGrades() {
         if (successCount > 0) {
           addNotif({
             type: 'success', kind: 'akademik',
+            targetRoles: ['guru'],
             title: 'Nilai Tersimpan',
-            body: `${successCount} nilai berhasil disimpan untuk ${selectedMapel?.nama || 'mata pelajaran ini'}.`,
+            body: `${successCount} nilai berhasil disimpan untuk ${selectedAssignment.mataPelajaranNama} (${selectedAssignment.kelasNama}).`,
           });
         }
       }
@@ -175,11 +232,11 @@ export default function GuruGrades() {
     }
   };
 
-  const kelasItems = kelasList.map(k => ({ value: k.id, label: k.name, hint: `Kelas ${k.level}` }));
-  const mapelItems = mapelList.map(m => ({ value: m.id, label: `${m.kode} — ${m.nama}`, hint: m.nama }));
-
-  const selectedKelas = kelasList.find(k => k.id === selectedKelasId);
-  const selectedMapel = mapelList.find(m => m.id === selectedMapelId);
+  const assignmentItems = assignments.map(a => ({
+    value: a.key,
+    label: `${a.kelasNama} — ${a.mataPelajaranNama}`,
+    hint: `${a.mataPelajaranKode}${a.kelasLevel ? ` · Kelas ${a.kelasLevel}` : ''}`,
+  }));
 
   return (
     <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6 text-slate-100">
@@ -190,9 +247,10 @@ export default function GuruGrades() {
           <p className="text-slate-300 mt-1">Masukkan nilai harian, UTS, dan UAS. Nilai akhir dihitung otomatis.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={loadStudentsWithGrades} disabled={loading}
-            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0">
-            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0"
+            title="Segarkan data">
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={handleSave} disabled={saving || students.length === 0}
             className="bg-blue-600 hover:bg-blue-500 h-11 px-6 rounded-xl font-semibold text-white">
@@ -205,26 +263,27 @@ export default function GuruGrades() {
       {/* Filter */}
       <Card className="bg-slate-900/60 border-white/10 rounded-2xl">
         <CardContent className="p-5">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Kelas</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-1.5 md:col-span-1">
+              <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">
+                Kelas & Mata Pelajaran
+              </Label>
               <LookupSelect
-                value={selectedKelasId}
-                onChange={setSelectedKelasId}
-                items={kelasItems}
-                placeholder={kelasItems.length ? 'Pilih kelas' : 'Memuat...'}
+                value={selectedKey}
+                onChange={setSelectedKey}
+                items={assignmentItems}
+                placeholder={
+                  loadingAssignments
+                    ? 'Memuat jadwal mengajar...'
+                    : assignmentItems.length
+                      ? 'Pilih kelas & mapel'
+                      : 'Belum ada jadwal mengajar'
+                }
                 className="h-11 bg-slate-950 border-white/10 rounded-lg text-white"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Mata Pelajaran</Label>
-              <LookupSelect
-                value={selectedMapelId}
-                onChange={setSelectedMapelId}
-                items={mapelItems}
-                placeholder={mapelItems.length ? 'Pilih mata pelajaran' : 'Memuat...'}
-                className="h-11 bg-slate-950 border-white/10 rounded-lg text-white"
-              />
+              <p className="text-[10px] text-slate-400">
+                Daftar ini diambil otomatis dari jadwal mengajar yang sudah diatur admin untuk Anda.
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Semester</Label>
@@ -246,6 +305,20 @@ export default function GuruGrades() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Kosongan: belum ada assignment */}
+      {!loadingAssignments && assignments.length === 0 && (
+        <div className="p-5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold text-amber-100">Belum ada jadwal mengajar untuk Anda</p>
+            <p className="mt-1 text-amber-200/90">
+              Input nilai hanya tersedia untuk kelas dan mata pelajaran yang tercantum di jadwal mengajar.
+              Silakan hubungi admin agar jadwal mengajar Anda dibuat terlebih dahulu untuk semester {semester} T.A. {tahunAjaran}.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Info banner */}
       <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-200 text-sm flex items-start gap-3">
@@ -269,7 +342,7 @@ export default function GuruGrades() {
         <CardHeader className="p-5 border-b border-white/10">
           <CardTitle className="text-white text-lg font-bold flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-blue-400" />
-            {selectedKelas?.name || '—'} · {selectedMapel?.nama || '—'}
+            {selectedAssignment ? `${selectedAssignment.kelasNama} · ${selectedAssignment.mataPelajaranNama}` : '—'}
             <Badge className="ml-auto bg-blue-500/10 text-blue-300 border-blue-500/30">
               {students.length} siswa
             </Badge>
@@ -326,7 +399,11 @@ export default function GuruGrades() {
                 <TableRow><TableCell colSpan={5} className="h-32 text-center">
                   <BookOpen className="h-10 w-10 text-slate-600 mx-auto mb-2" />
                   <p className="text-slate-300 font-semibold">Belum ada siswa</p>
-                  <p className="text-sm text-slate-400">Pilih kelas yang memiliki siswa terdaftar.</p>
+                  <p className="text-sm text-slate-400">
+                    {selectedAssignment
+                      ? 'Kelas ini belum memiliki siswa terdaftar.'
+                      : 'Pilih kelas & mata pelajaran yang Anda ampu dulu.'}
+                  </p>
                 </TableCell></TableRow>
               )}
             </TableBody>

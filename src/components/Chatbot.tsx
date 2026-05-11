@@ -15,28 +15,66 @@ interface Message {
 const SCHOOL_KNOWLEDGE = `
 INFORMASI SEKOLAH RESMI:
 Nama: SMAIT Nur Hidayah (Sekolah Menengah Atas Islam Terpadu Nur Hidayah)
-Alamat: Jl. Pisang Raya, Sonosaren, Gumpang, Kecamatan Kartasura, Kabupaten Sukoharjo, Jawa Tengah 57552
+Alamat: Jl. Pandawa No.10, Dusun III, Kel. Pucangan, Kec. Kartasura, Kab. Sukoharjo, Provinsi Jawa Tengah 57168
 Berdiri sejak: tahun 2005
 Yayasan: Yayasan Nur Hidayah Surakarta
 Jaringan: Anggota Jaringan Sekolah Islam Terpadu (JSIT) Indonesia
 Akreditasi: A (Unggul)
 Kurikulum: Kurikulum Merdeka terpadu dengan kurikulum keislaman khas JSIT
-Status: Sekolah swasta Islam Terpadu dengan sistem boarding (asrama) putra & putri
 Motto: Membentuk Generasi Rabbani yang Berprestasi
 
-PROGRAM PEMINATAN:
-1. MIPA (Matematika dan Ilmu Pengetahuan Alam) — Fisika, Kimia, Biologi, Matematika Tingkat Lanjut
-2. IPS (Ilmu Pengetahuan Sosial) — Ekonomi, Sosiologi, Geografi, Antropologi
-3. Tahfidz Al-Qur'an — Program unggulan, target minimal 5 juz, terintegrasi dengan peminatan akademik
+SISTEM KELAS:
+- Kelas 10: sepuluh kelas (X-1 s/d X-10) campur tanpa pemisahan gender.
+  Setiap kelas berisi sekitar 30 siswa. Penempatan kelas berdasarkan gabungan nilai tes
+  masuk dan nilai rapot sebelumnya, diproses oleh tim BK.
+- Kelas 11: siswa dibagi ulang berdasarkan rumpun peminatan yang dipilih mulai kelas 10 semester 2.
+
+PROGRAM PEMINATAN (mulai kelas 11):
+1. Rumpun A — Kelompok Kesehatan (2 kelas)
+   Mata pelajaran: Matematika, Fisika, Kimia, Biologi.
+   Diarahkan untuk jalur kedokteran, farmasi, keperawatan, dan ilmu kesehatan lainnya.
+   Merupakan rumpun paling diminati sehingga seleksinya ketat.
+2. Rumpun B — Kelompok Teknik (1 kelas)
+   Mata pelajaran: Fisika, Matematika Tingkat Lanjut, Biologi, Kimia.
+   Diarahkan untuk jalur teknik (informatika, sipil, mesin, industri, arsitektur).
+3. Rumpun C — Kelompok Sosial & Humaniora (2 kelas)
+   Mata pelajaran: Ekonomi, Sosiologi, Geografi, Sejarah.
+   Diarahkan untuk jalur hukum, bisnis, hubungan internasional, komunikasi, dan dakwah.
+Jika siswa memilih rumpun A namun tidak lolos, akan ditawarkan pindah ke rumpun B atau C.
 
 FASILITAS:
-- Asrama putra & putri (boarding school)
 - Masjid sekolah sebagai pusat ibadah dan halaqah
 - Laboratorium IPA (Fisika, Kimia, Biologi)
 - Laboratorium Komputer
 - Perpustakaan Islami
 - Lapangan olahraga (basket, futsal, voli, panahan)
-- Kantin sehat
+
+KEBIJAKAN PERANGKAT:
+Siswa TIDAK diperbolehkan membawa ponsel atau laptop ke sekolah.
+Portal akademik diakses menggunakan tablet resmi yang diizinkan di sekolah,
+atau dari perangkat pribadi di luar jam sekolah.
+
+SISTEM AKADEMIK ONLINE:
+- Input nilai dilakukan oleh guru mata pelajaran langsung ke sistem.
+  Wali kelas memantau dan memverifikasi nilai siswa di kelasnya tanpa setoran file manual.
+- Rapot online dapat diakses siswa setiap semester, menampilkan tren naik/turun nilai
+  serta peta persaingan dengan siswa lain yang menargetkan jurusan kampus yang sama.
+- Rapot online baru dapat dibuka jika administrasi sekolah sudah lunas.
+- Pengambilan rapot fisik tetap dilakukan tatap muka antara orang tua dan wali kelas.
+- Sistem juga mencatat prestasi siswa (akademik, olahraga, keagamaan),
+  pelanggaran, frekuensi kunjungan ke BK, serta keanggotaan ekstrakurikuler.
+- Penjadwalan pelajaran menggunakan sistem penjadwalan otomatis agar tidak bentrok
+  antar guru maupun antar kelas.
+
+DATA ALUMNI:
+Track record alumni mulai dirapikan sejak tahun 2023. Data lulusan lama masih dalam
+proses digitalisasi dari arsip Excel ke sistem.
+
+AKSES PENGGUNA:
+Akun portal akademik hanya tersedia untuk siswa, guru, dan admin.
+Belum tersedia akun khusus orang tua. Komunikasi sekolah dengan orang tua
+masih dilakukan melalui wali kelas secara langsung, telepon, WhatsApp,
+atau kunjungan ke rumah bila diperlukan.
 
 EKSTRAKURIKULER UNGGULAN:
 Tahfidz Al-Qur'an, Kajian Islam, Jurnalistik, Panahan (Olahraga Sunnah),
@@ -57,7 +95,8 @@ Mujahidun Linafsihi, Harishun 'ala Waqtihi, Munazzhamun fi Syu'unihi, Qodirun 'a
 TENTANG APLIKASI SCOLA:
 SCOLA adalah Sistem Informasi Akademik berbasis cloud untuk SMAIT Nur Hidayah.
 Fitur: Login multi-role (Admin/Guru/Siswa), Import massal via Excel, Export PDF/Excel,
-Chatbot AI, Penjurusan Kurikulum Merdeka, Pencatatan Nilai & Prestasi, Data Alumni.
+Chatbot AI, Penjurusan Kurikulum Merdeka (Rumpun A/B/C), Pencatatan Nilai, Prestasi,
+Pelanggaran & BK, Ekstrakurikuler, dan Data Alumni.
 `;
 
 export default function Chatbot({ context }: { context: string }) {
@@ -69,12 +108,13 @@ export default function Chatbot({ context }: { context: string }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Initial greeting based on role
+    // Sapaan awal berbasis nama pengguna (bukan Akhi/Ukhti).
+    const displayName = user?.name?.trim() || '';
     const greetings: Record<string, string> = {
-      admin: `Assalamu'alaikum ${user?.name || 'Admin'}! Saya SCOLA AI asisten SMAIT Nur Hidayah. Saya bisa bantu kelola data siswa, guru, jadwal, atau info sekolah. Mau tanya apa?`,
-      guru: `Assalamu'alaikum ${user?.name || 'Ustadz/Ustadzah'}! Saya bisa bantu info input nilai, absensi, atau penjadwalan. Ada yang ingin ditanyakan?`,
-      siswa: `Assalamu'alaikum ${user?.name || 'Akhi/Ukhti'}! Saya SCOLA AI. Tanyakan saja soal jadwal, nilai, program tahfidz, atau info SMAIT Nur Hidayah.`,
-      public: 'Assalamu\'alaikum! Saya SCOLA AI. Saya bisa bantu menjelaskan tentang SMAIT Nur Hidayah Sukoharjo, program peminatan, tahfidz, asrama, dan pendaftaran.',
+      admin: `Halo${displayName ? `, ${displayName}` : ''}. Saya SCOLA AI, asisten SMAIT Nur Hidayah. Ada yang bisa saya bantu — misalnya kelola data siswa, guru, jadwal, atau info sekolah?`,
+      guru: `Halo${displayName ? `, ${displayName}` : ''}. Saya SCOLA AI. Saya bisa bantu urusan input nilai, penjadwalan, atau informasi kelas. Ada yang ingin ditanyakan?`,
+      siswa: `Halo${displayName ? `, ${displayName}` : ''}. Saya SCOLA AI. Silakan tanyakan soal jadwal, nilai, rumpun peminatan, atau info SMAIT Nur Hidayah.`,
+      public: `Halo${displayName ? `, ${displayName}` : ''}. Saya SCOLA AI dan bisa menjelaskan tentang SMAIT Nur Hidayah Sukoharjo, sistem pembagian kelas, rumpun peminatan, dan cara kerja portal akademik.`,
     };
     setMessages([{ role: 'assistant', content: greetings[context] || greetings.public }]);
   }, [context, user?.name]);
@@ -90,10 +130,15 @@ export default function Chatbot({ context }: { context: string }) {
       admin: 'Pengguna saat ini adalah ADMINISTRATOR sekolah. Bantu menjawab tentang manajemen data akademik, penggunaan fitur SCOLA, dan kebijakan sekolah.',
       guru: `Pengguna adalah GURU${user?.specialization ? ` mata pelajaran ${user.specialization}` : ''}${user?.jabatan && user.jabatan !== 'Guru' ? ` dengan jabatan ${user.jabatan}` : ''}. Bantu dengan pertanyaan input nilai, absensi, dan administrasi kelas.`,
       siswa: `Pengguna adalah SISWA${user?.className ? ` kelas ${user.className}` : ''}. Bantu dengan info pelajaran, jadwal, nilai, dan info sekolah.`,
-      public: 'Pengguna adalah PENGUNJUNG/CALON SISWA. Bantu dengan info pendaftaran, program peminatan, asrama, fasilitas, dan keunggulan SMAIT Nur Hidayah Sukoharjo.',
+      public: 'Pengguna adalah PENGUNJUNG/CALON SISWA. Bantu dengan info sistem pembagian kelas, rumpun peminatan A/B/C, fasilitas, dan cara kerja portal akademik SMAIT Nur Hidayah Sukoharjo.',
     };
 
-    return `Kamu adalah SCOLA AI, asisten virtual SMAIT Nur Hidayah Sukoharjo. Jawab dalam Bahasa Indonesia yang hangat, profesional, dan ringkas. Gunakan sapaan islami jika relevan (Akhi, Ukhti, Ustadz/Ustadzah).
+    return `Kamu adalah SCOLA AI, asisten virtual SMAIT Nur Hidayah Sukoharjo. Jawab dalam Bahasa Indonesia yang hangat, profesional, dan ringkas.
+
+GAYA BAHASA:
+- Sapa pengguna dengan nama yang sudah diberikan di bawah. Jangan gunakan panggilan "Akhi", "Ukhti", "Ustadz", atau "Ustadzah".
+- Jika nama pengguna tidak diketahui, sapa secara netral tanpa kata ganti spesifik.
+${user?.name ? `- Nama pengguna saat ini: ${user.name}.` : '- Nama pengguna belum diketahui.'}
 
 ${roleContext[context] || roleContext.public}
 
@@ -106,7 +151,7 @@ PANDUAN JAWABAN:
 - Jangan mengarang data siswa/guru/nilai spesifik — arahkan ke menu yang tepat di aplikasi.
 - Format jawaban rapi dengan bullet points jika berisi daftar.
 - Jangan terlalu panjang, maksimal 4-5 kalimat kecuali diminta detail.
-- Boleh menyisipkan kutipan Al-Qur'an/Hadits singkat jika pertanyaan tentang motivasi atau keislaman.`;
+- Boleh menyisipkan kutipan Al-Qur'an/Hadits singkat hanya jika pengguna secara eksplisit meminta motivasi atau bertanya hal keislaman.`;
   };
 
   const handleSend = async (e: React.FormEvent) => {
@@ -158,18 +203,18 @@ PANDUAN JAWABAN:
   };
 
   const quickPrompts = context === 'public' ? [
-    'Apa saja jurusan yang ada?',
-    'Bagaimana program tahfidz?',
-    'Apakah ada asrama?',
-    'Cara pendaftaran bagaimana?',
+    'Apa saja rumpun peminatannya?',
+    'Bagaimana pembagian kelas 10?',
+    'Apakah boleh bawa HP ke sekolah?',
+    'Bagaimana cara melihat nilai?',
   ] : context === 'siswa' ? [
-    'Bagaimana cara lihat nilai?',
-    'Apa itu Kurikulum Merdeka?',
-    'Info peminatan kelas 11',
+    'Cara lihat rapot online?',
+    'Bagaimana memilih rumpun A/B/C?',
+    'Cara cek persaingan jurusan kampus',
   ] : context === 'guru' ? [
     'Cara input nilai harian?',
     'Bagaimana catat prestasi siswa?',
-    'Cara rekap absensi?',
+    'Cara catat poin BK siswa?',
   ] : [
     'Import siswa via Excel?',
     'Export akun ke PDF?',

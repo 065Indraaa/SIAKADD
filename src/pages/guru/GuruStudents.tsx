@@ -10,6 +10,7 @@ import { Search, Loader2, Phone, MapPin, RefreshCw, User, Info, Users } from 'lu
 import { fetchSiswa, UserListItem } from '@/lib/userService';
 import { fetchKelas } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 
 export default function GuruStudents() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,6 +52,8 @@ export default function GuruStudents() {
 
   useAutoRefresh(loadStudents, 20_000);
 
+  const [refreshing, refreshAll] = useManualRefresh(loadKelas, loadStudents);
+
   const filtered = students.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (s.nis || '').includes(searchTerm)
@@ -67,9 +70,9 @@ export default function GuruStudents() {
           <h2 className="text-3xl font-bold text-white">Data Siswa</h2>
           <p className="text-slate-300 mt-1">Monitoring profil dan kontak peserta didik per kelas.</p>
         </div>
-        <Button variant="outline" onClick={loadStudents} disabled={loading}
+        <Button variant="outline" onClick={refreshAll} disabled={refreshing}
           className="h-11 border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 rounded-xl">
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           Segarkan
         </Button>
       </div>

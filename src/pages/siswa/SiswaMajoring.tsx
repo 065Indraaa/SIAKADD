@@ -40,7 +40,7 @@ export default function SiswaMajoring() {
       setTimeout(() => setIsSuccess(false), 3000);
     } catch (e) {
       console.error(e);
-      alert("Gagal menyimpan pilihan penjurusan.");
+      alert("Gagal menyimpan pilihan rumpun peminatan.");
     } finally {
       setSaving(false);
     }
@@ -50,7 +50,7 @@ export default function SiswaMajoring() {
     return (
       <div className="flex items-center justify-center h-64 gap-3">
         <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-        <span className="text-sm text-slate-500">Memuat data penjurusan...</span>
+        <span className="text-sm text-slate-500">Memuat data rumpun peminatan...</span>
       </div>
     );
   }
@@ -61,8 +61,8 @@ export default function SiswaMajoring() {
     <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black italic tracking-tighter text-white">Peminatan Jurusan</h2>
-          <p className="text-slate-400 mt-1">Pilih jurusan yang Anda minati untuk jenjang Kelas 11.</p>
+          <h2 className="text-3xl font-black italic tracking-tighter text-white">Rumpun Peminatan</h2>
+          <p className="text-slate-400 mt-1">Pilih rumpun peminatan (A/B/C) untuk dipertimbangkan dalam penetapan kelas 11.</p>
         </div>
         {selectedId && (
           <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.4)] px-8 rounded-2xl h-12">
@@ -101,7 +101,7 @@ export default function SiswaMajoring() {
             </p>
             
             <div className="mt-6 flex items-center text-xs font-bold text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
-              Pilih Jurusan Ini <MoveRight className="ml-2 h-3 w-3" />
+              Pilih Rumpun Ini <MoveRight className="ml-2 h-3 w-3" />
             </div>
           </div>
         ))}
@@ -118,8 +118,8 @@ export default function SiswaMajoring() {
                 <h4 className="text-white font-bold mb-1 text-lg">Konfirmasi Pilihan</h4>
                 <p className="text-sm text-slate-500 leading-relaxed">
                   Anda telah memilih <span className="text-white font-bold underline decoration-blue-500/50">{currentJurusan?.nama}</span>. 
-                  Pilihan ini akan diteruskan ke tim kurikulum untuk dipertimbangkan dalam penetapan kelas 11. 
-                  Pastikan pilihan Anda sesuai dengan minat dan bakat.
+                  Pilihan ini akan diteruskan ke tim kurikulum & BK untuk dipertimbangkan dalam penetapan kelas 11. 
+                  Jika kuota rumpun pilihan utama penuh, sekolah dapat menawarkan rumpun alternatif.
                 </p>
               </div>
             </div>

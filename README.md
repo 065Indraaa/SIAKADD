@@ -1,20 +1,73 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# SCOLA — Sistem Informasi Akademik SMAIT Nur Hidayah Sukoharjo
 
-# Run and deploy your AI Studio app
+Portal akademik berbasis web untuk **SMAIT Nur Hidayah Sukoharjo**. Mengintegrasikan
+administrasi kelas, input nilai oleh guru, rapot online siswa, pencatatan prestasi,
+pelanggaran, bimbingan konseling, dan data alumni.
 
-This contains everything you need to run your app locally.
+Dikembangkan berdasarkan hasil wawancara Bapak **Nur Suci Aprilianto S.Pd. Gr.**
+(Wakil Kepala Bidang Kehumasan) pada 15 Maret 2026.
 
-View your app in AI Studio: https://ai.studio/apps/37707582-3ac4-4182-84d2-6b6877bee610
+## Fitur Utama
 
-## Run Locally
+- **Multi-role login** — Admin, Guru, dan Siswa.
+- **Manajemen kelas** — Kelas 10 dipisah putra (1–5) dan putri (6–10); kelas 11
+  dibagi menurut rumpun peminatan (A/B/C).
+- **Rumpun peminatan** — Rumpun A Kesehatan (2 kls), Rumpun B Teknik (1 kls),
+  Rumpun C Sosial (2 kls) — dipilih siswa mulai kelas 10 semester 2.
+- **Input nilai terintegrasi** — Guru menginput, wali kelas memverifikasi, siswa
+  melihat rapot online setiap semester.
+- **Pencatatan prestasi & BK** — Termasuk pelanggaran dan keanggotaan
+  ekstrakurikuler.
+- **Penjadwalan anti-bentrok** — Penjadwalan otomatis antar guru dan antar kelas.
+- **Chatbot AI** — Menjawab pertanyaan tentang sekolah (Groq + Llama 3.3).
+- **Impor & ekspor** — Impor siswa/guru dari Excel, ekspor akun ke PDF/Excel.
+- **Data alumni** — Pencatatan track record lulusan (mulai angkatan 2023).
 
-**Prerequisites:**  Node.js
+## Prasyarat
 
+- Node.js 18+
+- Firebase project dengan Firebase Data Connect aktif
+- API key Groq untuk chatbot (opsional)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Menjalankan Secara Lokal
+
+1. Install dependencies
+   ```cmd
+   npm install
+   ```
+2. Salin `.env.example` menjadi `.env` lalu isi nilai yang diperlukan:
+   - Konfigurasi Firebase (project id, api key, dll)
+   - `VITE_GROQ_API_KEY` untuk chatbot
+3. Jalankan dev server
+   ```cmd
+   npm run dev
+   ```
+   Aplikasi tersedia di http://localhost:3000.
+
+## Build Production
+
+```cmd
+npm run build
+npm run preview
+```
+
+## Membuat Data Demo
+
+Setelah login sebagai admin, buka menu **Pengguna** lalu klik **Buat Data Demo**
+untuk mengisi database dengan akun admin/guru/siswa, rumpun A/B/C, kelas, dan mata
+pelajaran siap pakai.
+
+Akun demo default (pasca seed):
+
+| Role  | Email           | Password    |
+| ----- | --------------- | ----------- |
+| Admin | admin@demo.com  | Admin@123   |
+| Guru  | guru@demo.com   | Guru@123    |
+| Siswa | siswa@demo.com  | Siswa@123   |
+
+## Catatan
+
+- Akun khusus orang tua belum tersedia; komunikasi dengan orang tua masih ditangani
+  wali kelas secara langsung, telepon, WhatsApp, atau kunjungan.
+- Sesuai kebijakan sekolah, siswa mengakses portal dari tablet resmi saat berada di
+  sekolah, atau perangkat pribadi di luar jam sekolah.

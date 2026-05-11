@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { fetchAlumni, addAlumniData, editAlumniData, removeAlumniData } from '@/lib/schoolService';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 
 export default function AdminAlumni() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,6 +43,8 @@ export default function AdminAlumni() {
   }, []);
 
   useAutoRefresh(loadData, 20_000);
+
+  const [refreshing, refreshAll] = useManualRefresh(loadData);
 
   const filteredAlumni = alumni.filter(alum => 
     alum.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -124,11 +127,12 @@ export default function AdminAlumni() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-wrap">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-white">Data Alumni</h2>
-          <p className="text-slate-400">Kelola data alumni dan penelusuran lulusan.</p>
+          <p className="text-slate-400">Penelusuran lulusan SMAIT Nur Hidayah. Data terekam mulai angkatan 2023.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={loadData} className="bg-white/5 border-white/10">
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+            className="bg-white/5 border-white/10" title="Segarkan data">
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={() => handleOpenDialog()} className="bg-blue-600 hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
             <Plus className="mr-2 h-4 w-4" /> Tambah Alumni
@@ -216,28 +220,43 @@ export default function AdminAlumni() {
     <div className="flex flex-col gap-3 py-4">
       {/* Nama */}
       <div className="flex flex-col gap-1.5">
-        <Label className="text-slate-400 text-sm">Nama</Label>
+        <Label className="text-slate-400 text-sm">Nama Lengkap</Label>
         <Input
           className="bg-slate-950 border-white/10 text-white"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          disabled={!!editingAlumni}
         />
       </div>
 
+      {/* NIS */}
+      {!editingAlumni && (
+        <div className="flex flex-col gap-1.5">
+          <Label className="text-slate-400 text-sm">NIS (opsional)</Label>
+          <Input
+            className="bg-slate-950 border-white/10 text-white"
+            placeholder="Kosongkan untuk auto-generate"
+            value={formData.nis || ''}
+            onChange={(e) => setFormData({ ...formData, nis: e.target.value })}
+          />
+        </div>
+      )}
+
       {/* Tahun */}
       <div className="flex flex-col gap-1.5">
-        <Label className="text-slate-400 text-sm">Tahun</Label>
+        <Label className="text-slate-400 text-sm">Tahun Lulus</Label>
         <Input
           type="number"
           className="bg-slate-950 border-white/10 text-white"
           value={formData.year}
           onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+          disabled={!!editingAlumni}
         />
       </div>
 
       {/* Status */}
       <div className="flex flex-col gap-1.5">
-        <Label className="text-slate-400 text-sm">Status</Label>
+        <Label className="text-slate-400 text-sm">Status Saat Ini</Label>
         <Select
           value={formData.status}
           onValueChange={(val) => setFormData({ ...formData, status: val })}
@@ -255,21 +274,38 @@ export default function AdminAlumni() {
 
       {/* Institusi */}
       <div className="flex flex-col gap-1.5">
-        <Label className="text-slate-400 text-sm">Institusi</Label>
+        <Label className="text-slate-400 text-sm">
+          {formData.status === 'Kerja' ? 'Nama Perusahaan/Instansi' : 'Nama Universitas/Institusi'}
+        </Label>
         <Input
           className="bg-slate-950 border-white/10 text-white"
-          value={formData.institution}
+          placeholder={formData.status === 'Kerja' ? 'Contoh: PT. Astra International' : 'Contoh: Universitas Gadjah Mada'}
+          value={formData.institution || ''}
           onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
         />
       </div>
 
       {/* Jurusan/Jabatan */}
       <div className="flex flex-col gap-1.5">
-        <Label className="text-slate-400 text-sm">Jurusan/Jabatan</Label>
+        <Label className="text-slate-400 text-sm">
+          {formData.status === 'Kerja' ? 'Jabatan / Posisi' : 'Program Studi / Jurusan'}
+        </Label>
         <Input
           className="bg-slate-950 border-white/10 text-white"
-          value={formData.major}
+          placeholder={formData.status === 'Kerja' ? 'Contoh: Software Engineer' : 'Contoh: Pendidikan Dokter'}
+          value={formData.major || ''}
           onChange={(e) => setFormData({ ...formData, major: e.target.value })}
+        />
+      </div>
+
+      {/* Prestasi */}
+      <div className="flex flex-col gap-1.5">
+        <Label className="text-slate-400 text-sm">Catatan Prestasi (opsional)</Label>
+        <Input
+          className="bg-slate-950 border-white/10 text-white"
+          placeholder="Contoh: Beasiswa Bidikmisi, Juara KSN"
+          value={formData.achievements || ''}
+          onChange={(e) => setFormData({ ...formData, achievements: e.target.value })}
         />
       </div>
     </div>

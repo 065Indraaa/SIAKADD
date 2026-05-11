@@ -11,6 +11,7 @@ import { fetchSiswa } from '@/lib/userService';
 import { fetchJurusan, savePeminatan } from '@/lib/schoolService';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 
 interface StudentRow {
   siswaId: string;
@@ -62,6 +63,8 @@ export default function AdminPenjuruan() {
   useEffect(() => { loadData(); }, []);
 
   useAutoRefresh(loadData, 20_000);
+
+  const [refreshing, refreshAll] = useManualRefresh(loadData);
 
   const handleAssignmentChange = (siswaId: string, newAssignment: string) => {
     setStudents(prev => prev.map(s => s.siswaId === siswaId ? { ...s, assigned: newAssignment } : s));
@@ -138,7 +141,7 @@ export default function AdminPenjuruan() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold text-white">Penjurusan Siswa</h2>
-          <p className="text-slate-300 mt-1">Tetapkan peminatan jurusan untuk setiap siswa sesuai Kurikulum Merdeka.</p>
+          <p className="text-slate-300 mt-1">Tetapkan rumpun peminatan (A/B/C) untuk setiap siswa SMAIT Nur Hidayah.</p>
         </div>
         <div className="flex items-center gap-3">
           {isSaved && (
@@ -146,9 +149,10 @@ export default function AdminPenjuruan() {
               <CheckCircle2 className="mr-2 h-4 w-4" /> Tersimpan
             </Badge>
           )}
-          <Button variant="outline" onClick={loadData}
-            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0">
-            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0"
+            title="Segarkan data">
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={handleSave} disabled={saving || changedCount === 0}
             className="bg-blue-600 hover:bg-blue-500 h-11 px-6 rounded-xl font-semibold text-white disabled:opacity-50">
@@ -162,10 +166,12 @@ export default function AdminPenjuruan() {
       <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-200 text-sm flex items-start gap-3">
         <Info className="h-5 w-5 flex-shrink-0 mt-0.5" />
         <div>
-          <p className="font-semibold text-blue-100">Panduan Penjurusan Kurikulum Merdeka</p>
+          <p className="font-semibold text-blue-100">Panduan Penjurusan SMAIT Nur Hidayah</p>
           <p className="mt-1 text-blue-200/90">
-            Pada Kurikulum Merdeka, siswa memilih <strong>mata pelajaran pilihan</strong> sesuai minat di kelas 11.
-            Penjurusan di halaman ini menetapkan <strong>peminatan resmi</strong> yang tercatat di profil siswa.
+            Siswa memilih rumpun peminatan mulai <strong>kelas 10 semester 2</strong>. Penempatan mengacu pada
+            pilihan siswa, nilai tes dan rapot, serta kuota kelas: <strong>Rumpun A (Kesehatan) 2 kelas</strong>,
+            <strong> Rumpun B (Teknik) 1 kelas</strong>, <strong>Rumpun C (Sosial) 2 kelas</strong>. Jika pilihan
+            utama tidak tersedia, siswa dapat dialihkan ke rumpun alternatif.
           </p>
         </div>
       </div>
@@ -270,7 +276,7 @@ export default function AdminPenjuruan() {
                             value={student.assigned}
                             onChange={(v) => handleAssignmentChange(student.siswaId, v)}
                             items={jurusanItems}
-                            placeholder="Pilih peminatan..."
+                            placeholder="Pilih rumpun A/B/C..."
                             allowEmpty
                             emptyLabel="— Tanpa Peminatan —"
                             className={`w-60 h-11 bg-slate-950 border-white/10 text-white rounded-lg ${

@@ -56,7 +56,7 @@ type Pengguna @table(name: "pengguna") {
 }
 
 # -------------------------------------------------------
-# JURUSAN — Kode unik (RPL, MIPA, IPS, dsb.)
+# JURUSAN / RUMPUN PEMINATAN — Kode unik (A, B, C untuk SMAIT Nur Hidayah)
 # -------------------------------------------------------
 type Jurusan @table(name: "jurusan") {
   id: UUID! @default(expr: "uuidV4()")

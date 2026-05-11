@@ -15,6 +15,7 @@ import { fetchGuru, UserListItem } from '@/lib/userService';
 import { deleteKelas } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 
 // Kurikulum Merdeka — Fase E (Kelas 10), Fase F (Kelas 11-12)
 const TINGKAT_OPTIONS = [
@@ -22,6 +23,9 @@ const TINGKAT_OPTIONS = [
   { value: '11', label: 'Kelas 11 — Fase F', hint: 'Kurikulum Merdeka' },
   { value: '12', label: 'Kelas 12 — Fase F', hint: 'Kurikulum Merdeka' },
 ];
+
+// Kelas 10 campur tanpa pembagian putra/putri.
+// Kelas 11: Rumpun A (2 kls), B (1 kls), C (2 kls).
 
 function generateTahunAjaran(): string[] {
   const now = new Date();
@@ -73,6 +77,8 @@ export default function AdminClasses() {
   useEffect(() => { loadData(); }, [loadData]);
 
   useAutoRefresh(loadData, 20_000);
+
+  const [refreshing, refreshAll] = useManualRefresh(loadData);
 
   const filteredClasses = classes.filter(cls =>
     cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -170,12 +176,13 @@ export default function AdminClasses() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold text-white">Manajemen Kelas</h2>
-          <p className="text-slate-300 mt-1">Kelola ruang belajar dan penugasan wali kelas sesuai Kurikulum Merdeka.</p>
+          <p className="text-slate-300 mt-1">Kelola kelas 10 (umum) dan kelas 11. Kelas 11: Rumpun A (2 kls), B (1 kls), C (2 kls).</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={loadData} disabled={loading}
-            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 p-0">
-            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 p-0"
+            title="Segarkan data">
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={() => handleOpenDialog()}
             className="bg-blue-600 hover:bg-blue-500 h-11 px-6 rounded-xl font-semibold text-white">
@@ -305,7 +312,10 @@ export default function AdminClasses() {
             <DialogTitle className="text-xl font-bold text-white">
               {formData.id ? 'Ubah Kelas' : 'Buat Kelas Baru'}
             </DialogTitle>
-            <p className="text-slate-300 text-xs mt-1">Sesuai Kurikulum Merdeka: Kelas 10 = Fase E, Kelas 11–12 = Fase F.</p>
+            <p className="text-slate-300 text-xs mt-1">
+              Kelas 10: Fase E — dibagi 10 kelas (X-1 s/d X-10), ~30 siswa/kelas.<br />
+              Kelas 11: Rumpun A Kesehatan (2 kls), B Teknik (1 kls), C Sosial (2 kls).
+            </p>
           </div>
 
           <div className="p-6 space-y-4">
@@ -351,13 +361,14 @@ export default function AdminClasses() {
             <div className="space-y-1.5">
               <Label className="text-slate-200 text-xs font-semibold">Nama Kelas</Label>
               <Input
-                placeholder="Contoh: X-MIPA-1"
+                placeholder="Contoh: X-1, XI-A-1, XII-C-2"
                 className="h-11 bg-slate-900 border-white/10 rounded-lg text-white placeholder:text-slate-500"
                 value={formData.name || ''}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
               <p className="text-[10px] text-slate-400">
-                Format umum: [Tingkat]-[Jurusan]-[No]. Contoh: X-MIPA-1, XI-IPS-2.
+                Kelas 10: X-1 s/d X-10 (tanpa pemisahan gender).<br />
+                Kelas 11: XI-A-1, XI-A-2 (Kesehatan) · XI-B-1 (Teknik) · XI-C-1, XI-C-2 (Sosial).
               </p>
             </div>
 
