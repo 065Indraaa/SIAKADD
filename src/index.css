@@ -48,38 +48,38 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
+    --background: oklch(0.985 0.003 264);
+    --foreground: oklch(0.15 0.01 264);
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
+    --card-foreground: oklch(0.15 0.01 264);
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.15 0.01 264);
+    --primary: oklch(0.52 0.22 264);
     --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.96 0.003 264);
+    --secondary-foreground: oklch(0.2 0.01 264);
+    --muted: oklch(0.95 0.003 264);
+    --muted-foreground: oklch(0.5 0.01 264);
+    --accent: oklch(0.94 0.01 264);
+    --accent-foreground: oklch(0.2 0.01 264);
     --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
+    --border: oklch(0.9 0.01 264);
+    --input: oklch(0.92 0.008 264);
+    --ring: oklch(0.52 0.22 264);
+    --chart-1: oklch(0.52 0.22 264);
+    --chart-2: oklch(0.6 0.18 180);
+    --chart-3: oklch(0.7 0.16 120);
+    --chart-4: oklch(0.7 0.2 60);
+    --chart-5: oklch(0.6 0.2 330);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar: oklch(0.98 0.003 264);
+    --sidebar-foreground: oklch(0.2 0.01 264);
+    --sidebar-primary: oklch(0.52 0.22 264);
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --sidebar-accent: oklch(0.94 0.005 264);
+    --sidebar-accent-foreground: oklch(0.2 0.01 264);
+    --sidebar-border: oklch(0.9 0.01 264);
+    --sidebar-ring: oklch(0.52 0.22 264);
 }
 
 .dark {
@@ -143,25 +143,39 @@
 
 /* ─── Design Tokens ─────────────────────────────────────── */
 .scola-sidebar {
-  background: linear-gradient(180deg, oklch(0.155 0.016 264) 0%, oklch(0.13 0.015 264) 100%);
-  border-right: 1px solid oklch(1 0 0 / 6%);
+  background: var(--sidebar);
+  border-right: 1px solid var(--sidebar-border);
 }
 
 .scola-card {
-  background: oklch(0.175 0.014 264 / 80%);
-  border: 1px solid oklch(1 0 0 / 7%);
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 16px;
   backdrop-filter: blur(12px);
+  color: var(--card-foreground);
+}
+
+.dark .scola-card {
+  background: oklch(0.175 0.014 264 / 80%);
+  border-color: oklch(1 0 0 / 7%);
 }
 
 .scola-stat-card {
-  background: oklch(0.175 0.014 264 / 60%);
-  border: 1px solid oklch(1 0 0 / 6%);
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 20px;
+  color: var(--card-foreground);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.dark .scola-stat-card {
+  background: oklch(0.175 0.014 264 / 60%);
+  border-color: oklch(1 0 0 / 6%);
 }
 .scola-stat-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 12px 40px oklch(0 0 0 / 15%);
+}
+.dark .scola-stat-card:hover {
   border-color: oklch(1 0 0 / 12%);
   box-shadow: 0 12px 40px oklch(0 0 0 / 30%);
 }
@@ -174,22 +188,22 @@
   border-radius: 10px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: oklch(0.62 0 0);
+  color: var(--muted-foreground);
   transition: all 0.15s ease;
   position: relative;
   text-decoration: none;
 }
 .scola-nav-item:hover {
-  color: oklch(0.92 0 0);
-  background: oklch(1 0 0 / 5%);
+  color: var(--foreground);
+  background: var(--accent);
 }
 .scola-nav-item.active {
-  color: #fff;
-  background: oklch(0.488 0.243 264.376);
-  box-shadow: 0 4px 16px oklch(0.488 0.243 264.376 / 25%);
+  color: var(--primary-foreground);
+  background: var(--primary);
+  box-shadow: 0 4px 16px oklch(0.52 0.22 264 / 25%);
 }
 .scola-nav-item.active svg {
-  color: #fff;
+  color: var(--primary-foreground);
 }
 
 .scola-badge-role {

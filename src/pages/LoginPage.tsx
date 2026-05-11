@@ -58,7 +58,7 @@ export default function LoginPage() {
           SCOLA
         </h2>
         <p className="mt-3 text-center text-slate-400 font-medium tracking-wide">
-          Sistem Informasi Akademik Berbasis Cloud
+          Sistem Informasi Akademik · SMAIT Nur Hidayah Sukoharjo
         </p>
       </div>
 
@@ -133,7 +133,7 @@ export default function LoginPage() {
 
               <div className="flex items-center justify-center gap-4 pt-4">
                 <div className="h-px bg-white/5 flex-1"></div>
-                <span className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-700">Demo Account</span>
+                <span className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-700">Akun Demo (setelah Seed)</span>
                 <div className="h-px bg-white/5 flex-1"></div>
               </div>
 
@@ -160,13 +160,17 @@ export default function LoginPage() {
                   SISWA
                 </button>
               </div>
+
+              <div className="text-[10px] text-slate-600 text-center leading-relaxed pt-2">
+                Jalankan <span className="text-blue-400 font-mono">Buat Data Demo</span> di menu admin → password default: <span className="text-yellow-400 font-mono">Admin@123</span>, <span className="text-yellow-400 font-mono">Guru@123</span>, <span className="text-yellow-400 font-mono">Siswa@123</span>
+              </div>
             </form>
           </CardContent>
         </Card>
       </div>
 
       <p className="mt-10 text-center text-xs text-slate-600 font-medium tracking-wide relative z-10 animate-fade-in delay-500">
-        &copy; 2026 SCOLA — Powered by Cloud Information System
+        &copy; 2026 SCOLA · Digunakan oleh SMAIT Nur Hidayah Sukoharjo
       </p>
     </div>
   );

@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -28,34 +30,38 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode,
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin/*" element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
+    <ThemeProvider>
+      <AuthProvider>
+        <NotificationProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
 
-          {/* Guru Routes */}
-          <Route path="/guru/*" element={
-            <ProtectedRoute allowedRoles={['guru']}>
-              <GuruDashboard />
-            </ProtectedRoute>
-          } />
+              {/* Admin Routes */}
+              <Route path="/admin/*" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
 
-          {/* Siswa Routes */}
-          <Route path="/siswa/*" element={
-            <ProtectedRoute allowedRoles={['siswa']}>
-              <SiswaDashboard />
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </Router>
-    </AuthProvider>
+              {/* Guru Routes */}
+              <Route path="/guru/*" element={
+                <ProtectedRoute allowedRoles={['guru']}>
+                  <GuruDashboard />
+                </ProtectedRoute>
+              } />
+
+              {/* Siswa Routes */}
+              <Route path="/siswa/*" element={
+                <ProtectedRoute allowedRoles={['siswa']}>
+                  <SiswaDashboard />
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </Router>
+        </NotificationProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

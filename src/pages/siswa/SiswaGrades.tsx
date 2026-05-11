@@ -29,8 +29,16 @@ export default function SiswaGrades() {
     loadGrades();
   }, [user?.siswaId, semester]);
 
+  const calculateNilaiAkhir = (g: any) => {
+    const nh = g.nilaiHarian || 0;
+    const uts = g.nilaiUts || 0;
+    const uas = g.nilaiUas || 0;
+    if (!nh && !uts && !uas) return 0;
+    return nh * 0.3 + uts * 0.3 + uas * 0.4;
+  };
+
   const avgIpk = grades.length > 0 
-    ? (grades.reduce((acc, curr) => acc + (curr.nilaiAkhir || 0), 0) / grades.length).toFixed(2)
+    ? (grades.reduce((acc, curr) => acc + calculateNilaiAkhir(curr), 0) / grades.length).toFixed(2)
     : '0.00';
 
   return (
@@ -68,7 +76,7 @@ export default function SiswaGrades() {
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <Select value={semester} onValueChange={setSemester}>
+              <Select value={semester} onValueChange={(v) => { if (v) setSemester(v); }}>
                 <SelectTrigger className="w-full sm:w-[220px] bg-slate-950/50 border-white/10 text-white rounded-2xl h-12 font-bold focus:ring-blue-600">
                   <SelectValue placeholder="Pilih Semester" />
                 </SelectTrigger>
@@ -114,9 +122,9 @@ export default function SiswaGrades() {
                       </TableCell>
                       <TableCell className="text-right pr-8">
                         <div className="inline-flex items-center gap-3">
-                          <div className={`h-2 w-2 rounded-full ${(grade.nilaiAkhir || 0) >= 80 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-amber-500'}`}></div>
-                          <span className={`text-2xl font-black tracking-tighter ${(grade.nilaiAkhir || 0) >= 80 ? 'text-emerald-400' : 'text-blue-400'}`}>
-                            {(grade.nilaiAkhir || 0).toFixed(1)}
+                          <div className={`h-2 w-2 rounded-full ${calculateNilaiAkhir(grade) >= 80 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-amber-500'}`}></div>
+                          <span className={`text-2xl font-black tracking-tighter ${calculateNilaiAkhir(grade) >= 80 ? 'text-emerald-400' : 'text-blue-400'}`}>
+                            {calculateNilaiAkhir(grade).toFixed(1)}
                           </span>
                         </div>
                       </TableCell>
@@ -136,7 +144,7 @@ export default function SiswaGrades() {
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Rata-rata IPK</p>
-                <p className="text-3xl font-black text-white tracking-tighter">{avgIpk} <span className="text-sm font-bold text-emerald-500 uppercase ml-2 tracking-widest">{parseFloat(avgIpk) >= 80 ? 'Excellent' : 'Good'}</span></p>
+                <p className="text-3xl font-black text-white tracking-tighter">{avgIpk} <span className="text-sm font-bold text-emerald-500 uppercase ml-2 tracking-widest">{parseFloat(avgIpk) >= 80 ? 'Sangat Baik' : 'Baik'}</span></p>
               </div>
             </div>
 

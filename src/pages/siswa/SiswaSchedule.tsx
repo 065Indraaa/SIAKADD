@@ -111,7 +111,7 @@ export default function SiswaSchedule() {
                       <TableCell colSpan={5} className="py-6 text-center">
                         <div className="inline-flex items-center gap-3 px-6 py-2 bg-indigo-600/20 rounded-full border border-indigo-500/20">
                           <Zap className="h-4 w-4 text-indigo-400 fill-indigo-400" />
-                          <span className="font-black text-indigo-300 uppercase tracking-[0.2em] text-[10px]">Break Session — Istirahat</span>
+                          <span className="font-black text-indigo-300 uppercase tracking-[0.2em] text-[10px]">Waktu Istirahat</span>
                         </div>
                       </TableCell>
                     ) : (

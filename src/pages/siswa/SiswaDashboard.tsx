@@ -185,7 +185,7 @@ function SiswaOverview() {
           <div className="mx-4 mb-4 p-4 rounded-xl bg-blue-600/8 border border-blue-500/15">
             <p className="text-xs font-semibold text-blue-300">💡 Info Akademik</p>
             <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-              Wali kelas: <span className="text-white font-medium">Drs. Sudirman</span>
+              Kelas: <span className="text-white font-medium">{user?.className || 'Belum diatur'}</span>
             </p>
             <p className="text-xs text-slate-400 leading-relaxed">
               Semester Genap 2024/2025 sedang berjalan.

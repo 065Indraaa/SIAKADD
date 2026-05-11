@@ -4,15 +4,37 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Edit2, Trash2, CheckCircle2, Info, RefreshCw, Loader2, Users, School, Layers } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Search, Plus, Edit2, Trash2, Info, RefreshCw, Loader2, Users, School, Layers } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LookupSelect } from '@/components/ui/lookup-select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { fetchKelas, addKelas, editKelas, fetchJurusan } from '@/lib/schoolService';
 import { fetchGuru, UserListItem } from '@/lib/userService';
 import { deleteKelas } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
+
+// Kurikulum Merdeka — Fase E (Kelas 10), Fase F (Kelas 11-12)
+const TINGKAT_OPTIONS = [
+  { value: '10', label: 'Kelas 10 — Fase E', hint: 'Kurikulum Merdeka' },
+  { value: '11', label: 'Kelas 11 — Fase F', hint: 'Kurikulum Merdeka' },
+  { value: '12', label: 'Kelas 12 — Fase F', hint: 'Kurikulum Merdeka' },
+];
+
+function generateTahunAjaran(): string[] {
+  const now = new Date();
+  const y = now.getFullYear();
+  return [`${y - 1}/${y}`, `${y}/${y + 1}`, `${y + 1}/${y + 2}`];
+}
+
+// Generate class name suggestions based on level + jurusan code
+function suggestKelasName(level: string, jurusanKode: string, roman: boolean = true) {
+  const romanMap: Record<string, string> = { '10': 'X', '11': 'XI', '12': 'XII' };
+  const prefix = roman ? romanMap[level] : level;
+  if (!jurusanKode) return `${prefix}-`;
+  return `${prefix}-${jurusanKode}-`;
+}
 
 export default function AdminClasses() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,7 +57,7 @@ export default function AdminClasses() {
       const [kelasData, guruData, jurusanData] = await Promise.all([
         fetchKelas(),
         fetchGuru(),
-        fetchJurusan()
+        fetchJurusan(),
       ]);
       setClasses(kelasData);
       setGuruList(guruData);
@@ -49,10 +71,10 @@ export default function AdminClasses() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const filteredClasses = classes.filter(cls => 
-    cls.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredClasses = classes.filter(cls =>
+    cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     cls.homeroom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cls.jurusan.toLowerCase().includes(searchTerm.toLowerCase())
+    (cls.jurusan || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleOpenDialog = (cls: any = null) => {
@@ -63,173 +85,209 @@ export default function AdminClasses() {
         name: cls.name,
         level: String(cls.level),
         waliKelasId: cls.homeroomId || '',
-        jurusanId: cls.jurusanId || ''
+        jurusanId: cls.jurusanId || '',
+        tahunAjaran: cls.tahunAjaran || generateTahunAjaran()[1],
       });
     } else {
-      setFormData({ name: '', level: '10', waliKelasId: '', jurusanId: '' });
+      setFormData({
+        name: '',
+        level: '10',
+        waliKelasId: '',
+        jurusanId: '',
+        tahunAjaran: generateTahunAjaran()[1],
+      });
     }
     setIsDialogOpen(true);
   };
 
+  // Auto-suggest name when level/jurusan changes
+  const updateName = (level: string, jurusanId: string) => {
+    const jurusan = jurusanList.find(j => j.id === jurusanId);
+    const suggestion = suggestKelasName(level, jurusan?.kode || '');
+    setFormData((prev: any) => ({ ...prev, level, jurusanId, name: suggestion }));
+  };
+
   const handleSaveClass = async () => {
     if (!formData.name || !formData.level) {
-      setError("Nama kelas dan tingkat wajib diisi.");
+      setError('Nama kelas dan tingkat wajib diisi.');
       return;
     }
     setSaving(true);
     setError(null);
     try {
+      const payload = {
+        name: formData.name,
+        level: formData.level,
+        waliKelasId: formData.waliKelasId || undefined,
+        jurusanId: formData.jurusanId || undefined,
+      };
       if (formData.id) {
-        await editKelas(formData.id, {
-          name: formData.name,
-          level: formData.level,
-          waliKelasId: formData.waliKelasId || undefined,
-          jurusanId: formData.jurusanId || undefined,
-        });
+        await editKelas(formData.id, payload);
       } else {
-        await addKelas({
-          name: formData.name,
-          level: formData.level,
-          waliKelasId: formData.waliKelasId || undefined,
-          jurusanId: formData.jurusanId || undefined,
-        });
+        await addKelas(payload);
       }
       setIsDialogOpen(false);
-      setTimeout(() => {
-        loadData();
-      }, 500);
+      await loadData();
     } catch (e: any) {
-      setError(e.message || "Gagal menyimpan kelas.");
+      setError(e.message || 'Gagal menyimpan kelas.');
     } finally {
       setSaving(false);
     }
   };
 
   const confirmDelete = (id: string) => { setDeletingId(id); setIsAlertOpen(true); };
-  
+
   const handleDelete = async () => {
     if (!deletingId) return;
     try {
       await deleteKelas(dataConnect, { id: deletingId });
-      setTimeout(() => {
-        loadData();
-      }, 500);
+      await loadData();
     } catch (e: any) {
-      setError(e.message || "Gagal menghapus kelas.");
+      setError(e.message || 'Gagal menghapus kelas.');
     }
     setIsAlertOpen(false);
     setDeletingId(null);
   };
 
+  const jurusanItems = jurusanList.map(j => ({
+    value: j.id,
+    label: `${j.kode} — ${j.nama}`,
+    hint: j.nama,
+  }));
+
+  const guruItems = guruList.map(g => ({
+    value: g.guruId!,
+    label: g.name,
+    hint: g.nip ? `NIP ${g.nip}` : undefined,
+  }));
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-500">
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-4xl font-black tracking-tighter text-white font-heading">Struktur Kelas</h2>
-          <p className="text-slate-400 font-medium tracking-tight">Manajemen ruang lingkup belajar dan penugasan wali kelas.</p>
+          <h2 className="text-3xl font-bold text-white">Manajemen Kelas</h2>
+          <p className="text-slate-300 mt-1">Kelola ruang belajar dan penugasan wali kelas sesuai Kurikulum Merdeka.</p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-3">
           <Button variant="outline" onClick={loadData} disabled={loading}
-            className="w-12 h-12 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 transition-all active:scale-95">
+            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 p-0">
             <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
           </Button>
-          <Button onClick={() => handleOpenDialog()} className="bg-blue-600 hover:bg-blue-500 h-12 px-6 rounded-2xl font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-all text-white flex-1 md:flex-none">
+          <Button onClick={() => handleOpenDialog()}
+            className="bg-blue-600 hover:bg-blue-500 h-11 px-6 rounded-xl font-semibold text-white">
             <Plus className="mr-2 h-5 w-5" /> Buat Kelas
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         {[
-           { label: 'Total Kelas', val: classes.length, icon: School, color: 'text-blue-400' },
-           { label: 'Tingkat Aktif', val: '10, 11, 12', icon: Layers, color: 'text-emerald-400' },
-           { label: 'Guru Wali', val: classes.filter(c => c.homeroomId).length, icon: Users, color: 'text-purple-400' },
-         ].map((stat, i) => (
-           <Card key={i} className="bg-slate-900/40 border-white/5 rounded-3xl shadow-xl overflow-hidden relative group">
-              <div className={`absolute top-0 right-0 w-24 h-24 ${stat.color} opacity-5 -mr-10 -mt-10 blur-2xl group-hover:opacity-20 transition-opacity`}></div>
-              <CardContent className="p-6 flex items-center gap-5">
-                 <div className={`h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center ${stat.color}`}>
-                    <stat.icon className="h-7 w-7" />
-                 </div>
-                 <div>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{stat.label}</p>
-                    <p className="text-2xl font-black text-white tracking-tight">{stat.val}</p>
-                 </div>
-              </CardContent>
-           </Card>
-         ))}
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[
+          { label: 'Total Kelas', val: classes.length, icon: School, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+          { label: 'Tingkat Aktif', val: [...new Set(classes.map(c => c.level))].sort().join(', ') || '-', icon: Layers, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+          { label: 'Wali Kelas Ter-assign', val: classes.filter(c => c.homeroomId).length, icon: Users, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+        ].map((stat, i) => (
+          <Card key={i} className="bg-slate-900/60 border-white/10 rounded-2xl">
+            <CardContent className="p-5 flex items-center gap-4">
+              <div className={`h-12 w-12 rounded-xl ${stat.bg} flex items-center justify-center ${stat.color}`}>
+                <stat.icon className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">{stat.label}</p>
+                <p className="text-2xl font-bold text-white mt-0.5">{stat.val}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {error && (
-        <div className="p-4 rounded-2xl bg-red-900/20 border border-red-500/20 text-red-400 text-sm flex items-center gap-3 animate-in slide-in-from-top-2">
+        <div className="p-4 rounded-xl bg-red-900/30 border border-red-500/30 text-red-300 text-sm flex items-center gap-3">
           <Info className="h-5 w-5 flex-shrink-0" /> {error}
         </div>
       )}
 
-      <Card className="bg-slate-900/40 backdrop-blur-3xl border border-white/5 shadow-2xl rounded-[2.5rem] overflow-hidden">
-        <CardHeader className="p-8 border-b border-white/5">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <CardTitle className="text-white font-heading text-2xl font-black">Daftar Inventaris Ruang</CardTitle>
+      {/* Table */}
+      <Card className="bg-slate-900/60 border-white/10 rounded-2xl overflow-hidden">
+        <CardHeader className="p-5 border-b border-white/10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <CardTitle className="text-white text-lg font-bold">Daftar Kelas Aktif</CardTitle>
             <div className="relative w-full md:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-              <Input placeholder="Cari nama kelas atau wali..."
-                className="pl-12 h-12 bg-slate-950/50 border-white/5 rounded-2xl text-white placeholder:text-slate-600"
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input placeholder="Cari nama kelas, wali, atau jurusan..."
+                className="pl-10 h-11 bg-slate-950 border-white/10 rounded-xl text-white placeholder:text-slate-400"
                 value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-white/5">
-              <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead className="p-6 text-slate-500 font-bold">Nama Kelas</TableHead>
-                <TableHead className="text-slate-500 font-bold">Klasifikasi</TableHead>
-                <TableHead className="text-slate-500 font-bold">Jurusan</TableHead>
-                <TableHead className="text-slate-500 font-bold">Penugasan Wali</TableHead>
-                <TableHead className="text-right text-slate-500 font-bold pr-8">Operasi</TableHead>
+            <TableHeader className="bg-slate-950/50">
+              <TableRow className="border-white/10 hover:bg-transparent">
+                <TableHead className="p-5 text-slate-200 font-semibold text-xs uppercase tracking-wider">Nama Kelas</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider">Tingkat / Fase</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider">Jurusan</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider">Wali Kelas</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider">Tahun Ajaran</TableHead>
+                <TableHead className="text-right text-slate-200 font-semibold text-xs uppercase tracking-wider pr-6">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-32"><Loader2 className="h-10 w-10 animate-spin text-blue-500 mx-auto opacity-50" /></TableCell></TableRow>
-              ) : filteredClasses.length > 0 ? filteredClasses.map((cls) => (
-                <TableRow key={cls.id} className="border-white/5 hover:bg-white/5 group transition-colors">
-                  <TableCell className="p-6">
-                    <span className="font-black text-xl text-blue-400 tracking-tighter">{cls.name}</span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="h-7 px-3 bg-white/5 border-white/10 text-slate-300 rounded-lg font-bold">
-                       Grade {cls.level}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-slate-300 font-medium">
-                    {cls.jurusan || <span className="text-slate-600 text-[10px] uppercase font-bold tracking-widest italic">General</span>}
-                  </TableCell>
-                  <TableCell>
-                    {cls.homeroom !== 'Belum Diatur' ? (
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                        <span className="text-slate-300 font-medium">{cls.homeroom}</span>
+                <TableRow><TableCell colSpan={6} className="text-center py-16">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto" />
+                </TableCell></TableRow>
+              ) : filteredClasses.length > 0 ? filteredClasses.map((cls) => {
+                const faseLabel = cls.level === '10' ? 'Fase E' : (cls.level === '11' || cls.level === '12') ? 'Fase F' : '-';
+                return (
+                  <TableRow key={cls.id} className="border-white/10 hover:bg-white/5 group">
+                    <TableCell className="p-5">
+                      <span className="font-bold text-lg text-blue-300">{cls.name}</span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <Badge variant="outline" className="h-6 px-2 bg-white/5 border-white/20 text-white rounded-md font-semibold w-fit">
+                          Kelas {cls.level}
+                        </Badge>
+                        <span className="text-[11px] text-slate-400 font-medium">{faseLabel}</span>
                       </div>
-                    ) : (
-                      <span className="text-slate-600 text-xs font-medium">Belum ditugaskan</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right pr-8">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(cls)} className="h-10 w-10 text-blue-400 hover:text-white hover:bg-blue-600 rounded-xl">
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => confirmDelete(cls.id)} className="h-10 w-10 text-red-400 hover:text-white hover:bg-red-600 rounded-xl">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )) : (
-                <TableRow><TableCell colSpan={5} className="text-center py-40">
-                  <div className="h-24 w-24 bg-slate-900 rounded-[2rem] mx-auto flex items-center justify-center text-4xl mb-6 opacity-30">🏫</div>
-                  <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Kosong • Tidak ada ruang kelas ditemukan</p>
+                    </TableCell>
+                    <TableCell className="text-slate-200 font-medium">
+                      {cls.jurusan || <span className="text-slate-500 italic text-sm">Belum diatur</span>}
+                    </TableCell>
+                    <TableCell>
+                      {cls.homeroom && cls.homeroom !== 'Belum Diatur' ? (
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                          <span className="text-slate-200 font-medium">{cls.homeroom}</span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-500 italic text-sm">Belum ditugaskan</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-slate-300 text-sm font-medium">
+                      {cls.tahunAjaran || '-'}
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(cls)}
+                          className="h-9 w-9 text-blue-400 hover:text-white hover:bg-blue-600 rounded-lg">
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => confirmDelete(cls.id)}
+                          className="h-9 w-9 text-red-400 hover:text-white hover:bg-red-600 rounded-lg">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              }) : (
+                <TableRow><TableCell colSpan={6} className="text-center py-16">
+                  <School className="h-12 w-12 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-300 font-semibold">Belum ada kelas terdaftar</p>
+                  <p className="text-slate-400 text-sm mt-1">Klik "Buat Kelas" untuk menambahkan kelas baru.</p>
                 </TableCell></TableRow>
               )}
             </TableBody>
@@ -237,86 +295,126 @@ export default function AdminClasses() {
         </CardContent>
       </Card>
 
-      <Dialog open={isDialogOpen} onOpenChange={(o) => { setIsDialogOpen(o); if(!o) setError(null); }}>
-        <DialogContent className="bg-slate-950 border border-white/10 max-w-md rounded-[2.5rem] p-0 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-           <div className="p-8 border-b border-white/5 bg-white/5">
-              <DialogTitle className="text-2xl font-black tracking-tight text-white font-heading">
-                {formData.id ? 'Modifikasi Ruang' : 'Buat Ruang Baru'}
-              </DialogTitle>
-              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Definisikan atribut dasar kelas akademik Anda.</p>
-           </div>
-           
-           <div className="p-8 space-y-6">
-              <div className="space-y-2">
-                <Label className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] ml-1">Nama Identitas Kelas</Label>
-                <Input placeholder="Contoh: XII-MIPA-1" className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold text-lg" 
-                  value={formData.name || ''} onChange={(e) => setFormData({...formData, name: e.target.value})} />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] ml-1">Grade / Tingkat</Label>
-                  <Select value={formData.level} onValueChange={(val) => setFormData({...formData, level: val})}>
-                    <SelectTrigger className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold"><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-white/10">
-                      <SelectItem value="10">Kelas 10</SelectItem>
-                      <SelectItem value="11">Kelas 11</SelectItem>
-                      <SelectItem value="12">Kelas 12</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] ml-1">Jurusan / Kompetensi Keahlian</Label>
-                  <Select key={`jurusan-${formData.id}-${jurusanList.length}`} value={formData.jurusanId || 'none'} onValueChange={(val) => setFormData({...formData, jurusanId: val === 'none' ? '' : val})}>
-                    <SelectTrigger className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold">
-                      <SelectValue placeholder="Pilih..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-white/10">
-                      <SelectItem value="none" className="text-slate-500">General</SelectItem>
-                      {jurusanList.map(j => <SelectItem key={j.id} value={j.id}>{j.nama}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+      {/* Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(o) => { setIsDialogOpen(o); if (!o) setError(null); }}>
+        <DialogContent className="bg-slate-950 border border-white/10 max-w-md rounded-2xl p-0 overflow-hidden">
+          <div className="p-6 border-b border-white/10 bg-white/5">
+            <DialogTitle className="text-xl font-bold text-white">
+              {formData.id ? 'Ubah Kelas' : 'Buat Kelas Baru'}
+            </DialogTitle>
+            <p className="text-slate-300 text-xs mt-1">Sesuai Kurikulum Merdeka: Kelas 10 = Fase E, Kelas 11–12 = Fase F.</p>
+          </div>
 
-              <div className="space-y-2">
-                <Label className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] ml-1">Wali Kelas Penanggung Jawab</Label>
-                <Select key={`guru-${formData.id}-${guruList.length}`} value={formData.waliKelasId || 'none'} onValueChange={(val) => setFormData({...formData, waliKelasId: val === 'none' ? '' : val})}>
-                  <SelectTrigger className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold">
-                    <SelectValue placeholder={guruList.length > 0 ? "Pilih Pengajar" : "Memuat..."} />
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-slate-200 text-xs font-semibold">Tingkat / Fase</Label>
+                <Select value={formData.level || '10'} onValueChange={(v) => updateName(v || '10', formData.jurusanId || '')}>
+                  <SelectTrigger className="h-11 bg-slate-900 border-white/10 rounded-lg text-white">
+                    <SelectValue>
+                      {(v: any) => {
+                        const opt = TINGKAT_OPTIONS.find(o => o.value === v);
+                        return opt?.label || 'Pilih tingkat';
+                      }}
+                    </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-white/10 max-h-48">
-                    <SelectItem value="none" className="text-slate-500">-- Biarkan Kosong --</SelectItem>
-                    {guruList.map(g => (
-                      <SelectItem key={g.guruId} value={g.guruId!} className="focus:bg-slate-800 rounded-xl h-12">
-                        {g.name} {g.nip ? `(NIP ${g.nip.slice(-4)})` : ''}
+                  <SelectContent className="bg-slate-900 border-white/10">
+                    {TINGKAT_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value} className="text-white">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{opt.label}</span>
+                          <span className="text-[10px] text-slate-400">{opt.hint}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-           </div>
 
-           <div className="p-8 bg-white/5 border-t border-white/5 flex gap-3">
-              <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="flex-1 h-14 rounded-2xl text-slate-400 font-bold hover:text-white">Batal</Button>
-              <Button onClick={handleSaveClass} disabled={saving} className="flex-1 h-14 rounded-2xl bg-blue-600 hover:bg-blue-500 font-bold shadow-xl shadow-blue-600/20 text-white">
-                {saving ? <Loader2 className="h-6 w-6 animate-spin" /> : 'Selesaikan'}
-              </Button>
-           </div>
+              <div className="space-y-1.5">
+                <Label className="text-slate-200 text-xs font-semibold">Jurusan</Label>
+                <LookupSelect
+                  value={formData.jurusanId || ''}
+                  onChange={(v) => updateName(formData.level || '10', v)}
+                  items={jurusanItems}
+                  placeholder={jurusanItems.length ? 'Pilih jurusan' : 'Memuat...'}
+                  allowEmpty
+                  emptyLabel="Tanpa Jurusan"
+                  className="h-11 bg-slate-900 border-white/10 rounded-lg text-white"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-slate-200 text-xs font-semibold">Nama Kelas</Label>
+              <Input
+                placeholder="Contoh: X-MIPA-1"
+                className="h-11 bg-slate-900 border-white/10 rounded-lg text-white placeholder:text-slate-500"
+                value={formData.name || ''}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+              <p className="text-[10px] text-slate-400">
+                Format umum: [Tingkat]-[Jurusan]-[No]. Contoh: X-MIPA-1, XI-IPS-2.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-slate-200 text-xs font-semibold">Tahun Ajaran</Label>
+              <Select value={formData.tahunAjaran || generateTahunAjaran()[1]} onValueChange={(v) => setFormData({ ...formData, tahunAjaran: v || generateTahunAjaran()[1] })}>
+                <SelectTrigger className="h-11 bg-slate-900 border-white/10 rounded-lg text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-white/10">
+                  {generateTahunAjaran().map(ta => (
+                    <SelectItem key={ta} value={ta} className="text-white">{ta}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-slate-200 text-xs font-semibold">Wali Kelas</Label>
+              <LookupSelect
+                value={formData.waliKelasId || ''}
+                onChange={(v) => setFormData({ ...formData, waliKelasId: v })}
+                items={guruItems}
+                placeholder={guruItems.length ? 'Pilih guru' : 'Belum ada guru'}
+                allowEmpty
+                emptyLabel="Belum Ditentukan"
+                className="h-11 bg-slate-900 border-white/10 rounded-lg text-white"
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-lg bg-red-900/30 border border-red-500/30 text-red-300 text-sm">
+                {error}
+              </div>
+            )}
+          </div>
+
+          <div className="p-6 bg-white/5 border-t border-white/10 flex gap-3">
+            <Button variant="ghost" onClick={() => setIsDialogOpen(false)}
+              className="flex-1 h-11 rounded-lg text-slate-200 hover:bg-white/5">Batal</Button>
+            <Button onClick={handleSaveClass} disabled={saving}
+              className="flex-1 h-11 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">
+              {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : formData.id ? 'Simpan Perubahan' : 'Buat Kelas'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
+      {/* Delete confirm */}
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent className="bg-slate-950 border border-red-500/10 rounded-[2.5rem] shadow-2xl p-4">
-          <AlertDialogHeader className="pb-4">
-            <AlertDialogTitle className="text-2xl font-black text-white font-heading">Terminasi Kelas?</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-400">
-              Menghapus entitas kelas akan memutus relasi <span className="text-red-400 font-bold">seluruh siswa</span> di dalamnya. Data historis mungkin akan terpengaruh.
+        <AlertDialogContent className="bg-slate-950 border border-red-500/20 rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-white">Hapus Kelas?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-300">
+              Menghapus kelas akan memutus relasi semua siswa di dalamnya. Pastikan siswa sudah dipindahkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3">
-            <AlertDialogCancel className="h-12 border-white/5 bg-white/5 text-slate-400 rounded-2xl px-6">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="h-12 bg-red-600 hover:bg-red-500 text-white font-bold rounded-2xl px-6 shadow-xl shadow-red-600/20">Konfirmasi Hapus</AlertDialogAction>
+            <AlertDialogCancel className="h-11 border-white/10 bg-white/5 text-slate-200 rounded-lg px-5">Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="h-11 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-lg px-5">Konfirmasi Hapus</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

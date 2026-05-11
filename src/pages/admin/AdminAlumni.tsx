@@ -42,40 +42,54 @@ export default function AdminAlumni() {
 
   const filteredAlumni = alumni.filter(alum => 
     alum.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    alum.year.toString().includes(searchTerm)
+    (alum.gradYear || '').toString().includes(searchTerm)
   );
 
   const handleOpenDialog = (alum: any = null) => {
     if (alum) {
       setEditingAlumni(alum);
-      setFormData(alum);
+      // Normalize field names for the form
+      setFormData({
+        ...alum,
+        year: alum.gradYear,
+        major: alum.position,
+      });
     } else {
       setEditingAlumni(null);
-      setFormData({ name: '', year: new Date().getFullYear(), status: 'Kuliah', institution: '', major: '' });
+      setFormData({ name: '', year: new Date().getFullYear(), status: 'Kuliah', institution: '', major: '', nis: '' });
     }
     setIsDialogOpen(true);
   };
 
   const handleSaveAlumni = async () => {
+    if (!formData.name?.trim()) { alert('Nama wajib diisi.'); return; }
     setSaving(true);
     try {
       if (editingAlumni) {
-        await editAlumniData(editingAlumni.id, formData);
+        await editAlumniData(editingAlumni.id, {
+          status: formData.status,
+          institution: formData.institution,
+          position: formData.major,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          achievements: formData.achievements,
+        });
       } else {
         await addAlumniData({
-          ...formData,
-          nis: `NIS-${Math.floor(Math.random() * 10000)}`, // temporary NIS if not provided
+          name: formData.name,
+          nis: formData.nis || `ALM-${Date.now().toString().slice(-6)}`,
           gradYear: formData.year,
-          position: formData.major
+          status: formData.status,
+          institution: formData.institution,
+          position: formData.major,
         });
       }
       setIsDialogOpen(false);
-      setTimeout(() => {
-        loadData();
-      }, 500);
-    } catch (e) {
+      await loadData();
+    } catch (e: any) {
       console.error(e);
-      alert('Gagal menyimpan alumni');
+      alert('Gagal menyimpan alumni: ' + (e.message || 'Error'));
     } finally {
       setSaving(false);
     }
@@ -154,17 +168,21 @@ export default function AdminAlumni() {
                   filteredAlumni.map((alum) => (
                     <TableRow key={alum.id} className="border-white/5 hover:bg-white/5 transition-colors">
                       <TableCell className="font-medium text-white">{alum.name}</TableCell>
-                      <TableCell className="text-slate-300">{alum.year || alum.gradYear}</TableCell>
+                      <TableCell className="text-slate-300">{alum.gradYear}</TableCell>
                       <TableCell>
-                        <Badge className={alum.status === 'Kuliah' ? 'bg-blue-600/20 text-blue-400 border-blue-500/20' : 'bg-emerald-600/20 text-emerald-400 border-emerald-500/20'}>
+                        <Badge className={
+                          alum.status === 'Kuliah' ? 'bg-blue-600/20 text-blue-400 border-blue-500/20' :
+                          alum.status === 'Kerja' ? 'bg-emerald-600/20 text-emerald-400 border-emerald-500/20' :
+                          'bg-slate-600/20 text-slate-400 border-slate-500/20'
+                        }>
                           {alum.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-slate-300">{alum.institution}</TableCell>
-                      <TableCell className="text-slate-300">{alum.major || alum.position}</TableCell>
+                      <TableCell className="text-slate-300">{alum.institution || '-'}</TableCell>
+                      <TableCell className="text-slate-300">{alum.position || '-'}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog({ ...alum, year: alum.gradYear, major: alum.position })} className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/20">
+                          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(alum)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/20">
                             <Edit2 className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="icon" onClick={() => confirmDelete(alum.id)} className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
@@ -188,7 +206,7 @@ export default function AdminAlumni() {
   <DialogContent className="bg-slate-900 border border-white/10 text-white sm:max-w-md">
     <DialogHeader>
       <DialogTitle className="text-white">
-        {editingAlumni ? 'Edit Alumni' : 'Tambah Alumni'}
+        {editingAlumni ? 'Ubah Alumni' : 'Tambah Alumni'}
       </DialogTitle>
     </DialogHeader>
 
@@ -227,7 +245,7 @@ export default function AdminAlumni() {
           <SelectContent className="bg-slate-900 border-white/10 text-white">
             <SelectItem value="Kuliah" className="text-white hover:bg-slate-800">Kuliah</SelectItem>
             <SelectItem value="Kerja" className="text-white hover:bg-slate-800">Kerja</SelectItem>
-            <SelectItem value="Wirausaha" className="text-white hover:bg-slate-800">Wirausaha</SelectItem>
+            <SelectItem value="Lainnya" className="text-white hover:bg-slate-800">Lainnya</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -263,9 +281,10 @@ export default function AdminAlumni() {
       </Button>
       <Button
         onClick={handleSaveAlumni}
+        disabled={saving}
         className="bg-blue-600 hover:bg-blue-500 text-white"
       >
-        Simpan
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Simpan'}
       </Button>
     </DialogFooter>
   </DialogContent>

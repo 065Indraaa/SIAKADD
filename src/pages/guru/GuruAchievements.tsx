@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LookupSelect } from '@/components/ui/lookup-select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Search, Plus, Loader2, RefreshCw, Trophy, Info, Trash2, Award, Calendar, TextQuote, Star } from 'lucide-react';
 import { addPrestasi } from '@/lib/schoolService';
@@ -127,7 +128,7 @@ export default function GuruAchievements() {
         <div>
            <div className="flex items-center gap-2 mb-2">
               <Star className="h-4 w-4 text-emerald-500 fill-emerald-500" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Hall of Fame</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Daftar Prestasi</span>
            </div>
           <h2 className="text-4xl font-black tracking-tighter text-white font-heading underline decoration-emerald-600/30 underline-offset-8 italic">Prestasi Siswa</h2>
           <p className="text-slate-400 font-medium mt-3">Arsip penghargaan dan pencapaian luar biasa siswa SMA.</p>
@@ -227,14 +228,17 @@ export default function GuruAchievements() {
            <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Penerima Prestasi *</Label>
-                <Select value={formData.siswaId} onValueChange={(v) => setFormData({...formData, siswaId: v})}>
-                  <SelectTrigger className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold">
-                    <SelectValue placeholder="Pilih Siswa" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-white/10 max-h-48 rounded-2xl">
-                    {allSiswa.map(s => <SelectItem key={s.siswaId} value={s.siswaId!} className="rounded-xl h-12">{s.name} ({s.nis})</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <LookupSelect
+                  value={formData.siswaId}
+                  onChange={(v) => setFormData({ ...formData, siswaId: v })}
+                  items={allSiswa.map(s => ({
+                    value: s.siswaId!,
+                    label: s.name,
+                    hint: `NIS ${s.nis || '-'}${s.className ? ' · ' + s.className : ''}`,
+                  }))}
+                  placeholder="Pilih Siswa"
+                  className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold"
+                />
               </div>
 
               <div className="space-y-2">

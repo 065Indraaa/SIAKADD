@@ -32,7 +32,7 @@ export default function SiswaAchievements() {
         <div>
           <div className="flex items-center gap-2 mb-3">
              <Trophy className="h-4 w-4 text-amber-400" />
-             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Excellence & Achievements</span>
+             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Pencapaian Istimewa</span>
           </div>
           <h2 className="text-5xl font-black tracking-tighter text-white font-heading leading-none">
             Prestasi Saya
@@ -122,4 +122,4 @@ export default function SiswaAchievements() {
       </div>
     </div>
   );
-}
+}

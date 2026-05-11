@@ -36,8 +36,12 @@ query GetPenggunaByEmail($email: String!) @auth(level: PUBLIC) {
   penggunas(where: { email: { eq: $email } }) {
     id
     email
+    password
     nama
     peran
+    telepon
+    alamat
+    fotoUrl
   }
 }
 

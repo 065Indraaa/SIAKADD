@@ -1,266 +1,412 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { LookupSelect } from '@/components/ui/lookup-select';
+import { Plus, Trash2, Loader2, RefreshCw, Calendar, Clock, MapPin, BookOpen, Info } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { fetchKelas, fetchJadwalKelas, addJadwalData, removeJadwalData, fetchMataPelajaran } from '@/lib/schoolService';
 import { fetchGuru } from '@/lib/userService';
-import { Loader2, RefreshCw } from 'lucide-react';
+
+const HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+const SEMESTER = ['Ganjil', 'Genap'];
+
+function generateTahunAjaran(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  // Semester Ganjil: Juli-Desember, Genap: Januari-Juni
+  return now.getMonth() >= 6 ? `${y}/${y + 1}` : `${y - 1}/${y}`;
+}
 
 export default function AdminSchedules() {
   const [kelasList, setKelasList] = useState<any[]>([]);
   const [guruList, setGuruList] = useState<any[]>([]);
   const [mapelList, setMapelList] = useState<any[]>([]);
   const [kelasFilter, setKelasFilter] = useState('');
-  const [hariFilter, setHariFilter] = useState('Senin');
+  const [hariFilter, setHariFilter] = useState<'semua' | string>('semua');
+  const [semesterFilter, setSemesterFilter] = useState('Ganjil');
+  const [tahunAjaran, setTahunAjaran] = useState(generateTahunAjaran());
 
   const [schedules, setSchedules] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState<any>({});
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const loadInitialData = async () => {
+  const loadMetadata = useCallback(async () => {
     try {
-      const [kelasData, guruData, mapelData] = await Promise.all([fetchKelas(), fetchGuru(), fetchMataPelajaran()]);
+      const [kelasData, guruData, mapelData] = await Promise.all([
+        fetchKelas(), fetchGuru(), fetchMataPelajaran(),
+      ]);
       setKelasList(kelasData);
       setGuruList(guruData);
       setMapelList(mapelData);
-      if (kelasData.length > 0) {
+      if (kelasData.length > 0 && !kelasFilter) {
         setKelasFilter(kelasData[0].id);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      setError(e.message || 'Gagal memuat data dasar.');
     }
-  };
+  }, [kelasFilter]);
 
-  React.useEffect(() => {
-    loadInitialData();
-  }, []);
+  useEffect(() => { loadMetadata(); }, [loadMetadata]);
 
-  const loadSchedules = async () => {
+  const loadSchedules = useCallback(async () => {
     if (!kelasFilter) return;
     setLoading(true);
+    setError(null);
     try {
-      const data = await fetchJadwalKelas(kelasFilter);
+      const data = await fetchJadwalKelas(kelasFilter, tahunAjaran);
       setSchedules(data);
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      setError(e.message || 'Gagal memuat jadwal.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [kelasFilter, tahunAjaran]);
 
-  React.useEffect(() => {
-    loadSchedules();
-  }, [kelasFilter]);
+  useEffect(() => { loadSchedules(); }, [loadSchedules]);
 
-  const filteredSchedules = schedules.filter(s => s.hari.toLowerCase() === hariFilter.toLowerCase());
+  const filteredSchedules = schedules
+    .filter(s => hariFilter === 'semua' || s.hari.toLowerCase() === hariFilter.toLowerCase())
+    .filter(s => semesterFilter === 'semua' || s.semester === semesterFilter)
+    .sort((a, b) => {
+      const hariOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const hariDiff = hariOrder.indexOf(a.hari) - hariOrder.indexOf(b.hari);
+      if (hariDiff !== 0) return hariDiff;
+      return (a.jamMulai || '').localeCompare(b.jamMulai || '');
+    });
 
   const handleOpenDialog = () => {
-    setFormData({ kelasId: kelasFilter, hari: hariFilter, jamMulai: '', jamSelesai: '', mataPelajaranId: '', guruId: '', ruang: '' });
+    setFormData({
+      kelasId: kelasFilter,
+      hari: hariFilter === 'semua' ? 'Senin' : hariFilter,
+      jamMulai: '07:00',
+      jamSelesai: '08:30',
+      mataPelajaranId: '',
+      guruId: '',
+      ruangan: '',
+      semester: semesterFilter === 'semua' ? 'Ganjil' : semesterFilter,
+      tahunAjaran,
+    });
+    setError(null);
     setIsDialogOpen(true);
   };
 
   const handleSaveSchedule = async () => {
+    if (!formData.kelasId || !formData.mataPelajaranId || !formData.guruId) {
+      setError('Kelas, mata pelajaran, dan guru wajib dipilih.');
+      return;
+    }
+    if (!formData.jamMulai || !formData.jamSelesai) {
+      setError('Jam mulai dan selesai wajib diisi.');
+      return;
+    }
     setSaving(true);
+    setError(null);
     try {
       await addJadwalData(formData);
       setIsDialogOpen(false);
-      setTimeout(() => {
-        loadSchedules();
-      }, 500);
-    } catch (e) {
-      console.error(e);
-      alert('Gagal menyimpan jadwal');
+      await loadSchedules();
+    } catch (e: any) {
+      setError(e.message || 'Gagal menyimpan jadwal.');
     } finally {
       setSaving(false);
     }
   };
 
-  const confirmDelete = (id: string) => {
-    setDeletingId(id);
-    setIsAlertOpen(true);
-  };
-
+  const confirmDelete = (id: string) => { setDeletingId(id); setIsAlertOpen(true); };
   const handleDelete = async () => {
-    if (deletingId) {
-      try {
-        await removeJadwalData(deletingId);
-        setTimeout(() => {
-          loadSchedules();
-        }, 500);
-      } catch (e) {
-        console.error(e);
-        alert('Gagal menghapus jadwal');
-      }
+    if (!deletingId) return;
+    try {
+      await removeJadwalData(deletingId);
+      await loadSchedules();
+    } catch (e: any) {
+      alert('Gagal menghapus: ' + (e.message || 'Error'));
     }
     setIsAlertOpen(false);
     setDeletingId(null);
   };
 
+  const currentKelasName = kelasList.find(k => k.id === kelasFilter)?.name || '-';
+
+  const kelasItems = kelasList.map(k => ({ value: k.id, label: k.name, hint: `Kelas ${k.level}` }));
+  const mapelItems = mapelList.map(m => ({ value: m.id, label: `${m.kode} — ${m.nama}`, hint: m.nama }));
+  const guruItems = guruList.map(g => ({
+    value: g.guruId!,
+    label: g.name,
+    hint: g.specialization ? `${g.specialization}` : (g.nip ? `NIP ${g.nip}` : undefined),
+  }));
+
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6 text-slate-100">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-white">Jadwal Pelajaran</h2>
-          <p className="text-slate-400">Atur penjadwalan mata pelajaran untuk masing-masing kelas.</p>
+          <h2 className="text-3xl font-bold text-white">Jadwal Pelajaran</h2>
+          <p className="text-slate-300 mt-1">Susun jadwal mingguan per kelas, per semester, dan per tahun ajaran.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={loadSchedules} disabled={loading} className="bg-slate-900 border-white/10 text-slate-400 hover:text-white">
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" onClick={loadSchedules} disabled={loading}
+            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0">
+            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
           </Button>
-          <Button onClick={() => handleOpenDialog()} className="bg-blue-600 hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-            <Plus className="mr-2 h-4 w-4" /> Buat Jadwal Baru
+          <Button onClick={handleOpenDialog} disabled={!kelasFilter}
+            className="bg-blue-600 hover:bg-blue-500 h-11 px-5 rounded-xl font-semibold text-white">
+            <Plus className="mr-2 h-4 w-4" /> Tambah Jadwal
           </Button>
         </div>
       </div>
 
-      <Card className="bg-slate-900/50 backdrop-blur-md border border-white/10 shadow-xl">
-        <CardHeader className="pb-4 border-b border-white/5">
-          <CardTitle className="text-white">Filter Jadwal</CardTitle>
-          <div className="flex flex-col sm:flex-row gap-4 mt-4 bg-slate-950 p-4 rounded-xl border border-white/10">
-            <div className="flex-1 space-y-1">
-              <label className="text-sm font-medium text-slate-400">Pilih Kelas</label>
-              <Select key={`filter-kelas-${kelasList.length}`} value={kelasFilter} onValueChange={(val) => setKelasFilter(val || '')}>
-                <SelectTrigger className="bg-slate-900 border-white/10 text-white">
-                  <SelectValue placeholder={kelasList.length > 0 ? "Pilih Kelas" : "Memuat Kelas..."} />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-white">
-                  {kelasList.map(k => (
-                    <SelectItem key={k.id} value={k.id} className="hover:bg-slate-800 focus:bg-slate-800">{k.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {/* Filter bar */}
+      <Card className="bg-slate-900/60 border-white/10 rounded-2xl">
+        <CardContent className="p-5">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Kelas</Label>
+              <LookupSelect
+                value={kelasFilter}
+                onChange={setKelasFilter}
+                items={kelasItems}
+                placeholder={kelasItems.length ? 'Pilih kelas' : 'Memuat...'}
+                className="h-11 bg-slate-950 border-white/10 rounded-lg text-white"
+              />
             </div>
-            <div className="flex-1 space-y-1">
-              <label className="text-sm font-medium text-slate-400">Pilih Hari</label>
-              <Select value={hariFilter} onValueChange={(val) => setHariFilter(val || 'Senin')}>
-                <SelectTrigger className="bg-slate-900 border-white/10 text-white">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Hari</Label>
+              <Select value={hariFilter} onValueChange={(v) => setHariFilter(v || 'semua')}>
+                <SelectTrigger className="h-11 bg-slate-950 border-white/10 rounded-lg text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-white">
-                  {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].map(h => (
-                    <SelectItem key={h} value={h} className="hover:bg-slate-800 focus:bg-slate-800">{h}</SelectItem>
-                  ))}
+                <SelectContent className="bg-slate-900 border-white/10">
+                  <SelectItem value="semua">Semua Hari</SelectItem>
+                  {HARI.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="rounded-lg border border-white/10 overflow-hidden">
-            <Table>
-              <TableHeader className="bg-slate-950/50">
-                <TableRow className="border-white/10 hover:bg-transparent">
-                  <TableHead className="text-slate-400">Jam</TableHead>
-                  <TableHead className="text-slate-400">Mata Pelajaran</TableHead>
-                  <TableHead className="text-slate-400">Guru Pengajar</TableHead>
-                  <TableHead className="text-slate-400">Ruang</TableHead>
-                  <TableHead className="text-slate-400 text-right">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-10"><Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-500" /></TableCell></TableRow>
-                ) : filteredSchedules.length > 0 ? (
-                  filteredSchedules.map((schedule) => (
-                    <TableRow key={schedule.id} className="border-white/5 hover:bg-white/5 transition-colors">
-                      <TableCell className="font-medium text-slate-300">{schedule.jamMulai} - {schedule.jamSelesai}</TableCell>
-                      <TableCell className="font-semibold text-blue-400">{schedule.mataPelajaran?.nama}</TableCell>
-                      <TableCell className="text-slate-300">{schedule.guru?.pengguna?.nama}</TableCell>
-                      <TableCell className="text-slate-300">{schedule.ruangan}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => confirmDelete(schedule.id)} className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-32 text-center text-slate-500">
-                      Belum ada jadwal untuk kelas ini pada hari {hariFilter}.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+            <div className="space-y-1.5">
+              <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Semester</Label>
+              <Select value={semesterFilter} onValueChange={(v) => setSemesterFilter(v || 'Ganjil')}>
+                <SelectTrigger className="h-11 bg-slate-950 border-white/10 rounded-lg text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-white/10">
+                  {SEMESTER.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Tahun Ajaran</Label>
+              <Input value={tahunAjaran} onChange={(e) => setTahunAjaran(e.target.value)}
+                placeholder="2024/2025"
+                className="h-11 bg-slate-950 border-white/10 rounded-lg text-white" />
+            </div>
           </div>
         </CardContent>
       </Card>
 
+      {error && (
+        <div className="p-4 rounded-xl bg-red-900/30 border border-red-500/30 text-red-300 text-sm flex items-center gap-3">
+          <Info className="h-5 w-5 flex-shrink-0" /> {error}
+        </div>
+      )}
+
+      {/* Table */}
+      <Card className="bg-slate-900/60 border-white/10 rounded-2xl overflow-hidden">
+        <CardHeader className="p-5 border-b border-white/10">
+          <CardTitle className="text-white text-lg font-bold flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-blue-400" />
+            Jadwal {currentKelasName} · {semesterFilter} {tahunAjaran}
+            <Badge className="ml-auto bg-blue-500/10 text-blue-300 border-blue-500/30">
+              {filteredSchedules.length} sesi
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader className="bg-slate-950/50">
+              <TableRow className="border-white/10 hover:bg-transparent">
+                <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4 pl-6">Hari & Jam</TableHead>
+                <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4">Mata Pelajaran</TableHead>
+                <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4">Guru Pengajar</TableHead>
+                <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4">Ruangan</TableHead>
+                <TableHead className="text-right text-slate-200 text-xs uppercase tracking-wider font-semibold py-4 pr-6">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={5} className="text-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
+                </TableCell></TableRow>
+              ) : filteredSchedules.length > 0 ? (
+                filteredSchedules.map((schedule) => (
+                  <TableRow key={schedule.id} className="border-white/10 hover:bg-white/5">
+                    <TableCell className="py-4 pl-6">
+                      <div className="flex flex-col gap-1">
+                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 w-fit font-semibold">
+                          {schedule.hari}
+                        </Badge>
+                        <span className="text-slate-300 text-sm font-mono flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {schedule.jamMulai} – {schedule.jamSelesai}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-blue-400" />
+                        <span className="font-semibold text-white">{schedule.mataPelajaran?.nama || '-'}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-slate-200">
+                      {schedule.guru?.pengguna?.nama || '-'}
+                      {schedule.guru?.nip && (
+                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">NIP {schedule.guru.nip}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-slate-200">
+                      {schedule.ruangan ? (
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="h-3 w-3 text-slate-400" />
+                          {schedule.ruangan}
+                        </div>
+                      ) : <span className="text-slate-500 italic text-sm">Belum diatur</span>}
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                      <Button variant="ghost" size="icon" onClick={() => confirmDelete(schedule.id)}
+                        className="h-9 w-9 text-red-400 hover:text-white hover:bg-red-600 rounded-lg">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-32 text-center">
+                    <Calendar className="h-10 w-10 text-slate-600 mx-auto mb-2" />
+                    <p className="text-slate-300 font-semibold">Belum ada jadwal</p>
+                    <p className="text-sm text-slate-400">
+                      Klik "Tambah Jadwal" untuk membuat jadwal baru.
+                    </p>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
       {/* Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-slate-900 border border-white/10 text-white">
-          <DialogHeader>
-            <DialogTitle>Tambah Jadwal Baru</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-slate-400">Jam Mulai</Label>
-              <Input className="col-span-3 bg-slate-950 border-white/10 text-white" value={formData.jamMulai} onChange={(e) => setFormData({...formData, jamMulai: e.target.value})} placeholder="07:00" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-slate-400">Jam Selesai</Label>
-              <Input className="col-span-3 bg-slate-950 border-white/10 text-white" value={formData.jamSelesai} onChange={(e) => setFormData({...formData, jamSelesai: e.target.value})} placeholder="08:30" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-slate-400">Mata Pelajaran</Label>
-              <Select key={`mapel-select-${mapelList.length}`} value={formData.mataPelajaranId} onValueChange={(val) => setFormData({...formData, mataPelajaranId: val})}>
-                <SelectTrigger className="col-span-3 bg-slate-950 border-white/10 text-white">
-                  <SelectValue placeholder={mapelList.length > 0 ? "Pilih Mata Pelajaran" : "Memuat..."} />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-white max-h-48">
-                  {mapelList.map(m => <SelectItem key={m.id} value={m.id}>{m.nama}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-slate-400">Guru</Label>
-              <Select key={`guru-select-${guruList.length}`} value={formData.guruId} onValueChange={(val) => setFormData({...formData, guruId: val})}>
-                <SelectTrigger className="col-span-3 bg-slate-950 border-white/10 text-white">
-                  <SelectValue placeholder={guruList.length > 0 ? "Pilih Guru" : "Memuat..."} />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-white max-h-48">
-                  {guruList.map(g => <SelectItem key={g.guruId} value={g.guruId}>{g.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-slate-400">Ruang</Label>
-              <Input className="col-span-3 bg-slate-950 border-white/10 text-white" value={formData.ruangan} onChange={(e) => setFormData({...formData, ruangan: e.target.value})} placeholder="Lab. Bahasa" />
-            </div>
+      <Dialog open={isDialogOpen} onOpenChange={(o) => { setIsDialogOpen(o); if (!o) setError(null); }}>
+        <DialogContent className="bg-slate-950 border border-white/10 text-white rounded-2xl p-0 overflow-hidden max-w-lg">
+          <div className="p-6 border-b border-white/10 bg-white/5">
+            <DialogTitle className="text-xl font-bold">Tambah Jadwal Baru</DialogTitle>
+            <p className="text-slate-300 text-xs mt-1">Untuk kelas {currentKelasName}, T.A. {tahunAjaran}.</p>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="text-slate-400">Batal</Button>
-            <Button onClick={handleSaveSchedule} disabled={saving} className="bg-blue-600 hover:bg-blue-500">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Simpan'}
+          <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-1.5">
+              <Label className="text-slate-200 text-xs font-semibold">Mata Pelajaran *</Label>
+              <LookupSelect
+                value={formData.mataPelajaranId || ''}
+                onChange={(v) => setFormData({ ...formData, mataPelajaranId: v })}
+                items={mapelItems}
+                placeholder="Pilih mata pelajaran"
+                className="h-11 bg-slate-900 border-white/10 rounded-lg text-white"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-slate-200 text-xs font-semibold">Guru Pengajar *</Label>
+              <LookupSelect
+                value={formData.guruId || ''}
+                onChange={(v) => setFormData({ ...formData, guruId: v })}
+                items={guruItems}
+                placeholder="Pilih guru"
+                className="h-11 bg-slate-900 border-white/10 rounded-lg text-white"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-slate-200 text-xs font-semibold">Hari *</Label>
+                <Select value={formData.hari || 'Senin'} onValueChange={(v) => setFormData({ ...formData, hari: v || 'Senin' })}>
+                  <SelectTrigger className="h-11 bg-slate-900 border-white/10 rounded-lg text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-white/10">
+                    {HARI.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-slate-200 text-xs font-semibold">Jam Mulai *</Label>
+                <Input type="time" value={formData.jamMulai || ''} onChange={(e) => setFormData({ ...formData, jamMulai: e.target.value })}
+                  className="h-11 bg-slate-900 border-white/10 rounded-lg text-white [color-scheme:dark]" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-slate-200 text-xs font-semibold">Jam Selesai *</Label>
+                <Input type="time" value={formData.jamSelesai || ''} onChange={(e) => setFormData({ ...formData, jamSelesai: e.target.value })}
+                  className="h-11 bg-slate-900 border-white/10 rounded-lg text-white [color-scheme:dark]" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-slate-200 text-xs font-semibold">Semester</Label>
+                <Select value={formData.semester || 'Ganjil'} onValueChange={(v) => setFormData({ ...formData, semester: v || 'Ganjil' })}>
+                  <SelectTrigger className="h-11 bg-slate-900 border-white/10 rounded-lg text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-white/10">
+                    {SEMESTER.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-slate-200 text-xs font-semibold">Ruangan</Label>
+                <Input value={formData.ruangan || ''} onChange={(e) => setFormData({ ...formData, ruangan: e.target.value })}
+                  placeholder="Contoh: Lab Komputer"
+                  className="h-11 bg-slate-900 border-white/10 rounded-lg text-white placeholder:text-slate-500" />
+              </div>
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-lg bg-red-900/30 border border-red-500/30 text-red-300 text-sm">
+                {error}
+              </div>
+            )}
+          </div>
+          <div className="p-6 bg-white/5 border-t border-white/10 flex gap-3">
+            <Button variant="ghost" onClick={() => setIsDialogOpen(false)}
+              className="flex-1 h-11 rounded-lg text-slate-200 hover:bg-white/5">Batal</Button>
+            <Button onClick={handleSaveSchedule} disabled={saving}
+              className="flex-1 h-11 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">
+              {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Simpan Jadwal'}
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
+
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent className="bg-slate-900 border border-white/10 text-white">
+        <AlertDialogContent className="bg-slate-950 border border-red-500/20 rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Jadwal?</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-400">
-              Jadwal yang dihapus tidak dapat dikembalikan. Lanjutkan?
+            <AlertDialogTitle className="text-white text-xl font-bold">Hapus Jadwal?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-300">
+              Jadwal yang dihapus tidak dapat dikembalikan. Siswa tidak akan melihat jadwal ini lagi.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent border-white/10 hover:bg-slate-800 text-slate-300">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-500 text-white">Hapus</AlertDialogAction>
+          <AlertDialogFooter className="gap-3">
+            <AlertDialogCancel className="h-11 border-white/10 bg-white/5 text-slate-200 rounded-lg px-5">Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="h-11 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-lg px-5">Hapus</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

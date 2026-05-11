@@ -40,11 +40,11 @@ enum JabatanGuru {
 }
 
 # -------------------------------------------------------
-# PENGGUNA — akun login (email, password di Firebase Auth)
+# PENGGUNA — akun login (email unik lintas sistem)
 # -------------------------------------------------------
 type Pengguna @table(name: "pengguna") {
   id: UUID! @default(expr: "uuidV4()")
-  email: String!
+  email: String! @unique
   nama: String!
   peran: PeranPengguna!
   telepon: String
@@ -56,38 +56,37 @@ type Pengguna @table(name: "pengguna") {
 }
 
 # -------------------------------------------------------
-# JURUSAN
+# JURUSAN — Kode unik (RPL, MIPA, IPS, dsb.)
 # -------------------------------------------------------
 type Jurusan @table(name: "jurusan") {
   id: UUID! @default(expr: "uuidV4()")
-  kode: String!
+  kode: String! @unique
   nama: String!
 }
 
 # -------------------------------------------------------
-# MATA PELAJARAN
+# MATA PELAJARAN — Kode unik (MTK, BIN, FIS, dsb.)
 # -------------------------------------------------------
 type MataPelajaran @table(name: "mata_pelajaran") {
   id: UUID! @default(expr: "uuidV4()")
-  kode: String!
+  kode: String! @unique
   nama: String!
   tipe: String
 }
 
 # -------------------------------------------------------
-# GURU — data profil guru
+# GURU — NIP unik per guru
 # -------------------------------------------------------
 type Guru @table(name: "guru") {
   id: UUID! @default(expr: "uuidV4()")
   pengguna: Pengguna!
-  nip: String!
+  nip: String! @unique
   jenisKelamin: JenisKelamin!
   tempatLahir: String
   tanggalLahir: Date
   jabatan: JabatanGuru! @default(expr: "\"Guru\"")
-  # Guru bisa mengajar mata pelajaran tertentu
+  # Guru bisa mengajar mata pelajaran tertentu (opsional)
   mataPelajaranId: UUID
-  # Apakah guru ini adalah wali kelas suatu kelas?
   spesialisasi: String
 }
 
@@ -104,12 +103,12 @@ type Kelas @table(name: "kelas") {
 }
 
 # -------------------------------------------------------
-# SISWA — data profil siswa (lengkap)
+# SISWA — NIS unik per siswa
 # -------------------------------------------------------
 type Siswa @table(name: "siswa") {
   id: UUID! @default(expr: "uuidV4()")
   pengguna: Pengguna!
-  nis: String!
+  nis: String! @unique
   jenisKelamin: JenisKelamin!
   tempatLahir: String
   tanggalLahir: Date
@@ -179,12 +178,12 @@ type Prestasi @table(name: "prestasi") {
 }
 
 # -------------------------------------------------------
-# ALUMNI
+# ALUMNI — NIS unik
 # -------------------------------------------------------
 type Alumni @table(name: "alumni") {
   id: UUID! @default(expr: "uuidV4()")
   penggunaSiswa: Siswa
-  nis: String!
+  nis: String! @unique
   nama: String!
   tahunLulus: Int!
   status: StatusAlumni!

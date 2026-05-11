@@ -1,21 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { useNotifications } from '../contexts/NotificationContext';
 import {
   LogOut, LayoutDashboard, Users, GraduationCap, BookOpen,
-  Award, Settings, Menu, X, MessageSquare, Bell, Calendar,
-  ChevronRight, Zap, Book, MoveRight
+  Award, Settings, Menu, X, MessageSquare, Calendar,
+  ChevronRight, Zap, Book, MoveRight, Sun, Moon
 } from 'lucide-react';
 import Chatbot from './Chatbot';
+import NotificationBell from './NotificationBell';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { notifications, add: addNotif } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => { setIsMobileOpen(false); }, [location.pathname]);
+
+  // Welcome notification on first login of session
+  useEffect(() => {
+    if (!user) return;
+    const sessionKey = `scola_welcome_${user.uid}`;
+    if (!sessionStorage.getItem(sessionKey)) {
+      sessionStorage.setItem(sessionKey, '1');
+      addNotif({
+        type: 'success',
+        kind: 'system',
+        title: `Selamat datang, ${user.name}!`,
+        body: `Anda berhasil masuk sebagai ${user.role === 'admin' ? 'Administrator' : user.role === 'guru' ? 'Guru' : 'Siswa'}. Semoga harimu menyenangkan.`,
+      });
+    }
+  }, [user, addNotif]);
 
   const handleLogout = async () => {
     await logout();
@@ -67,26 +87,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
         <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-600/30">
           <Zap className="w-4 h-4 text-white" />
         </div>
         <div>
-          <div className="text-white font-bold text-base leading-none" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <div className="text-sidebar-foreground font-bold text-base leading-none" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             SCOLA
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5 font-medium leading-none">Sistem Akademik</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5 font-medium leading-none">SMAIT Nur Hidayah</div>
         </div>
       </div>
 
       {/* User info */}
-      <div className="px-4 py-4 border-b border-white/[0.06]">
+      <div className="px-4 py-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3 px-2">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
             {user?.name?.[0]?.toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-white text-sm font-semibold leading-tight truncate">{user?.name}</p>
+            <p className="text-sidebar-foreground text-sm font-semibold leading-tight truncate">{user?.name}</p>
             <span className={`inline-block mt-0.5 text-[10px] font-semibold px-2 py-0.5 rounded-full ${roleColors[user?.role || ''] || 'bg-slate-500/15 text-slate-400'}`}>
               {roleLabel[user?.role || ''] || user?.role}
             </span>
@@ -114,10 +134,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </nav>
 
       {/* Logout */}
-      <div className="px-3 py-4 border-t border-white/[0.06]">
+      <div className="px-3 py-4 border-t border-sidebar-border">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-red-400 hover:bg-red-500/8 transition-all"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-red-400 hover:bg-red-500/8 transition-all"
         >
           <LogOut className="w-4 h-4" />
           <span>Keluar</span>
@@ -127,7 +147,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="flex h-screen bg-[oklch(0.115_0.018_264)] text-slate-200 overflow-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="flex h-screen bg-background text-foreground overflow-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
 
       {/* ── Mobile Overlay ─────────────────────────────────── */}
       {isMobileOpen && (
@@ -139,7 +159,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="absolute inset-y-0 left-0 w-72 scola-sidebar shadow-2xl animate-in slide-in-from-left duration-300">
             <button
               onClick={() => setIsMobileOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 hover:text-white z-10"
+              className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-muted hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground z-10"
             >
               <X className="w-4 h-4" />
             </button>
@@ -156,26 +176,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* ── Main Area ─────────────────────────────────────── */}
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Topbar */}
-        <header className="flex items-center justify-between h-14 px-6 border-b border-white/[0.06] bg-[oklch(0.115_0.018_264)]/90 backdrop-blur-xl flex-shrink-0 z-20">
+        <header className="flex items-center justify-between h-14 px-6 border-b border-border bg-background/90 backdrop-blur-xl flex-shrink-0 z-20">
           <div className="flex items-center gap-3">
             <button
-              className="md:hidden w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 hover:text-white"
+              className="md:hidden w-8 h-8 rounded-lg bg-muted hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground"
               onClick={() => setIsMobileOpen(true)}
             >
               <Menu className="w-4 h-4" />
             </button>
             <div className="hidden sm:block">
-              <p className="text-sm font-semibold text-white">
+              <p className="text-sm font-semibold text-foreground">
                 {user?.role === 'admin' ? 'Panel Administrator' : user?.role === 'guru' ? 'Panel Pengajar' : 'Portal Siswa'}
               </p>
-              <p className="text-[11px] text-slate-500">SMKN ASOLOLE — T.A. 2024/2025</p>
+              <p className="text-[11px] text-muted-foreground">SMAIT Nur Hidayah Sukoharjo — T.A. 2024/2025</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="relative w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 transition-all">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+            <button onClick={toggleTheme}
+              className="w-8 h-8 rounded-lg bg-muted hover:bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
+              aria-label="Ubah tema">
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
+            <NotificationBell />
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold">
               {user?.name?.[0]?.toUpperCase()}
             </div>
@@ -191,8 +213,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* ── Chatbot FAB ───────────────────────────────────── */}
       <div className="fixed bottom-6 right-6 z-[200] flex flex-col items-end gap-3">
         {isChatOpen && (
-          <div className="w-[360px] h-[520px] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-white/10 bg-[oklch(0.155_0.016_264)] animate-in slide-in-from-bottom-5 duration-300">
-            <div className="flex items-center justify-between px-5 py-4 bg-blue-600 text-white">
+          <div className="w-[380px] h-[560px] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-border bg-card animate-in slide-in-from-bottom-5 duration-300">
+            <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
                   <MessageSquare className="w-4 h-4" />

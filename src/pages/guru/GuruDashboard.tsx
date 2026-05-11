@@ -7,7 +7,7 @@ import GuruAchievements from './GuruAchievements';
 import GuruStudents from './GuruStudents';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchJadwalGuru } from '@/lib/schoolService';
-import { getPenggunaByEmail } from '@uassiakad/connector';
+import { listPrestasi } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
 
 function GuruOverview() {
@@ -17,7 +17,6 @@ function GuruOverview() {
   const [stats, setStats] = useState({
     kelasDiajar: 0,
     totalSiswa: 0,
-    nilaiDiinput: '0%',
     prestasiDicatat: 0
   });
 
@@ -30,27 +29,31 @@ function GuruOverview() {
   const loadGuruData = async () => {
     setLoading(true);
     try {
-      let myGuruId = user?.guruId;
-      if (!myGuruId && user?.email) {
-        const res = await getPenggunaByEmail(dataConnect, { email: user.email });
-        if (res.data.penggunas.length > 0) {
-           // Bypassing cache update here for simple polish
-        }
-      }
-
-      setStats({
-        kelasDiajar: user?.kelasId ? 1 : 2, 
-        totalSiswa: 24,
-        nilaiDiinput: '85%',
-        prestasiDicatat: 3
-      });
+      const myGuruId = user?.guruId;
 
       if (myGuruId) {
         const jadwal = await fetchJadwalGuru(myGuruId, '2024/2025');
         const hariIni = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
         const jadwalHariIni = jadwal.filter((j: any) => j.hari.toLowerCase() === hariIni.toLowerCase());
         setTodaySchedule(jadwalHariIni);
+
+        // Count unique classes from schedule
+        const uniqueClasses = new Set(jadwal.map((j: any) => j.kelas?.nama).filter(Boolean));
+        setStats(prev => ({
+          ...prev,
+          kelasDiajar: uniqueClasses.size || 0,
+        }));
       }
+
+      // Fetch prestasi count
+      try {
+        const prestasiRes = await listPrestasi(dataConnect, {});
+        setStats(prev => ({
+          ...prev,
+          prestasiDicatat: prestasiRes.data.prestasis?.length || 0,
+        }));
+      } catch { /* ignore */ }
+
     } catch (e) {
       console.error('Failed to load guru dashboard stats:', e);
     } finally {
@@ -96,9 +99,9 @@ function GuruOverview() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[
           { title: "Mata Pelajaran", val: user?.specialization || "Umum", sub: "Spesialisasi Terdaftar", icon: BookOpen, color: "text-blue-400" },
-          { title: "Total Murid", val: "24", sub: "Di bawah pengawasan", icon: Users, color: "text-purple-400" },
-          { title: "Progress Nilai", val: stats.nilaiDiinput, sub: "Semester Berjalan", icon: CheckCircle, color: "text-emerald-400" },
-          { title: "Prestasi Baru", val: stats.prestasiDicatat.toString(), sub: "Bulan Terakhir", icon: Award, color: "text-amber-400" },
+          { title: "Kelas Diampu", val: stats.kelasDiajar.toString(), sub: "Dari jadwal aktif", icon: Users, color: "text-purple-400" },
+          { title: "Jabatan", val: user?.jabatan || "Guru", sub: "Status Struktural", icon: CheckCircle, color: "text-emerald-400" },
+          { title: "Prestasi Dicatat", val: stats.prestasiDicatat.toString(), sub: "Total di sistem", icon: Award, color: "text-amber-400" },
         ].map((stat, i) => (
           <Card key={i} className="bg-slate-900/40 border-white/5 rounded-3xl shadow-xl hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -127,7 +130,7 @@ function GuruOverview() {
           <CardContent className="p-8 space-y-6">
             {todaySchedule.length === 0 ? (
               <div className="text-center py-20 bg-slate-950/30 rounded-[2rem] border border-dashed border-white/5">
-                <div className="h-16 w-16 bg-slate-900 rounded-2xl mx-auto flex items-center justify-center mb-4 opacity-30 italic font-black text-2xl">Zzz</div>
+                <div className="h-16 w-16 bg-slate-900 rounded-2xl mx-auto flex items-center justify-center mb-4 opacity-30 italic font-black text-2xl">—</div>
                 <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Hari ini tidak ada jadwal mengajar.</p>
               </div>
             ) : (

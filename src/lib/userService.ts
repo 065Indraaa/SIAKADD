@@ -167,7 +167,8 @@ export async function createGuruWithAccount(payload: CreateGuruPayload): Promise
 }> {
   const nip = payload.nip || await generateNIP();
   const email = payload.email || generateGuruEmail(payload.name, nip);
-  const defaultPassword = `Guru@${nip.slice(-5)}`;
+  // Demo-friendly password for easy login during presentations
+  const defaultPassword = email.endsWith('@demo.com') ? 'Guru@123' : `Guru@${nip.slice(-5)}`;
 
   const userResult = await createPengguna(dataConnect, {
     email,
@@ -208,7 +209,8 @@ export async function createSiswaWithAccount(payload: CreateSiswaPayload): Promi
 }> {
   const nis = await generateNIS();
   const email = payload.email || generateSiswaEmail(nis);
-  const defaultPassword = `Siswa@${nis.slice(-6)}`;
+  // Demo-friendly password for easy login during presentations
+  const defaultPassword = email.endsWith('@demo.com') ? 'Siswa@123' : `Siswa@${nis.slice(-6)}`;
 
   const userResult = await createPengguna(dataConnect, {
     email,
@@ -419,31 +421,103 @@ export async function clearAllData() {
 
 export async function seedDemoData() {
   try {
-    // 1. Create Admin
-    await createAdminWithAccount({
-      name: "Super Admin",
-      email: "admin@demo.com",
-    });
+    // --- 1. JURUSAN ---
+    const { createJurusan, createMataPelajaran, createKelas } = await import('@uassiakad/connector');
 
-    // 2. Create Guru
-    await createGuruWithAccount({
-      name: "Budi Santoso, M.Pd",
-      email: "guru@demo.com",
-      gender: 'L',
-      jabatan: 'WaliKelas',
-      specialization: 'Matematika',
-    });
+    const jurusanList = [
+      { kode: 'MIPA', nama: 'Matematika dan Ilmu Pengetahuan Alam' },
+      { kode: 'IPS', nama: 'Ilmu Pengetahuan Sosial' },
+      { kode: 'BHS', nama: 'Bahasa dan Budaya' },
+    ];
+    const jurusanIds: Record<string, string> = {};
+    for (const j of jurusanList) {
+      try {
+        const r = await createJurusan(dataConnect, j);
+        jurusanIds[j.kode] = r.data.jurusan_insert.id;
+      } catch (e) { /* mungkin sudah ada */ }
+    }
 
-    // 3. Create Siswa
-    await createSiswaWithAccount({
-      name: "Siswa Teladan",
-      email: "siswa@demo.com",
-      gender: 'L',
-      birthPlace: 'Jakarta',
-      birthDate: '2008-05-15',
-    });
+    // --- 2. MATA PELAJARAN ---
+    const mapelList = [
+      { kode: 'MTK', nama: 'Matematika' },
+      { kode: 'BIN', nama: 'Bahasa Indonesia' },
+      { kode: 'BIG', nama: 'Bahasa Inggris' },
+      { kode: 'FIS', nama: 'Fisika' },
+      { kode: 'KIM', nama: 'Kimia' },
+      { kode: 'BIO', nama: 'Biologi' },
+      { kode: 'SEJ', nama: 'Sejarah' },
+      { kode: 'PKN', nama: 'Pendidikan Kewarganegaraan' },
+    ];
+    for (const m of mapelList) {
+      try { await createMataPelajaran(dataConnect, m); } catch (e) { /* skip if exists */ }
+    }
 
-    return true;
+    // --- 3. ADMIN (3 akun) ---
+    const admins = [
+      { name: 'Super Administrator', email: 'admin@demo.com' },
+      { name: 'Kepala Tata Usaha', email: 'katu@demo.com' },
+      { name: 'Staff Admin', email: 'staff@demo.com' },
+    ];
+    for (const a of admins) {
+      try { await createAdminWithAccount(a); } catch (e) { /* skip */ }
+    }
+
+    // --- 4. GURU (5 akun dengan jabatan berbeda) ---
+    const guruList: CreateGuruPayload[] = [
+      { name: 'Dr. Suyanto, M.Pd', email: 'kepsek@demo.com', gender: 'L', jabatan: 'Kepsek', specialization: 'Manajemen Pendidikan', nip: '196501011990031001', birthPlace: 'Yogyakarta', birthDate: '1965-01-01', phone: '081234567001' },
+      { name: 'Dra. Rina Kusuma, M.Pd', email: 'wakepsek@demo.com', gender: 'P', jabatan: 'WakilKepsek', specialization: 'Kurikulum', nip: '197003151995032002', birthPlace: 'Solo', birthDate: '1970-03-15', phone: '081234567002' },
+      { name: 'Budi Santoso, S.Pd', email: 'guru@demo.com', gender: 'L', jabatan: 'WaliKelas', specialization: 'Matematika', nip: '198505202010011003', birthPlace: 'Jakarta', birthDate: '1985-05-20', phone: '081234567003' },
+      { name: 'Siti Aminah, S.Pd', email: 'guru.siti@demo.com', gender: 'P', jabatan: 'Guru', specialization: 'Bahasa Indonesia', nip: '198807102012032004', birthPlace: 'Bandung', birthDate: '1988-07-10', phone: '081234567004' },
+      { name: 'Ahmad Fauzi, S.Pd, M.Psi', email: 'guru.bk@demo.com', gender: 'L', jabatan: 'BK', specialization: 'Bimbingan Konseling', nip: '199002252015031005', birthPlace: 'Surabaya', birthDate: '1990-02-25', phone: '081234567005' },
+    ];
+    const guruIds: string[] = [];
+    for (const g of guruList) {
+      try {
+        const r = await createGuruWithAccount(g);
+        guruIds.push(r.guruId);
+      } catch (e) { console.error('Skip guru:', (e as any).message); }
+    }
+
+    // --- 5. KELAS (pakai wali kelas dari guru yang baru dibuat) ---
+    const kelasData = [
+      { nama: 'X-MIPA-1', tingkat: 10, tahunAjaran: '2024/2025', jurusanId: jurusanIds['MIPA'], waliKelasId: guruIds[2] },
+      { nama: 'X-IPS-1', tingkat: 10, tahunAjaran: '2024/2025', jurusanId: jurusanIds['IPS'], waliKelasId: guruIds[3] },
+      { nama: 'XI-MIPA-1', tingkat: 11, tahunAjaran: '2024/2025', jurusanId: jurusanIds['MIPA'], waliKelasId: guruIds[2] },
+      { nama: 'XII-MIPA-1', tingkat: 12, tahunAjaran: '2024/2025', jurusanId: jurusanIds['MIPA'], waliKelasId: guruIds[4] },
+    ];
+    const kelasIds: string[] = [];
+    for (const k of kelasData) {
+      try {
+        const r = await createKelas(dataConnect, k as any);
+        kelasIds.push(r.data.kelas_insert.id);
+      } catch (e) { /* skip */ }
+    }
+
+    // --- 6. SISWA (10 akun tersebar di beberapa kelas) ---
+    const siswaList: CreateSiswaPayload[] = [
+      { name: 'Yusuf Ramadhan', email: 'siswa@demo.com', gender: 'L', birthPlace: 'Jakarta', birthDate: '2008-05-15', address: 'Jl. Merdeka No. 1', phone: '081200000001', classId: kelasIds[2], majorId: jurusanIds['MIPA'], tahunMasuk: 2023 },
+      { name: 'Aisha Putri', email: 'siswa.aisha@demo.com', gender: 'P', birthPlace: 'Bandung', birthDate: '2008-08-22', address: 'Jl. Sudirman No. 10', phone: '081200000002', classId: kelasIds[2], majorId: jurusanIds['MIPA'], tahunMasuk: 2023 },
+      { name: 'Rizky Pratama', email: 'siswa.rizky@demo.com', gender: 'L', birthPlace: 'Surabaya', birthDate: '2009-02-10', address: 'Jl. Diponegoro No. 5', phone: '081200000003', classId: kelasIds[0], majorId: jurusanIds['MIPA'], tahunMasuk: 2024 },
+      { name: 'Indah Permata', email: 'siswa.indah@demo.com', gender: 'P', birthPlace: 'Yogyakarta', birthDate: '2009-06-18', address: 'Jl. Malioboro No. 20', phone: '081200000004', classId: kelasIds[0], majorId: jurusanIds['MIPA'], tahunMasuk: 2024 },
+      { name: 'Farhan Maulana', email: 'siswa.farhan@demo.com', gender: 'L', birthPlace: 'Medan', birthDate: '2009-11-03', address: 'Jl. Gatot Subroto No. 7', phone: '081200000005', classId: kelasIds[1], majorId: jurusanIds['IPS'], tahunMasuk: 2024 },
+      { name: 'Dewi Anggraini', email: 'siswa.dewi@demo.com', gender: 'P', birthPlace: 'Semarang', birthDate: '2009-04-27', address: 'Jl. Pahlawan No. 33', phone: '081200000006', classId: kelasIds[1], majorId: jurusanIds['IPS'], tahunMasuk: 2024 },
+      { name: 'Bagas Wicaksana', email: 'siswa.bagas@demo.com', gender: 'L', birthPlace: 'Malang', birthDate: '2007-09-12', address: 'Jl. Veteran No. 15', phone: '081200000007', classId: kelasIds[3], majorId: jurusanIds['MIPA'], tahunMasuk: 2022 },
+      { name: 'Citra Lestari', email: 'siswa.citra@demo.com', gender: 'P', birthPlace: 'Palembang', birthDate: '2007-12-01', address: 'Jl. Ahmad Yani No. 8', phone: '081200000008', classId: kelasIds[3], majorId: jurusanIds['MIPA'], tahunMasuk: 2022 },
+      { name: 'Doni Saputra', email: 'siswa.doni@demo.com', gender: 'L', birthPlace: 'Denpasar', birthDate: '2008-07-19', address: 'Jl. Imam Bonjol No. 12', phone: '081200000009', classId: kelasIds[2], majorId: jurusanIds['MIPA'], tahunMasuk: 2023 },
+      { name: 'Eka Wulandari', email: 'siswa.eka@demo.com', gender: 'P', birthPlace: 'Makassar', birthDate: '2008-03-30', address: 'Jl. Urip Sumoharjo No. 22', phone: '081200000010', classId: kelasIds[2], majorId: jurusanIds['MIPA'], tahunMasuk: 2023 },
+    ];
+    for (const s of siswaList) {
+      try { await createSiswaWithAccount(s); } catch (e) { console.error('Skip siswa:', (e as any).message); }
+    }
+
+    return {
+      admin: admins.length,
+      guru: guruList.length,
+      siswa: siswaList.length,
+      kelas: kelasData.length,
+      jurusan: jurusanList.length,
+      mapel: mapelList.length,
+    };
   } catch (e) {
     console.error("Error seeding demo data:", e);
     throw e;
