@@ -52,7 +52,7 @@ export default function GuruStudents() {
 
   useAutoRefresh(loadStudents, 20_000);
 
-  const [refreshing, refreshAll] = useManualRefresh(loadKelas, loadStudents);
+  const [refreshing, refresh] = useManualRefresh(loadKelas, loadStudents);
 
   const filtered = students.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -70,7 +70,7 @@ export default function GuruStudents() {
           <h2 className="text-3xl font-bold text-white">Data Siswa</h2>
           <p className="text-slate-300 mt-1">Monitoring profil dan kontak peserta didik per kelas.</p>
         </div>
-        <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+        <Button variant="outline" onClick={refresh} disabled={refreshing}
           className="h-11 border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 rounded-xl">
           <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           Segarkan
@@ -152,9 +152,13 @@ export default function GuruStudents() {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={`font-medium ${
-                      s.gender === 'L' ? 'bg-blue-500/10 text-blue-300 border-blue-500/30' : 'bg-pink-500/10 text-pink-300 border-pink-500/30'
+                      s.gender === 'L'
+                        ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30'
+                        : s.gender === 'P'
+                        ? 'bg-pink-500/10 text-pink-700 dark:text-pink-300 border-pink-500/30'
+                        : 'bg-muted text-muted-foreground border-border'
                     }`}>
-                      {s.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
+                      {s.gender === 'L' ? 'Laki-laki' : s.gender === 'P' ? 'Perempuan' : '-'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-slate-200">

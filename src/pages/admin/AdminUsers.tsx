@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LookupSelect } from '@/components/ui/lookup-select';
-import { Search, Plus, Edit2, Trash2, RefreshCw, Loader2, Copy, CheckCircle2, FileSpreadsheet, Eye, EyeOff, Zap, Download, Upload, FileText, X } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, RefreshCw, Loader2, Copy, CheckCircle2, FileSpreadsheet, Eye, EyeOff, Zap, Download, Upload, FileText, GraduationCap } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -17,7 +17,8 @@ import {
   deleteUserById, clearAllData, seedDemoData,
   UserListItem,
 } from '@/lib/userService';
-import { fetchKelas, fetchJurusan } from '@/lib/schoolService';
+import { fetchKelas, fetchJurusan, graduateSiswa } from '@/lib/schoolService';
+import { currentGraduationYear } from '@/lib/tahunAjaran';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useManualRefresh } from '@/lib/useManualRefresh';
 import * as XLSX from 'xlsx';
@@ -172,6 +173,18 @@ export default function AdminUsers() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [newAccountInfo, setNewAccountInfo] = useState<any>(null);
 
+  // ── Luluskan siswa ke alumni ─────────────────────────────
+  const [isGraduateOpen, setIsGraduateOpen] = useState(false);
+  const [graduateTarget, setGraduateTarget] = useState<UserListItem | null>(null);
+  const [graduateForm, setGraduateForm] = useState<{
+    status: 'Kuliah' | 'Kerja' | 'Lainnya';
+    institusi: string;
+    jabatanAtauJurusan: string;
+    tahunLulus: number;
+    prestasi: string;
+  }>({ status: 'Kuliah', institusi: '', jabatanAtauJurusan: '', tahunLulus: currentGraduationYear(), prestasi: '' });
+  const [graduating, setGraduating] = useState(false);
+
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importType, setImportType] = useState<'siswa' | 'guru'>('siswa');
   const [importProgress, setImportProgress] = useState<{ total: number; done: number; errors: string[] } | null>(null);
@@ -222,7 +235,7 @@ export default function AdminUsers() {
     loadMetadata();
   }, 20_000);
 
-  const [refreshing, refreshAll] = useManualRefresh(fetchUsersData, loadMetadata);
+  const [refreshing, refresh] = useManualRefresh(fetchUsersData, loadMetadata);
 
   const filteredUsers = users.filter(user => {
     const low = searchTerm.toLowerCase();
@@ -412,6 +425,56 @@ export default function AdminUsers() {
   };
 
   const confirmDelete = (id: string) => { setDeletingId(id); setIsAlertOpen(true); };
+
+  // ── Luluskan siswa → buka dialog ────────────────────────
+  const handleOpenGraduate = (user: UserListItem) => {
+    setGraduateTarget(user);
+    setGraduateForm({
+      status: 'Kuliah',
+      institusi: '',
+      jabatanAtauJurusan: '',
+      tahunLulus: currentGraduationYear(),
+      prestasi: '',
+    });
+    setIsGraduateOpen(true);
+  };
+
+  const handleGraduate = async () => {
+    if (!graduateTarget || !graduateTarget.siswaId) return;
+    if (!graduateTarget.nis || !graduateTarget.name) {
+      alert('Data siswa tidak lengkap (NIS/nama).');
+      return;
+    }
+    setGraduating(true);
+    try {
+      await graduateSiswa({
+        siswaId: graduateTarget.siswaId,
+        nis: graduateTarget.nis,
+        nama: graduateTarget.name,
+        tahunLulus: graduateForm.tahunLulus,
+        status: graduateForm.status,
+        institusi: graduateForm.institusi || undefined,
+        jabatanAtauJurusan: graduateForm.jabatanAtauJurusan || undefined,
+        email: graduateTarget.email || undefined,
+        telepon: graduateTarget.phone || undefined,
+        alamat: graduateTarget.address || undefined,
+        prestasi: graduateForm.prestasi || undefined,
+      });
+      addNotif({
+        type: 'success', kind: 'akademik',
+        title: 'Siswa Diluluskan',
+        body: `${graduateTarget.name} telah ditambahkan ke data alumni tahun ${graduateForm.tahunLulus}.`,
+      });
+      setIsGraduateOpen(false);
+      setGraduateTarget(null);
+      await fetchUsersData();
+    } catch (e: any) {
+      alert('Gagal meluluskan siswa: ' + (e.message || 'NIS mungkin sudah terdaftar di alumni.'));
+    } finally {
+      setGraduating(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deletingId) return;
     const user = users.find(u => u.id === deletingId);
@@ -457,13 +520,75 @@ export default function AdminUsers() {
           className="bg-rose-600 hover:bg-rose-500 h-11 px-5 rounded-xl font-bold text-white">
           <FileText className="mr-2 h-4 w-4" /> Ekspor PDF
         </Button>
-        <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+        <Button variant="outline" onClick={refresh} disabled={refreshing}
           className="h-11 w-11 rounded-xl border-white/5 bg-white/5 p-0"
           title="Segarkan data">
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
         </Button>
 
         <div className="ml-auto flex gap-2">
+          {/* Tombol proses kelulusan manual — langsung dari frontend */}
+          <Button onClick={async () => {
+            if (!confirm(
+              'Proses kelulusan akan memindahkan SEMUA siswa kelas 12 ke data alumni.\n\n' +
+              'Pastikan data kelas sudah benar sebelum melanjutkan.\n\nLanjutkan?'
+            )) return;
+            setLoading(true);
+            try {
+              // Ambil semua siswa kelas 12
+              const allSiswa = await fetchSiswa();
+              const kelas12 = allSiswa.filter(s => String(s.gradeLevel) === '12');
+
+              if (kelas12.length === 0) {
+                alert('Tidak ada siswa kelas 12 yang ditemukan.');
+                return;
+              }
+
+              const tahunLulus = currentGraduationYear();
+              let processed = 0;
+              let skipped = 0;
+              const errors: string[] = [];
+
+              for (const siswa of kelas12) {
+                if (!siswa.siswaId || !siswa.nis) { skipped++; continue; }
+                try {
+                  await graduateSiswa({
+                    siswaId: siswa.siswaId,
+                    nis: siswa.nis,
+                    nama: siswa.name,
+                    tahunLulus,
+                    status: 'Lainnya',
+                    jabatanAtauJurusan: siswa.peminatanName || undefined,
+                    email: siswa.email || undefined,
+                    telepon: siswa.phone || undefined,
+                    alamat: siswa.address || undefined,
+                  });
+                  processed++;
+                } catch (e: any) {
+                  // NIS sudah ada di alumni = skip
+                  if (e.message?.includes('unique') || e.message?.includes('duplicate')) {
+                    skipped++;
+                  } else {
+                    errors.push(`${siswa.name}: ${e.message}`);
+                  }
+                }
+              }
+
+              addNotif({
+                type: errors.length > 0 ? 'warning' : 'success',
+                kind: 'akademik',
+                title: 'Proses Kelulusan Selesai',
+                body: `${processed} siswa dipindahkan ke alumni tahun ${tahunLulus}. ${skipped} dilewati (sudah ada). ${errors.length > 0 ? `${errors.length} gagal.` : ''}`,
+              });
+              await fetchUsersData();
+            } catch (e: any) {
+              alert('Gagal memproses kelulusan: ' + e.message);
+            } finally {
+              setLoading(false);
+            }
+          }} variant="outline" className="h-11 border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-xl">
+            <GraduationCap className="mr-2 h-4 w-4" /> Proses Kelulusan
+          </Button>
           <Button onClick={async () => {
             if (!confirm('Buat data demo SMAIT Nur Hidayah? Termasuk 3 admin, 5 guru, 10 siswa, jurusan, dan kelas.')) return;
             setLoading(true);
@@ -609,6 +734,13 @@ export default function AdminUsers() {
                   </TableCell>
                   <TableCell className="text-right p-5">
                     <div className="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                      {user.role === 'siswa' && String(user.gradeLevel) === '12' && (
+                        <Button variant="ghost" size="icon" onClick={() => handleOpenGraduate(user)}
+                          className="h-9 w-9 text-emerald-500 hover:text-white hover:bg-emerald-600 rounded-lg"
+                          title="Luluskan siswa ke data alumni">
+                          <GraduationCap className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(user)}
                         className="h-9 w-9 text-blue-400 hover:text-white hover:bg-blue-600 rounded-lg">
                         <Edit2 className="h-4 w-4" />
@@ -913,6 +1045,87 @@ export default function AdminUsers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ========== Graduate Student Dialog ========== */}
+      <Dialog open={isGraduateOpen} onOpenChange={setIsGraduateOpen}>
+        <DialogContent className="bg-slate-950 border border-white/10 max-w-lg rounded-3xl p-0 overflow-hidden shadow-2xl">
+          <div className="p-6 border-b border-white/5 bg-emerald-500/5">
+            <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-emerald-400" /> Luluskan Siswa
+            </DialogTitle>
+            <p className="text-slate-400 text-xs mt-1">
+              Data siswa akan dipindahkan ke <b>Alumni</b>. Nilai dan prestasi tetap tersimpan.
+            </p>
+          </div>
+
+          <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+            {graduateTarget && (
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Siswa</p>
+                <p className="text-white font-semibold mt-0.5">{graduateTarget.name}</p>
+                <p className="text-xs text-slate-400 font-mono">NIS {graduateTarget.nis} · {graduateTarget.className || 'Tanpa kelas'}</p>
+              </div>
+            )}
+
+            <FormField label="Tahun Lulus" required>
+              <Input type="number" value={graduateForm.tahunLulus}
+                onChange={(e) => setGraduateForm({ ...graduateForm, tahunLulus: parseInt(e.target.value, 10) || currentGraduationYear() })}
+                className="h-11 bg-slate-900 border-white/5 rounded-xl text-white" />
+            </FormField>
+
+            <FormField label="Status Setelah Lulus" required>
+              <Select value={graduateForm.status}
+                onValueChange={(v) => setGraduateForm({ ...graduateForm, status: v as 'Kuliah' | 'Kerja' | 'Lainnya' })}>
+                <SelectTrigger className="h-11 bg-slate-900 border-white/5 rounded-xl text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-white/10">
+                  <SelectItem value="Kuliah">Kuliah</SelectItem>
+                  <SelectItem value="Kerja">Kerja</SelectItem>
+                  <SelectItem value="Lainnya">Lainnya</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormField>
+
+            <FormField label={graduateForm.status === 'Kerja' ? 'Nama Perusahaan / Instansi' : 'Nama Universitas / Institusi'}>
+              <Input value={graduateForm.institusi}
+                onChange={(e) => setGraduateForm({ ...graduateForm, institusi: e.target.value })}
+                placeholder={graduateForm.status === 'Kerja' ? 'Contoh: PT. Astra International' : 'Contoh: Universitas Gadjah Mada'}
+                className="h-11 bg-slate-900 border-white/5 rounded-xl text-white" />
+            </FormField>
+
+            <FormField label={graduateForm.status === 'Kerja' ? 'Jabatan / Posisi' : 'Program Studi / Jurusan'}>
+              <Input value={graduateForm.jabatanAtauJurusan}
+                onChange={(e) => setGraduateForm({ ...graduateForm, jabatanAtauJurusan: e.target.value })}
+                placeholder={graduateForm.status === 'Kerja' ? 'Contoh: Software Engineer' : 'Contoh: Teknik Informatika'}
+                className="h-11 bg-slate-900 border-white/5 rounded-xl text-white" />
+            </FormField>
+
+            <FormField label="Catatan Prestasi (opsional)">
+              <Input value={graduateForm.prestasi}
+                onChange={(e) => setGraduateForm({ ...graduateForm, prestasi: e.target.value })}
+                placeholder="Beasiswa, juara, dll"
+                className="h-11 bg-slate-900 border-white/5 rounded-xl text-white" />
+            </FormField>
+
+            <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 text-xs text-blue-300 leading-relaxed">
+              Data akan masuk ke menu <b>Alumni</b>. Admin & BK bisa memperbarui
+              institusi/jabatan kapan saja saat ada update dari alumni.
+            </div>
+          </div>
+
+          <div className="p-6 border-t border-white/5 bg-white/5 flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setIsGraduateOpen(false)}
+              className="h-11 px-5 rounded-xl text-slate-300 hover:bg-white/5">Batal</Button>
+            <Button onClick={handleGraduate} disabled={graduating}
+              className="h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
+              {graduating ? <Loader2 className="h-4 w-4 animate-spin" /> : (
+                <><GraduationCap className="h-4 w-4 mr-2" /> Luluskan ke Alumni</>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Account info after add */}
       {newAccountInfo && <AccountInfoModal info={newAccountInfo} onClose={() => setNewAccountInfo(null)} />}

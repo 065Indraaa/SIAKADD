@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Chatbot from './Chatbot';
 import NotificationBell from './NotificationBell';
+import { currentTahunAjaran, currentSemester } from '../lib/tahunAjaran';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
@@ -66,6 +67,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       { label: 'Nilai & Rapor', href: '/siswa/grades', icon: BookOpen },
       { label: 'Jadwal', href: '/siswa/schedule', icon: Calendar },
       { label: 'Pencapaian', href: '/siswa/achievements', icon: Award },
+      { label: 'Jejak Alumni', href: '/siswa/alumni', icon: GraduationCap },
     ];
     return [];
   };
@@ -188,7 +190,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <p className="text-sm font-semibold text-foreground">
                 {user?.role === 'admin' ? 'Panel Administrator' : user?.role === 'guru' ? 'Panel Pengajar' : 'Portal Siswa'}
               </p>
-              <p className="text-[11px] text-muted-foreground">SMAIT Nur Hidayah Sukoharjo — T.A. 2024/2025</p>
+              <p className="text-[11px] text-muted-foreground">SMAIT Nur Hidayah Sukoharjo · T.A. {currentTahunAjaran()} · Semester {currentSemester()}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -205,7 +207,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto scola-portal">
           {children}
         </main>
       </div>

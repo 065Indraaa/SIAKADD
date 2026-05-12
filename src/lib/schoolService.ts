@@ -26,18 +26,34 @@ import {
   getPenggunaByEmail,
   updateSiswaPeminatan,
   StatusAlumni,
-  TipePrestasi
+  TipePrestasi,
+  listSemuaKelasRef,
+  listKelasByTingkatRef,
+  listJurusanRef,
+  listMataPelajaranRef,
+  getJadwalByKelasRef,
+  getJadwalByGuruRef,
+  getNilaiBySiswaRef,
+  getNilaiByKelasRef,
+  listPrestasiRef,
+  listAlumniRef,
 } from '@uassiakad/connector';
+import { executeQuery } from 'firebase/data-connect';
 
 import { dataConnect } from './userService';
+import { currentTahunAjaran } from './tahunAjaran';
+
+// Helper: selalu fetch dari server, tidak pakai cache
+const NO_CACHE = { fetchPolicy: 'SERVER_ONLY' as const };
 
 // ============================================================
 // KELAS
 // ============================================================
 export async function fetchKelas(tingkat?: number) {
-  const res = tingkat 
-    ? await listKelasByTingkat(dataConnect, { tingkat })
-    : await listSemuaKelas(dataConnect);
+  const ref = tingkat
+    ? listKelasByTingkatRef(dataConnect, { tingkat })
+    : listSemuaKelasRef(dataConnect);
+  const res = await executeQuery(ref, NO_CACHE);
   return res.data.kelass.map((k) => ({
     id: k.id,
     name: k.nama,
@@ -54,7 +70,7 @@ export async function addKelas(data: any) {
   return await createKelas(dataConnect, {
     nama: data.name,
     tingkat: parseInt(data.level),
-    tahunAjaran: '2023/2024',
+    tahunAjaran: data.tahunAjaran || currentTahunAjaran(),
     jurusanId: data.jurusanId,
     waliKelasId: data.waliKelasId
   });
@@ -74,7 +90,7 @@ export async function editKelas(id: string, data: any) {
 // JURUSAN
 // ============================================================
 export async function fetchJurusan() {
-  const res = await listJurusan(dataConnect);
+  const res = await executeQuery(listJurusanRef(dataConnect), NO_CACHE);
   return res.data.jurusans.map((j) => ({
     id: j.id,
     kode: j.kode,
@@ -102,7 +118,7 @@ export async function removeJurusan(id: string) {
 }
 
 export async function fetchMataPelajaran() {
-  const res = await listMataPelajaran(dataConnect);
+  const res = await executeQuery(listMataPelajaranRef(dataConnect), NO_CACHE);
   return res.data.mataPelajarans;
 }
 
@@ -130,13 +146,13 @@ export async function removeMataPelajaran(id: string) {
 // ============================================================
 import { createJadwal, deleteJadwal } from '@uassiakad/connector';
 
-export async function fetchJadwalKelas(kelasId: string, tahunAjaran: string = '2023/2024') {
-  const res = await getJadwalByKelas(dataConnect, { kelasId, tahunAjaran });
+export async function fetchJadwalKelas(kelasId: string, tahunAjaran: string = currentTahunAjaran()) {
+  const res = await executeQuery(getJadwalByKelasRef(dataConnect, { kelasId, tahunAjaran }), NO_CACHE);
   return res.data.jadwals;
 }
 
-export async function fetchJadwalGuru(guruId: string, tahunAjaran: string = '2023/2024') {
-  const res = await getJadwalByGuru(dataConnect, { guruId, tahunAjaran });
+export async function fetchJadwalGuru(guruId: string, tahunAjaran: string = currentTahunAjaran()) {
+  const res = await executeQuery(getJadwalByGuruRef(dataConnect, { guruId, tahunAjaran }), NO_CACHE);
   return res.data.jadwals;
 }
 
@@ -149,7 +165,7 @@ export async function addJadwalData(data: any) {
     jamSelesai: data.jamSelesai,
     hari: data.hari,
     ruangan: data.ruangan,
-    tahunAjaran: data.tahunAjaran || '2023/2024',
+    tahunAjaran: data.tahunAjaran || currentTahunAjaran(),
     semester: data.semester || 'Ganjil'
   });
 }
@@ -162,7 +178,7 @@ export async function removeJadwalData(id: string) {
 // NILAI
 // ============================================================
 export async function fetchNilaiSiswa(siswaId: string, semester: string, tahunAjaran: string) {
-  const res = await getNilaiBySiswa(dataConnect, { siswaId, semester, tahunAjaran });
+  const res = await executeQuery(getNilaiBySiswaRef(dataConnect, { siswaId, semester, tahunAjaran }), NO_CACHE);
   return res.data.nilais;
 }
 
@@ -170,7 +186,7 @@ export async function fetchNilaiSiswa(siswaId: string, semester: string, tahunAj
 // PRESTASI
 // ============================================================
 export async function fetchPrestasiSiswa(siswaId?: string) {
-  const res = await listPrestasi(dataConnect, { siswaId });
+  const res = await executeQuery(listPrestasiRef(dataConnect, { siswaId }), NO_CACHE);
   return res.data.prestasis;
 }
 
@@ -189,8 +205,13 @@ export async function addPrestasi(data: any) {
 // ============================================================
 // ALUMNI
 // ============================================================
-export async function fetchAlumni() {
-  const res = await listAlumni(dataConnect);
+
+/**
+ * Ambil daftar alumni. Jika `tahunLulus` di-set, filter ke tahun tsb.
+ * Jika kosong / undefined, ambil semua.
+ */
+export async function fetchAlumni(tahunLulus?: number) {
+  const res = await executeQuery(listAlumniRef(dataConnect, { tahunLulus }), NO_CACHE);
   return res.data.alumnis.map(a => ({
     id: a.id,
     nis: a.nis,
@@ -236,6 +257,48 @@ export async function editAlumniData(id: string, data: any) {
 
 export async function removeAlumniData(id: string) {
   return await deleteAlumni(dataConnect, { id });
+}
+
+// ============================================================
+// GRADUATION — pindahkan siswa ke alumni
+// ============================================================
+
+/**
+ * Meluluskan siswa — pindahkan ke tabel Alumni.
+ *
+ * Catatan:
+ * - Nilai, prestasi, dan histori akademik TETAP tersimpan di database karena
+ *   tabel Alumni terpisah dari Siswa. Admin/BK masih bisa melihat nama, NIS,
+ *   dan track record lulusan di halaman Alumni.
+ * - Setelah diluluskan, akun siswa (Pengguna) TETAP dipertahankan agar siswa
+ *   bisa login (jika dibutuhkan) dan agar relasi ke prestasi/nilai lama
+ *   tidak broken. Yang berubah hanya status keanggotaan.
+ */
+export async function graduateSiswa(params: {
+  siswaId: string;
+  nis: string;
+  nama: string;
+  tahunLulus: number;
+  status: 'Kuliah' | 'Kerja' | 'Lainnya';
+  institusi?: string;
+  jabatanAtauJurusan?: string;
+  email?: string;
+  telepon?: string;
+  alamat?: string;
+  prestasi?: string;
+}) {
+  return await createAlumni(dataConnect, {
+    nis: params.nis,
+    nama: params.nama,
+    tahunLulus: params.tahunLulus,
+    status: params.status as StatusAlumni,
+    institusi: params.institusi || null,
+    jabatanAtauJurusan: params.jabatanAtauJurusan || null,
+    email: params.email || null,
+    telepon: params.telepon || null,
+    alamat: params.alamat || null,
+    prestasi: params.prestasi || null,
+  });
 }
 
 export async function savePeminatan(siswaId: string, jurusanId: string | null) {

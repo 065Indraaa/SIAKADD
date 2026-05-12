@@ -26,13 +26,21 @@ import {
   JenisKelamin,
   PeranPengguna,
   JabatanGuru,
+  listGuruRef,
+  listSemuaSiswaRef,
+  listSiswaByKelasRef,
+  listPenggunaRef,
 } from '@uassiakad/connector';
+import { executeQuery } from 'firebase/data-connect';
 
 import { getDataConnect } from 'firebase/data-connect';
 import { connectorConfig } from '@uassiakad/connector';
 import { app } from './firebase';
 
 export const dataConnect = getDataConnect(app, connectorConfig);
+
+// Helper: selalu fetch dari server, tidak pakai cache
+const NO_CACHE = { fetchPolicy: 'SERVER_ONLY' as const };
 
 // ============================================================
 // PAYLOAD TYPES
@@ -271,7 +279,7 @@ export async function createAdminWithAccount(payload: { name: string; email?: st
 // ============================================================
 
 export async function fetchGuru(): Promise<UserListItem[]> {
-  const result = await listGuru(dataConnect);
+  const result = await executeQuery(listGuruRef(dataConnect), NO_CACHE);
   return result.data.gurus.map((t) => ({
     id: t.pengguna.id,
     guruId: t.id,
@@ -291,9 +299,9 @@ export async function fetchGuru(): Promise<UserListItem[]> {
 }
 
 export async function fetchSiswa(classId?: string): Promise<UserListItem[]> {
-  const result = classId 
-    ? await listSiswaByKelas(dataConnect, { kelasId: classId })
-    : await listSemuaSiswa(dataConnect);
+  const result = classId
+    ? await executeQuery(listSiswaByKelasRef(dataConnect, { kelasId: classId }), NO_CACHE)
+    : await executeQuery(listSemuaSiswaRef(dataConnect), NO_CACHE);
   return result.data.siswas.map((s) => ({
     id: s.pengguna.id,
     siswaId: s.id,
@@ -319,7 +327,7 @@ export async function fetchSiswa(classId?: string): Promise<UserListItem[]> {
 }
 
 export async function fetchAdmin(): Promise<UserListItem[]> {
-  const result = await listPengguna(dataConnect, { peran: PeranPengguna.admin });
+  const result = await executeQuery(listPenggunaRef(dataConnect, { peran: PeranPengguna.admin }), NO_CACHE);
   return result.data.penggunas.map((u) => ({
     id: u.id,
     name: u.nama,
@@ -485,13 +493,14 @@ export async function seedDemoData() {
     }
 
     // --- 5. KELAS (kelas 10 campur, kelas 11 rumpun A/B/C) ---
+    const TA = (await import('./tahunAjaran')).currentTahunAjaran();
     const kelasData = [
-      { nama: 'X-1', tingkat: 10, tahunAjaran: '2024/2025', jurusanId: undefined, waliKelasId: guruIds[2] },
-      { nama: 'X-2', tingkat: 10, tahunAjaran: '2024/2025', jurusanId: undefined, waliKelasId: guruIds[3] },
-      { nama: 'XI-A-1', tingkat: 11, tahunAjaran: '2024/2025', jurusanId: jurusanIds['A'], waliKelasId: guruIds[2] },
-      { nama: 'XI-B-1', tingkat: 11, tahunAjaran: '2024/2025', jurusanId: jurusanIds['B'], waliKelasId: guruIds[4] },
-      { nama: 'XI-C-1', tingkat: 11, tahunAjaran: '2024/2025', jurusanId: jurusanIds['C'], waliKelasId: guruIds[3] },
-      { nama: 'XII-A-1', tingkat: 12, tahunAjaran: '2024/2025', jurusanId: jurusanIds['A'], waliKelasId: guruIds[4] },
+      { nama: 'X-1', tingkat: 10, tahunAjaran: TA, jurusanId: undefined, waliKelasId: guruIds[2] },
+      { nama: 'X-2', tingkat: 10, tahunAjaran: TA, jurusanId: undefined, waliKelasId: guruIds[3] },
+      { nama: 'XI-A-1', tingkat: 11, tahunAjaran: TA, jurusanId: jurusanIds['A'], waliKelasId: guruIds[2] },
+      { nama: 'XI-B-1', tingkat: 11, tahunAjaran: TA, jurusanId: jurusanIds['B'], waliKelasId: guruIds[4] },
+      { nama: 'XI-C-1', tingkat: 11, tahunAjaran: TA, jurusanId: jurusanIds['C'], waliKelasId: guruIds[3] },
+      { nama: 'XII-A-1', tingkat: 12, tahunAjaran: TA, jurusanId: jurusanIds['A'], waliKelasId: guruIds[4] },
     ];
     const kelasIds: string[] = [];
     for (const k of kelasData) {

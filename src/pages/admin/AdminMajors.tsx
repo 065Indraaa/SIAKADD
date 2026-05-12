@@ -53,7 +53,7 @@ export default function AdminMajors() {
 
   useAutoRefresh(loadData, 20_000);
 
-  const [refreshing, refreshAll] = useManualRefresh(loadData);
+  const [refreshing, refresh] = useManualRefresh(loadData);
 
   const handleOpenAdd = () => {
     setEditingMajor(null);
@@ -131,7 +131,7 @@ export default function AdminMajors() {
           <p className="text-slate-300 mt-1">Kelola daftar rumpun peminatan SMAIT Nur Hidayah (A/B/C) yang dipilih siswa mulai kelas 11.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+          <Button variant="outline" onClick={refresh} disabled={refreshing}
             className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0"
             title="Segarkan data">
             <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />

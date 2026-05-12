@@ -16,6 +16,7 @@ import { deleteKelas } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useManualRefresh } from '@/lib/useManualRefresh';
+import { currentTahunAjaran, buildTahunAjaranOptions } from '@/lib/tahunAjaran';
 
 // Kurikulum Merdeka — Fase E (Kelas 10), Fase F (Kelas 11-12)
 const TINGKAT_OPTIONS = [
@@ -23,15 +24,6 @@ const TINGKAT_OPTIONS = [
   { value: '11', label: 'Kelas 11 — Fase F', hint: 'Kurikulum Merdeka' },
   { value: '12', label: 'Kelas 12 — Fase F', hint: 'Kurikulum Merdeka' },
 ];
-
-// Kelas 10 campur tanpa pembagian putra/putri.
-// Kelas 11: Rumpun A (2 kls), B (1 kls), C (2 kls).
-
-function generateTahunAjaran(): string[] {
-  const now = new Date();
-  const y = now.getFullYear();
-  return [`${y - 1}/${y}`, `${y}/${y + 1}`, `${y + 1}/${y + 2}`];
-}
 
 // Generate class name suggestions based on level + jurusan code
 function suggestKelasName(level: string, jurusanKode: string, roman: boolean = true) {
@@ -78,7 +70,7 @@ export default function AdminClasses() {
 
   useAutoRefresh(loadData, 20_000);
 
-  const [refreshing, refreshAll] = useManualRefresh(loadData);
+  const [refreshing, refresh] = useManualRefresh(loadData);
 
   const filteredClasses = classes.filter(cls =>
     cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -95,7 +87,7 @@ export default function AdminClasses() {
         level: String(cls.level),
         waliKelasId: cls.homeroomId || '',
         jurusanId: cls.jurusanId || '',
-        tahunAjaran: cls.tahunAjaran || generateTahunAjaran()[1],
+        tahunAjaran: cls.tahunAjaran || currentTahunAjaran(),
       });
     } else {
       setFormData({
@@ -103,7 +95,7 @@ export default function AdminClasses() {
         level: '10',
         waliKelasId: '',
         jurusanId: '',
-        tahunAjaran: generateTahunAjaran()[1],
+        tahunAjaran: currentTahunAjaran(),
       });
     }
     setIsDialogOpen(true);
@@ -179,7 +171,7 @@ export default function AdminClasses() {
           <p className="text-slate-300 mt-1">Kelola kelas 10 (umum) dan kelas 11. Kelas 11: Rumpun A (2 kls), B (1 kls), C (2 kls).</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+          <Button variant="outline" onClick={refresh} disabled={refreshing}
             className="h-11 w-11 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 p-0"
             title="Segarkan data">
             <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
@@ -374,12 +366,12 @@ export default function AdminClasses() {
 
             <div className="space-y-1.5">
               <Label className="text-slate-200 text-xs font-semibold">Tahun Ajaran</Label>
-              <Select value={formData.tahunAjaran || generateTahunAjaran()[1]} onValueChange={(v) => setFormData({ ...formData, tahunAjaran: v || generateTahunAjaran()[1] })}>
+              <Select value={formData.tahunAjaran || currentTahunAjaran()} onValueChange={(v) => setFormData({ ...formData, tahunAjaran: v || currentTahunAjaran() })}>
                 <SelectTrigger className="h-11 bg-slate-900 border-white/10 rounded-lg text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-900 border-white/10">
-                  {generateTahunAjaran().map(ta => (
+                  {buildTahunAjaranOptions().map(ta => (
                     <SelectItem key={ta} value={ta} className="text-white">{ta}</SelectItem>
                   ))}
                 </SelectContent>

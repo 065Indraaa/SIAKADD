@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookOpen, Award, CheckCircle, Loader2, Sparkles, Calendar, ArrowRight, Zap } from 'lucide-react';
+import { Users, BookOpen, Award, CheckCircle, Loader2, Calendar, ArrowRight } from 'lucide-react';
 import GuruGrades from './GuruGrades';
 import GuruAchievements from './GuruAchievements';
 import GuruStudents from './GuruStudents';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchJadwalGuru } from '@/lib/schoolService';
+import { currentTahunAjaran, currentSemester } from '@/lib/tahunAjaran';
 import { listPrestasi } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
 
@@ -32,7 +33,7 @@ function GuruOverview() {
       const myGuruId = user?.guruId;
 
       if (myGuruId) {
-        const jadwal = await fetchJadwalGuru(myGuruId, '2024/2025');
+        const jadwal = await fetchJadwalGuru(myGuruId, currentTahunAjaran());
         const hariIni = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
         const jadwalHariIni = jadwal.filter((j: any) => j.hari.toLowerCase() === hariIni.toLowerCase());
         setTodaySchedule(jadwalHariIni);
@@ -71,131 +72,106 @@ function GuruOverview() {
   }
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-3">
-             <Zap className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Panel Pendidik Cerdas</span>
-          </div>
-          <h2 className="text-5xl font-black tracking-tighter text-white font-heading leading-none">
+          <h2 className="text-2xl font-bold text-foreground">
             Halo, {user?.name.split(' ')[0]}!
           </h2>
-          <p className="text-slate-400 font-medium mt-4 text-lg max-w-xl">
-             Sistem telah memverifikasi data Anda. Berikut adalah ringkasan performa kelas yang Anda ampu hari ini.
+          <p className="text-muted-foreground mt-1 text-sm max-w-xl">
+            Berikut ringkasan kelas yang Anda ampu.
           </p>
         </div>
-        <div className="bg-white/5 border border-white/5 p-4 rounded-3xl flex items-center gap-4 backdrop-blur-2xl">
-           <div className="h-12 w-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
-              <Calendar className="h-6 w-6" />
-           </div>
-           <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tahun Ajaran</p>
-              <p className="text-white font-bold">2024/2025 • Genap</p>
-           </div>
+        <div className="scola-card px-4 py-2.5 flex items-center gap-3 rounded-xl">
+          <Calendar className="h-4 w-4 text-blue-500" />
+          <div>
+            <p className="text-[11px] text-muted-foreground leading-none">Tahun Ajaran</p>
+            <p className="text-sm font-semibold text-foreground mt-0.5">{currentTahunAjaran()} · {currentSemester()}</p>
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { title: "Mata Pelajaran", val: user?.specialization || "Umum", sub: "Spesialisasi Terdaftar", icon: BookOpen, color: "text-blue-400" },
-          { title: "Kelas Diampu", val: stats.kelasDiajar.toString(), sub: "Dari jadwal aktif", icon: Users, color: "text-purple-400" },
-          { title: "Jabatan", val: user?.jabatan || "Guru", sub: "Status Struktural", icon: CheckCircle, color: "text-emerald-400" },
-          { title: "Prestasi Dicatat", val: stats.prestasiDicatat.toString(), sub: "Total di sistem", icon: Award, color: "text-amber-400" },
+          { title: "Mata Pelajaran", val: user?.specialization || "Umum", sub: "Spesialisasi terdaftar", icon: BookOpen, color: "text-blue-500" },
+          { title: "Kelas Diampu", val: stats.kelasDiajar.toString(), sub: "Dari jadwal aktif", icon: Users, color: "text-purple-500" },
+          { title: "Jabatan", val: user?.jabatan || "Guru", sub: "Status struktural", icon: CheckCircle, color: "text-emerald-500" },
+          { title: "Prestasi Dicatat", val: stats.prestasiDicatat.toString(), sub: "Total di sistem", icon: Award, color: "text-amber-500" },
         ].map((stat, i) => (
-          <Card key={i} className="bg-slate-900/40 border-white/5 rounded-3xl shadow-xl hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-               <stat.icon className="h-20 w-20" />
+          <div key={i} className="scola-stat-card p-5">
+            <div className={`w-9 h-9 rounded-xl bg-muted flex items-center justify-center mb-3`}>
+              <stat.icon className={`w-4 h-4 ${stat.color}`} />
             </div>
-            <CardHeader className="p-6 pb-2">
-              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500">{stat.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 pt-0">
-              <div className={`text-3xl font-black tracking-tighter ${stat.color} mb-1`}>{stat.val}</div>
-              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{stat.sub}</p>
-            </CardContent>
-          </Card>
+            <p className="text-xl font-bold text-foreground">{stat.val}</p>
+            <p className="text-xs font-medium text-muted-foreground mt-0.5">{stat.title}</p>
+            <p className="text-[11px] text-muted-foreground/70 mt-0.5">{stat.sub}</p>
+          </div>
         ))}
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 bg-slate-900/40 border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden">
-          <CardHeader className="p-8 border-b border-white/5 flex flex-row items-center justify-between">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        {/* Jadwal hari ini */}
+        <div className="col-span-4 scola-card p-0 overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
             <div>
-               <CardTitle className="text-white font-heading font-black text-2xl italic">Jadwal Hari Ini</CardTitle>
-               <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Linimasa Pengajaran</p>
+              <h3 className="text-sm font-semibold text-foreground">Jadwal Hari Ini</h3>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </p>
             </div>
-            <Sparkles className="h-6 w-6 text-blue-500 animate-pulse" />
-          </CardHeader>
-          <CardContent className="p-8 space-y-6">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="divide-y divide-border">
             {todaySchedule.length === 0 ? (
-              <div className="text-center py-20 bg-slate-950/30 rounded-[2rem] border border-dashed border-white/5">
-                <div className="h-16 w-16 bg-slate-900 rounded-2xl mx-auto flex items-center justify-center mb-4 opacity-30 italic font-black text-2xl">—</div>
-                <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Hari ini tidak ada jadwal mengajar.</p>
+              <div className="py-10 text-center">
+                <p className="text-sm text-muted-foreground">Tidak ada jadwal mengajar hari ini.</p>
               </div>
             ) : (
               todaySchedule.map((s, idx) => (
-                <div key={idx} className="group relative flex items-center justify-between p-6 bg-slate-950/50 hover:bg-slate-900 border border-white/5 rounded-3xl transition-all duration-300">
-                  <div className="flex items-center gap-6">
-                     <div className="h-14 w-14 rounded-2xl bg-blue-600/10 border border-blue-500/10 flex flex-col items-center justify-center leading-none">
-                        <span className="text-[10px] font-black text-blue-500 uppercase">Jam</span>
-                        <span className="text-lg font-black text-white">{idx + 1}</span>
-                     </div>
-                     <div>
-                        <p className="font-black text-xl text-white tracking-tight">{s.mataPelajaran?.nama || 'Sesi Belajar'}</p>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{s.jamMulai} — {s.jamSelesai}</p>
-                     </div>
+                <div key={idx} className="flex items-center justify-between px-6 py-4 hover:bg-accent transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 text-sm font-bold flex-shrink-0">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{s.mataPelajaran?.nama || 'Sesi Belajar'}</p>
+                      <p className="text-[11px] text-muted-foreground">{s.jamMulai} — {s.jamSelesai}</p>
+                    </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-black text-xl text-blue-400 tracking-tighter">{s.kelas?.nama}</p>
-                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Ruang {s.ruangan}</p>
+                    <p className="text-sm font-semibold text-foreground">{s.kelas?.nama}</p>
+                    <p className="text-[11px] text-muted-foreground">{s.ruangan || '—'}</p>
                   </div>
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="col-span-3 bg-slate-900/40 border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden h-fit">
-          <CardHeader className="p-8 border-b border-white/5">
-            <CardTitle className="text-white font-heading font-black text-2xl italic">Alur Kerja</CardTitle>
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Akses Cepat Fungsional</p>
-          </CardHeader>
-          <CardContent className="p-8 space-y-4">
-            <Link to="grades" className="group flex items-center gap-6 p-6 rounded-3xl bg-slate-950/50 hover:bg-blue-600 border border-white/5 transition-all duration-500">
-              <div className="p-4 rounded-2xl bg-blue-600/10 group-hover:bg-white/20 text-blue-400 group-hover:text-white transition-colors">
-                 <CheckCircle className="h-7 w-7" />
-              </div>
-              <div className="flex-1">
-                <p className="font-black text-lg text-white group-hover:translate-x-1 transition-transform">Input Nilai</p>
-                <p className="text-xs font-bold text-slate-500 group-hover:text-white/70 uppercase tracking-widest">Harian • UTS • UAS</p>
-              </div>
-              <ArrowRight className="h-5 w-5 text-slate-700 group-hover:text-white transition-all transform group-hover:rotate-[-45deg]" />
-            </Link>
-            
-            <Link to="achievements" className="group flex items-center gap-6 p-6 rounded-3xl bg-slate-950/50 hover:bg-emerald-600 border border-white/5 transition-all duration-500">
-              <div className="p-4 rounded-2xl bg-emerald-600/10 group-hover:bg-white/20 text-emerald-400 group-hover:text-white transition-colors">
-                 <Award className="h-7 w-7" />
-              </div>
-              <div className="flex-1">
-                <p className="font-black text-lg text-white group-hover:translate-x-1 transition-transform">Catat Prestasi</p>
-                <p className="text-xs font-bold text-slate-500 group-hover:text-white/70 uppercase tracking-widest">Sertifikasi • Lomba</p>
-              </div>
-              <ArrowRight className="h-5 w-5 text-slate-700 group-hover:text-white transition-all transform group-hover:rotate-[-45deg]" />
-            </Link>
-
-            <Link to="students" className="group flex items-center gap-6 p-6 rounded-3xl bg-slate-950/50 hover:bg-purple-600 border border-white/5 transition-all duration-500">
-              <div className="p-4 rounded-2xl bg-purple-600/10 group-hover:bg-white/20 text-purple-400 group-hover:text-white transition-colors">
-                 <Users className="h-7 w-7" />
-              </div>
-              <div className="flex-1">
-                <p className="font-black text-lg text-white group-hover:translate-x-1 transition-transform">Data Murid</p>
-                <p className="text-xs font-bold text-slate-500 group-hover:text-white/70 uppercase tracking-widest">Profil • Kehadiran</p>
-              </div>
-              <ArrowRight className="h-5 w-5 text-slate-700 group-hover:text-white transition-all transform group-hover:rotate-[-45deg]" />
-            </Link>
-          </CardContent>
-        </Card>
+        {/* Akses cepat */}
+        <div className="col-span-3 scola-card p-0 overflow-hidden h-fit">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-sm font-semibold text-foreground">Akses Cepat</h3>
+          </div>
+          <div className="p-4 space-y-2">
+            {[
+              { label: 'Input Nilai', sub: 'Harian · UTS · UAS', href: 'grades', icon: CheckCircle, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+              { label: 'Catat Prestasi', sub: 'Sertifikasi · Lomba', href: 'achievements', icon: Award, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+              { label: 'Data Murid', sub: 'Profil · Kehadiran', href: 'students', icon: Users, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+            ].map((item, i) => (
+              <Link key={i} to={item.href} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-muted/50 hover:bg-muted border border-border transition-all group">
+                <div className={`w-9 h-9 rounded-lg ${item.bg} flex items-center justify-center flex-shrink-0`}>
+                  <item.icon className={`w-4 h-4 ${item.color}`} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                  <p className="text-[11px] text-muted-foreground">{item.sub}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

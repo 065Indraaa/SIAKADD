@@ -12,7 +12,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Search, Plus, Loader2, RefreshCw, Trophy, Info, Trash2, Award, Calendar, TextQuote, Star } from 'lucide-react';
 import { addPrestasi } from '@/lib/schoolService';
 import { fetchSiswa, UserListItem } from '@/lib/userService';
-import { listPrestasi, deletePrestasi } from '@uassiakad/connector';
+import { listPrestasi, deletePrestasi, listPrestasiRef } from '@uassiakad/connector';
+import { executeQuery } from 'firebase/data-connect';
 import { dataConnect } from '@/lib/userService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useManualRefresh } from '@/lib/useManualRefresh';
@@ -55,7 +56,7 @@ export default function GuruAchievements() {
     setError(null);
     try {
       const [prestasiRes, siswaData] = await Promise.all([
-        listPrestasi(dataConnect, {}),
+        executeQuery(listPrestasiRef(dataConnect, {}), { fetchPolicy: 'SERVER_ONLY' }),
         fetchSiswa(),
       ]);
       setAllSiswa(siswaData);
@@ -68,8 +69,9 @@ export default function GuruAchievements() {
         peringkat: p.peringkat,
         tanggal: p.tanggal,
         deskripsi: p.deskripsi,
-        siswaId: p.siswaId,
-        siswaName: siswaData.find(s => s.siswaId === p.siswaId)?.name || 'Siswa Terhapus'
+        // Ambil siswaId dan nama dari relasi siswa yang sudah di-join di query
+        siswaId: p.siswa?.id,
+        siswaName: p.siswa?.pengguna?.nama || 'Siswa Terhapus',
       }));
       setAchievements(mapped);
     } catch (e: any) {
@@ -83,7 +85,22 @@ export default function GuruAchievements() {
 
   useAutoRefresh(loadData, 20_000);
 
-  const [refreshing, refreshAll] = useManualRefresh(loadData);
+  const [refreshing, refresh] = useManualRefresh(loadData);
+
+  const handleOpenDialog = () => {
+    // Reset form setiap kali dialog dibuka agar tidak ada sisa data sebelumnya
+    setFormData({
+      siswaId: '',
+      nama: '',
+      tipe: 'Akademik',
+      tingkat: '',
+      peringkat: '',
+      tanggal: new Date().toISOString().slice(0, 10),
+      deskripsi: '',
+    });
+    setError(null);
+    setIsDialogOpen(true);
+  };
 
   const filtered = achievements.filter(a =>
     a.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -140,11 +157,11 @@ export default function GuruAchievements() {
           <p className="text-slate-400 font-medium mt-3">Arsip penghargaan dan pencapaian luar biasa siswa SMA.</p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
-          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+          <Button variant="outline" onClick={refresh} disabled={refreshing}
             className="h-14 px-6 rounded-2xl border-white/5 bg-white/5 text-slate-300" title="Segarkan data">
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
-          <Button onClick={() => setIsDialogOpen(true)} className="bg-emerald-600 hover:bg-emerald-500 h-14 px-8 rounded-2xl font-black shadow-xl shadow-emerald-600/20 text-white flex-1 md:flex-none transition-all active:scale-95">
+          <Button onClick={handleOpenDialog} className="bg-emerald-600 hover:bg-emerald-500 h-11 px-6 rounded-xl font-semibold text-white">
             <Plus className="mr-2 h-5 w-5" /> Catat Prestasi
           </Button>
         </div>
@@ -238,12 +255,14 @@ export default function GuruAchievements() {
                 <LookupSelect
                   value={formData.siswaId}
                   onChange={(v) => setFormData({ ...formData, siswaId: v })}
-                  items={allSiswa.map(s => ({
-                    value: s.siswaId!,
-                    label: s.name,
-                    hint: `NIS ${s.nis || '-'}${s.className ? ' · ' + s.className : ''}`,
-                  }))}
-                  placeholder="Pilih Siswa"
+                  items={allSiswa
+                    .filter(s => !!s.siswaId)
+                    .map(s => ({
+                      value: s.siswaId as string,
+                      label: s.name,
+                      hint: `NIS ${s.nis || '-'}${s.className ? ' · ' + s.className : ''}`,
+                    }))}
+                  placeholder={allSiswa.length ? 'Pilih Siswa' : 'Memuat daftar siswa...'}
                   className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold"
                 />
               </div>
@@ -277,7 +296,8 @@ export default function GuruAchievements() {
                     <Select value={formData.tipe} onValueChange={(v) => setFormData({...formData, tipe: v})}>
                        <SelectTrigger className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold"><SelectValue /></SelectTrigger>
                        <SelectContent className="bg-slate-900 border-white/10 rounded-2xl">
-                          {['Akademik', 'Olahraga', 'Seni', 'Organisasi', 'Lainnya'].map(t => <SelectItem key={t} value={t} className="rounded-xl">{t}</SelectItem>)}
+                          <SelectItem value="Akademik" className="rounded-xl">Akademik</SelectItem>
+                          <SelectItem value="NonAkademik" className="rounded-xl">Non-Akademik (Olahraga, Seni, dll)</SelectItem>
                        </SelectContent>
                     </Select>
                  </div>

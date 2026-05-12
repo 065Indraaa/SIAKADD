@@ -10,12 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Save, Loader2, RefreshCw, CheckCircle2, Info, BookOpen, Calculator, AlertTriangle } from 'lucide-react';
 import { fetchJadwalGuru } from '@/lib/schoolService';
 import { fetchSiswa } from '@/lib/userService';
-import { upsertNilai, getNilaiByKelas } from '@uassiakad/connector';
+import { upsertNilai, getNilaiByKelas, getNilaiByKelasRef } from '@uassiakad/connector';
+import { executeQuery } from 'firebase/data-connect';
 import { dataConnect } from '@/lib/userService';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useManualRefresh } from '@/lib/useManualRefresh';
+import { currentTahunAjaran, currentSemester } from '@/lib/tahunAjaran';
 
 interface SiswaGrade {
   siswaId: string;
@@ -39,18 +41,12 @@ interface TeachingAssignment {
 
 const SEMESTER = ['Ganjil', 'Genap'];
 
-function generateTahunAjaran(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  return now.getMonth() >= 6 ? `${y}/${y + 1}` : `${y - 1}/${y}`;
-}
-
 export default function GuruGrades() {
   const { user } = useAuth();
   const { add: addNotif } = useNotifications();
 
-  const [semester, setSemester] = useState('Ganjil');
-  const [tahunAjaran, setTahunAjaran] = useState(generateTahunAjaran());
+  const [semester, setSemester] = useState(currentSemester());
+  const [tahunAjaran, setTahunAjaran] = useState(currentTahunAjaran());
 
   const [assignments, setAssignments] = useState<TeachingAssignment[]>([]);
   const [selectedKey, setSelectedKey] = useState('');
@@ -93,18 +89,21 @@ export default function GuruGrades() {
         a.kelasNama.localeCompare(b.kelasNama) || a.mataPelajaranNama.localeCompare(b.mataPelajaranNama),
       );
       setAssignments(list);
-      // Jika pilihan lama tidak ada lagi, pilih pertama (kalau ada).
-      if (list.length === 0) {
-        setSelectedKey('');
-      } else if (!list.find(a => a.key === selectedKey)) {
-        setSelectedKey(list[0].key);
-      }
+      // Pilih pertama hanya jika belum ada pilihan valid — pakai functional update
+      // agar tidak perlu selectedKey di deps (mencegah infinite loop).
+      setSelectedKey(prev => {
+        if (list.length === 0) return '';
+        if (list.find(a => a.key === prev)) return prev; // pilihan lama masih valid
+        return list[0].key; // fallback ke pertama
+      });
     } catch (e: any) {
       setError(e.message || 'Gagal memuat daftar kelas & mata pelajaran yang Anda ampu.');
     } finally {
       setLoadingAssignments(false);
     }
-  }, [user?.guruId, semester, tahunAjaran, selectedKey]);
+  // selectedKey SENGAJA tidak dimasukkan ke deps untuk mencegah infinite loop.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.guruId, semester, tahunAjaran]);
 
   useEffect(() => { loadAssignments(); }, [loadAssignments]);
 
@@ -124,10 +123,10 @@ export default function GuruGrades() {
       const { kelasId, mataPelajaranId } = selectedAssignment;
       const siswaData = await fetchSiswa(kelasId);
 
-      const gradesRes = await getNilaiByKelas(dataConnect, {
+      const gradesRes = await executeQuery(getNilaiByKelasRef(dataConnect, {
         kelasId,
         mataPelajaranId,
-      });
+      }), { fetchPolicy: 'SERVER_ONLY' });
       const gradesMap = new Map<string, any>();
       gradesRes.data.nilais.forEach((n: any) => {
         if (n.semester !== semester || n.tahunAjaran !== tahunAjaran) return;
@@ -157,7 +156,7 @@ export default function GuruGrades() {
 
   useAutoRefresh(loadStudentsWithGrades, 20_000);
 
-  const [refreshing, refreshAll] = useManualRefresh(loadAssignments, loadStudentsWithGrades);
+  const [refreshing, refresh] = useManualRefresh(loadAssignments, loadStudentsWithGrades);
 
   const handleNilaiChange = (siswaId: string, field: keyof SiswaGrade, val: string) => {
     setStudents(prev => prev.map(s => s.siswaId === siswaId ? { ...s, [field]: val } : s));
@@ -247,7 +246,7 @@ export default function GuruGrades() {
           <p className="text-slate-300 mt-1">Masukkan nilai harian, UTS, dan UAS. Nilai akhir dihitung otomatis.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+          <Button variant="outline" onClick={refresh} disabled={refreshing}
             className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0"
             title="Segarkan data">
             <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
@@ -299,7 +298,7 @@ export default function GuruGrades() {
             <div className="space-y-1.5">
               <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Tahun Ajaran</Label>
               <Input value={tahunAjaran} onChange={(e) => setTahunAjaran(e.target.value)}
-                placeholder="2024/2025"
+                placeholder={currentTahunAjaran()}
                 className="h-11 bg-slate-950 border-white/10 rounded-lg text-white" />
             </div>
           </div>

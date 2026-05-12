@@ -443,6 +443,13 @@ query ListPrestasi($siswaId: UUID) @auth(level: PUBLIC) {
     peringkat
     tanggal
     deskripsi
+    siswa {
+      id
+      nis
+      pengguna {
+        nama
+      }
+    }
   }
 }
 

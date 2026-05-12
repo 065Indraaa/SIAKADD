@@ -3,24 +3,21 @@ import { useCallback, useRef, useState } from 'react';
 /**
  * Hook untuk tombol refresh manual yang reliable.
  *
- * - Memaksa durasi minimum spin (default 500ms) supaya feedback visual ke user
- *   tetap kelihatan meski data selesai di-fetch dalam waktu sangat cepat.
- * - Menerima satu atau banyak async fetcher sekaligus.
- * - Mengabaikan klik berulang saat refresh sedang berjalan.
+ * Cara kerja:
+ * - Terima satu atau lebih fetcher sebagai argumen
+ * - Klik refresh → panggil semua fetcher + tampilkan spinner
+ * - Fetcher disimpan di ref agar tidak perlu masuk ke deps useCallback
+ * - Minimum spin 600ms agar feedback visual terlihat
  *
  * Contoh:
  *   const [refreshing, refresh] = useManualRefresh(loadData);
- *   <Button onClick={refresh} disabled={refreshing}>...</Button>
- *
- *   // atau untuk banyak fetcher sekaligus:
- *   const [refreshing, refresh] = useManualRefresh(loadMetadata, loadAssignments);
+ *   <Button onClick={refresh} disabled={refreshing}>Refresh</Button>
  */
 export function useManualRefresh(
   ...fetchers: Array<() => void | Promise<void>>
 ): [boolean, () => Promise<void>] {
   const [refreshing, setRefreshing] = useState(false);
   const busyRef = useRef(false);
-  // Simpan fetchers terbaru di ref supaya closure tidak stale.
   const fetchersRef = useRef(fetchers);
   fetchersRef.current = fetchers;
 
@@ -36,17 +33,15 @@ export function useManualRefresh(
             const r = fn();
             return r instanceof Promise ? r : Promise.resolve();
           } catch (e) {
-            return Promise.reject(e);
+            console.error('[useManualRefresh]', e);
+            return Promise.resolve();
           }
         }),
       );
-    } catch (e) {
-      console.error('[useManualRefresh] gagal:', e);
     } finally {
       const elapsed = Date.now() - start;
-      const minSpin = 500;
-      if (elapsed < minSpin) {
-        await new Promise(res => setTimeout(res, minSpin - elapsed));
+      if (elapsed < 600) {
+        await new Promise(res => setTimeout(res, 600 - elapsed));
       }
       busyRef.current = false;
       setRefreshing(false);

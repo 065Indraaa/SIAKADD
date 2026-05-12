@@ -14,16 +14,10 @@ import { fetchKelas, fetchJadwalKelas, addJadwalData, removeJadwalData, fetchMat
 import { fetchGuru } from '@/lib/userService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useManualRefresh } from '@/lib/useManualRefresh';
+import { currentTahunAjaran, currentSemester } from '@/lib/tahunAjaran';
 
 const HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 const SEMESTER = ['Ganjil', 'Genap'];
-
-function generateTahunAjaran(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  // Semester Ganjil: Juli-Desember, Genap: Januari-Juni
-  return now.getMonth() >= 6 ? `${y}/${y + 1}` : `${y - 1}/${y}`;
-}
 
 export default function AdminSchedules() {
   const [kelasList, setKelasList] = useState<any[]>([]);
@@ -31,8 +25,8 @@ export default function AdminSchedules() {
   const [mapelList, setMapelList] = useState<any[]>([]);
   const [kelasFilter, setKelasFilter] = useState('');
   const [hariFilter, setHariFilter] = useState<'semua' | string>('semua');
-  const [semesterFilter, setSemesterFilter] = useState('Ganjil');
-  const [tahunAjaran, setTahunAjaran] = useState(generateTahunAjaran());
+  const [semesterFilter, setSemesterFilter] = useState<'Ganjil' | 'Genap'>(currentSemester());
+  const [tahunAjaran, setTahunAjaran] = useState(currentTahunAjaran());
 
   const [schedules, setSchedules] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -80,11 +74,11 @@ export default function AdminSchedules() {
 
   useAutoRefresh(loadSchedules, 20_000);
 
-  const [refreshing, refreshAll] = useManualRefresh(loadMetadata, loadSchedules);
+  const [refreshing, refresh] = useManualRefresh(loadMetadata, loadSchedules);
 
   const filteredSchedules = schedules
     .filter(s => hariFilter === 'semua' || s.hari.toLowerCase() === hariFilter.toLowerCase())
-    .filter(s => semesterFilter === 'semua' || s.semester === semesterFilter)
+    .filter(s => s.semester === semesterFilter)
     .sort((a, b) => {
       const hariOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       const hariDiff = hariOrder.indexOf(a.hari) - hariOrder.indexOf(b.hari);
@@ -101,7 +95,7 @@ export default function AdminSchedules() {
       mataPelajaranId: '',
       guruId: '',
       ruangan: '',
-      semester: semesterFilter === 'semua' ? 'Ganjil' : semesterFilter,
+      semester: semesterFilter,
       tahunAjaran,
     });
     setError(null);
@@ -162,7 +156,7 @@ export default function AdminSchedules() {
           <p className="text-slate-300 mt-1">Susun jadwal mingguan per kelas, per semester, dan per tahun ajaran.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={refreshAll} disabled={refreshing}
+          <Button variant="outline" onClick={refresh} disabled={refreshing}
             className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0"
             title="Segarkan data">
             <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
@@ -214,7 +208,7 @@ export default function AdminSchedules() {
             <div className="space-y-1.5">
               <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Tahun Ajaran</Label>
               <Input value={tahunAjaran} onChange={(e) => setTahunAjaran(e.target.value)}
-                placeholder="2024/2025"
+                placeholder={currentTahunAjaran()}
                 className="h-11 bg-slate-950 border-white/10 rounded-lg text-white" />
             </div>
           </div>

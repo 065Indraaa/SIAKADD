@@ -138,8 +138,8 @@
 /* ─── Scrollbar ─────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: oklch(1 0 0 / 10%); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: oklch(1 0 0 / 20%); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
 
 /* ─── Design Tokens ─────────────────────────────────────── */
 .scola-sidebar {
@@ -173,7 +173,7 @@
 }
 .scola-stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px oklch(0 0 0 / 15%);
+  box-shadow: 0 12px 40px oklch(0 0 0 / 10%);
 }
 .dark .scola-stat-card:hover {
   border-color: oklch(1 0 0 / 12%);
@@ -215,65 +215,203 @@
   border-radius: 999px;
 }
 
+/* Page header — pakai CSS variable agar responsif light/dark */
 .scola-page-header {
   margin-bottom: 2rem;
 }
 .scola-page-header h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: oklch(0.95 0 0);
+  color: var(--foreground);
   line-height: 1.2;
 }
 .scola-page-header p {
   font-size: 0.875rem;
-  color: oklch(0.58 0 0);
+  color: var(--muted-foreground);
   margin-top: 0.25rem;
 }
 
 /* ─── Table Overrides ────────────────────────────────────── */
 .scola-table thead tr {
-  border-bottom: 1px solid oklch(1 0 0 / 6%);
-  background: oklch(1 0 0 / 3%);
+  border-bottom: 1px solid var(--border);
+  background: var(--muted);
 }
 .scola-table thead th {
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: oklch(0.5 0 0);
+  color: var(--muted-foreground);
   padding: 14px 20px;
 }
 .scola-table tbody tr {
-  border-bottom: 1px solid oklch(1 0 0 / 4%);
+  border-bottom: 1px solid var(--border);
   transition: background 0.15s;
 }
 .scola-table tbody tr:hover {
-  background: oklch(1 0 0 / 3%);
+  background: var(--accent);
 }
 .scola-table tbody td {
   padding: 14px 20px;
   font-size: 0.875rem;
+  color: var(--foreground);
 }
+
+/* ─────────────────────────────────────────────────────────────
+   LIGHT MODE OVERRIDES — Semua halaman dalam layout portal
+   (setelah login). Menimpa class Tailwind hardcoded dark-only
+   agar teks & border terbaca di light mode.
+   ───────────────────────────────────────────────────────────── */
+
+/* Wrapper utama layout portal */
+.scola-portal {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+/* Card & container */
+.scola-portal .bg-slate-900\/60,
+.scola-portal .bg-slate-900\/50,
+.scola-portal .bg-slate-900\/40,
+.scola-portal .bg-slate-900\/30,
+.scola-portal .bg-slate-900\/20 {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+}
+.dark .scola-portal .bg-slate-900\/60 { background: oklch(0.175 0.014 264 / 60%) !important; }
+.dark .scola-portal .bg-slate-900\/50 { background: oklch(0.175 0.014 264 / 50%) !important; }
+.dark .scola-portal .bg-slate-900\/40 { background: oklch(0.175 0.014 264 / 40%) !important; }
+
+/* Teks heading halaman */
+.scola-portal .text-white {
+  color: var(--foreground) !important;
+}
+.dark .scola-portal .text-white {
+  color: oklch(0.96 0 0) !important;
+}
+
+/* Teks sekunder */
+.scola-portal .text-slate-100,
+.scola-portal .text-slate-200,
+.scola-portal .text-slate-300 {
+  color: var(--foreground) !important;
+}
+.dark .scola-portal .text-slate-100,
+.dark .scola-portal .text-slate-200,
+.dark .scola-portal .text-slate-300 {
+  color: oklch(0.85 0 0) !important;
+}
+
+.scola-portal .text-slate-400 {
+  color: var(--muted-foreground) !important;
+}
+.dark .scola-portal .text-slate-400 {
+  color: oklch(0.62 0 0) !important;
+}
+
+.scola-portal .text-slate-500,
+.scola-portal .text-slate-600 {
+  color: var(--muted-foreground) !important;
+  opacity: 0.8;
+}
+.dark .scola-portal .text-slate-500,
+.dark .scola-portal .text-slate-600 {
+  color: oklch(0.5 0 0) !important;
+  opacity: 1;
+}
+
+/* Border */
+.scola-portal .border-white\/10,
+.scola-portal .border-white\/5,
+.scola-portal .border-white\/\[0\.06\],
+.scola-portal .border-white\/\[0\.04\] {
+  border-color: var(--border) !important;
+}
+.dark .scola-portal .border-white\/10 { border-color: oklch(1 0 0 / 10%) !important; }
+.dark .scola-portal .border-white\/5  { border-color: oklch(1 0 0 / 5%) !important; }
+
+/* Hover row tabel */
+.scola-portal .hover\:bg-white\/5:hover,
+.scola-portal .hover\:bg-white\/\[0\.02\]:hover,
+.scola-portal .hover\:bg-white\/\[0\.03\]:hover,
+.scola-portal .hover\:bg-white\/\[0\.05\]:hover {
+  background: var(--accent) !important;
+}
+.dark .scola-portal .hover\:bg-white\/5:hover { background: oklch(1 0 0 / 5%) !important; }
+
+/* Background transparan putih (card inner) */
+.scola-portal .bg-white\/5,
+.scola-portal .bg-white\/\[0\.03\],
+.scola-portal .bg-white\/\[0\.04\],
+.scola-portal .bg-white\/\[0\.05\] {
+  background: var(--muted) !important;
+}
+.dark .scola-portal .bg-white\/5 { background: oklch(1 0 0 / 5%) !important; }
+.dark .scola-portal .bg-white\/\[0\.03\] { background: oklch(1 0 0 / 3%) !important; }
+
+/* TableHeader background */
+.scola-portal thead tr,
+.scola-portal .bg-slate-950\/50,
+.scola-portal .bg-slate-950\/30,
+.scola-portal .bg-slate-950\/20 {
+  background: var(--muted) !important;
+}
+.dark .scola-portal thead tr { background: oklch(0.115 0.018 264 / 50%) !important; }
+.dark .scola-portal .bg-slate-950\/50 { background: oklch(0.115 0.018 264 / 50%) !important; }
+
+/* Input dalam halaman portal */
+.scola-portal .bg-slate-950 {
+  background: var(--input) !important;
+  color: var(--foreground) !important;
+}
+.dark .scola-portal .bg-slate-950 { background: oklch(0.115 0.018 264) !important; }
+
+/* Placeholder input */
+.scola-portal .placeholder\:text-slate-400::placeholder,
+.scola-portal .placeholder\:text-slate-500::placeholder {
+  color: var(--muted-foreground) !important;
+  opacity: 0.7;
+}
+
+/* Divide (garis pemisah baris) */
+.scola-portal .divide-white\/\[0\.04\] > * + *,
+.scola-portal .divide-white\/\[0\.06\] > * + * {
+  border-color: var(--border) !important;
+}
+
+/* Wrapper class text-slate-100 yang dipakai di banyak halaman */
+.scola-portal.text-slate-100,
+.scola-portal > .text-slate-100,
+.scola-portal .text-slate-100 {
+  color: var(--foreground) !important;
+}
+
+/* Badge warna yang hardcoded untuk dark */
+.scola-portal .bg-blue-500\/10 { background: oklch(0.52 0.22 264 / 10%) !important; }
+.scola-portal .bg-emerald-500\/10 { background: oklch(0.6 0.18 160 / 10%) !important; }
+.scola-portal .bg-amber-500\/10 { background: oklch(0.7 0.2 60 / 10%) !important; }
+.scola-portal .bg-violet-500\/10 { background: oklch(0.6 0.2 290 / 10%) !important; }
+.scola-portal .bg-red-500\/10 { background: oklch(0.577 0.245 27 / 10%) !important; }
 
 /* ─── Input Overrides ────────────────────────────────────── */
 .scola-input {
-  background: oklch(0.12 0.012 264) !important;
-  border: 1px solid oklch(1 0 0 / 8%) !important;
+  background: var(--input) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 10px !important;
-  color: oklch(0.94 0 0) !important;
+  color: var(--foreground) !important;
   font-size: 0.875rem !important;
   height: 42px !important;
   transition: border-color 0.15s;
 }
 .scola-input:focus {
-  border-color: oklch(0.488 0.243 264.376 / 60%) !important;
+  border-color: var(--ring) !important;
   outline: none !important;
 }
 
 /* ─── Button Overrides ────────────────────────────────────── */
 .scola-btn-primary {
-  background: oklch(0.488 0.243 264.376);
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-foreground);
   border-radius: 10px;
   font-weight: 600;
   font-size: 0.875rem;
@@ -285,10 +423,10 @@
   border: none;
   cursor: pointer;
   transition: all 0.15s;
-  box-shadow: 0 4px 14px oklch(0.488 0.243 264.376 / 25%);
+  box-shadow: 0 4px 14px oklch(0.488 0.243 264.376 / 20%);
 }
 .scola-btn-primary:hover {
-  background: oklch(0.53 0.243 264.376);
+  opacity: 0.9;
   transform: translateY(-1px);
 }
 .scola-btn-primary:active { transform: scale(0.98); }
@@ -300,8 +438,8 @@
 
 .scola-btn-ghost {
   background: transparent;
-  color: oklch(0.58 0 0);
-  border: 1px solid oklch(1 0 0 / 8%);
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
   border-radius: 10px;
   font-weight: 500;
   font-size: 0.875rem;
@@ -314,15 +452,18 @@
   transition: all 0.15s;
 }
 .scola-btn-ghost:hover {
-  background: oklch(1 0 0 / 5%);
-  color: oklch(0.92 0 0);
-  border-color: oklch(1 0 0 / 12%);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--border);
 }
 
 /* ─── Grade Badge ────────────────────────────────────────── */
-.grade-excellent { color: #34d399; font-weight: 700; }
-.grade-good { color: #60a5fa; font-weight: 700; }
-.grade-warn { color: #fbbf24; font-weight: 700; }
+.grade-excellent { color: #16a34a; font-weight: 700; }
+.grade-good { color: #2563eb; font-weight: 700; }
+.grade-warn { color: #d97706; font-weight: 700; }
+.dark .grade-excellent { color: #34d399; }
+.dark .grade-good { color: #60a5fa; }
+.dark .grade-warn { color: #fbbf24; }
 
 /* ─── Section Label ──────────────────────────────────────── */
 .section-label {
@@ -330,7 +471,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: oklch(0.45 0 0);
+  color: var(--muted-foreground);
   margin-bottom: 8px;
   padding: 0 4px;
 }
@@ -349,14 +490,44 @@
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: oklch(1 0 0 / 5%);
+  background: var(--muted);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: oklch(0.4 0 0);
+  color: var(--muted-foreground);
 }
 .empty-state p {
   font-size: 0.875rem;
-  color: oklch(0.5 0 0);
+  color: var(--muted-foreground);
   font-weight: 500;
+}
+
+/* Teks error merah */
+.scola-portal .text-red-300 { color: #dc2626 !important; }
+.dark .scola-portal .text-red-300 { color: #fca5a5 !important; }
+.scola-portal .bg-red-900\/30 { background: #fee2e2 !important; border-color: #fca5a5 !important; }
+.dark .scola-portal .bg-red-900\/30 { background: oklch(0.3 0.1 22 / 30%) !important; }
+
+/* Teks italic/placeholder di tabel */
+.scola-portal .italic { color: var(--muted-foreground) !important; }
+.dark .scola-portal .italic { color: oklch(0.5 0 0) !important; }
+
+/* Heading halaman yang masih pakai text-white langsung */
+.scola-portal h2.text-white,
+.scola-portal h3.text-white {
+  color: var(--foreground) !important;
+}
+.dark .scola-portal h2.text-white,
+.dark .scola-portal h3.text-white {
+  color: oklch(0.96 0 0) !important;
+}
+
+/* Label form */
+.scola-portal .text-slate-200.text-xs,
+.scola-portal label.text-slate-200 {
+  color: var(--foreground) !important;
+}
+.dark .scola-portal .text-slate-200.text-xs,
+.dark .scola-portal label.text-slate-200 {
+  color: oklch(0.85 0 0) !important;
 }
