@@ -1,0 +1,208 @@
+# =============================================================
+# SIAKAD SMA — Firebase Data Connect Schema (GraphQL SDL)
+# =============================================================
+
+enum PeranPengguna {
+  admin
+  guru
+  siswa
+}
+
+enum JenisKelamin {
+  L
+  P
+}
+
+enum StatusAlumni {
+  Kuliah
+  Kerja
+  Lainnya
+}
+
+enum StatusKehadiran {
+  Hadir
+  Izin
+  Sakit
+  Alpa
+}
+
+enum TipePrestasi {
+  Akademik
+  NonAkademik
+}
+
+enum JabatanGuru {
+  Guru
+  WaliKelas
+  Kepsek
+  WakilKepsek
+  BK
+}
+
+# -------------------------------------------------------
+# PENGGUNA — akun login (email unik lintas sistem)
+# -------------------------------------------------------
+type Pengguna @table(name: "pengguna") {
+  id: UUID! @default(expr: "uuidV4()")
+  email: String! @unique
+  nama: String!
+  peran: PeranPengguna!
+  telepon: String
+  alamat: String
+  fotoUrl: String
+  password: String
+  dibuatPada: Timestamp! @default(expr: "request.time")
+  diperbaruiPada: Timestamp! @default(expr: "request.time")
+}
+
+# -------------------------------------------------------
+# JURUSAN / RUMPUN PEMINATAN — Kode unik (A, B, C untuk SMAIT Nur Hidayah)
+# -------------------------------------------------------
+type Jurusan @table(name: "jurusan") {
+  id: UUID! @default(expr: "uuidV4()")
+  kode: String! @unique
+  nama: String!
+}
+
+# -------------------------------------------------------
+# MATA PELAJARAN — Kode unik (MTK, BIN, FIS, dsb.)
+# -------------------------------------------------------
+type MataPelajaran @table(name: "mata_pelajaran") {
+  id: UUID! @default(expr: "uuidV4()")
+  kode: String! @unique
+  nama: String!
+  tipe: String
+}
+
+# -------------------------------------------------------
+# GURU — NIP unik per guru
+# -------------------------------------------------------
+type Guru @table(name: "guru") {
+  id: UUID! @default(expr: "uuidV4()")
+  pengguna: Pengguna!
+  nip: String! @unique
+  jenisKelamin: JenisKelamin!
+  tempatLahir: String
+  tanggalLahir: Date
+  jabatan: JabatanGuru! @default(expr: "\"Guru\"")
+  # Guru bisa mengajar mata pelajaran tertentu (opsional)
+  mataPelajaranId: UUID
+  spesialisasi: String
+}
+
+# -------------------------------------------------------
+# KELAS
+# -------------------------------------------------------
+type Kelas @table(name: "kelas") {
+  id: UUID! @default(expr: "uuidV4()")
+  nama: String!
+  tingkat: Int!
+  jurusan: Jurusan
+  waliKelas: Guru
+  tahunAjaran: String!
+}
+
+# -------------------------------------------------------
+# SISWA — NIS unik per siswa
+# -------------------------------------------------------
+type Siswa @table(name: "siswa") {
+  id: UUID! @default(expr: "uuidV4()")
+  pengguna: Pengguna!
+  nis: String! @unique
+  jenisKelamin: JenisKelamin!
+  tempatLahir: String
+  tanggalLahir: Date
+  alamat: String
+  kelas: Kelas
+  jurusan: Jurusan
+  peminatan: Jurusan
+  tahunMasuk: Int
+}
+
+# -------------------------------------------------------
+# JADWAL PELAJARAN
+# -------------------------------------------------------
+type Jadwal @table(name: "jadwal") {
+  id: UUID! @default(expr: "uuidV4()")
+  kelas: Kelas!
+  mataPelajaran: MataPelajaran!
+  guru: Guru!
+  hari: String!
+  jamMulai: String!
+  jamSelesai: String!
+  ruangan: String
+  semester: String!
+  tahunAjaran: String!
+}
+
+# -------------------------------------------------------
+# NILAI
+# -------------------------------------------------------
+type Nilai @table(name: "nilai") {
+  id: UUID! @default(expr: "uuidV4()")
+  siswa: Siswa!
+  mataPelajaran: MataPelajaran!
+  kelas: Kelas!
+  semester: String!
+  tahunAjaran: String!
+  nilaiHarian: Float
+  nilaiUts: Float
+  nilaiUas: Float
+}
+
+# -------------------------------------------------------
+# KEHADIRAN
+# -------------------------------------------------------
+type Kehadiran @table(name: "kehadiran") {
+  id: UUID! @default(expr: "uuidV4()")
+  siswa: Siswa!
+  kelas: Kelas!
+  tanggal: Date!
+  status: StatusKehadiran!
+  catatan: String
+  dicatatOleh: Guru
+}
+
+# -------------------------------------------------------
+# PRESTASI
+# -------------------------------------------------------
+type Prestasi @table(name: "prestasi") {
+  id: UUID! @default(expr: "uuidV4()")
+  siswa: Siswa!
+  nama: String!
+  tipe: TipePrestasi!
+  tingkat: String!
+  peringkat: String!
+  tanggal: Date!
+  deskripsi: String
+}
+
+# -------------------------------------------------------
+# ALUMNI — NIS unik
+# -------------------------------------------------------
+type Alumni @table(name: "alumni") {
+  id: UUID! @default(expr: "uuidV4()")
+  penggunaSiswa: Siswa
+  nis: String! @unique
+  nama: String!
+  tahunLulus: Int!
+  status: StatusAlumni!
+  institusi: String
+  jabatanAtauJurusan: String
+  email: String
+  telepon: String
+  alamat: String
+  prestasi: String
+}
+
+# -------------------------------------------------------
+# PENGUMUMAN
+# -------------------------------------------------------
+type Pengumuman @table(name: "pengumuman") {
+  id: UUID! @default(expr: "uuidV4()")
+  judul: String!
+  konten: String!
+  penulis: Pengguna
+  isPenting: Boolean! @default(expr: "false")
+  dibuatPada: Timestamp! @default(expr: "request.time")
+}

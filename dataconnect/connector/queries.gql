@@ -1,0 +1,477 @@
+# =============================================================
+# SIAKAD — Queries (Read Data)
+# =============================================================
+
+# -------------------------------------------------------
+# PENGGUNA QUERIES
+# -------------------------------------------------------
+
+query ListPengguna($peran: PeranPengguna) @auth(level: PUBLIC) {
+  penggunas(where: { peran: { eq: $peran } }, orderBy: { nama: ASC }) {
+    id
+    email
+    password
+    nama
+    peran
+    telepon
+    alamat
+    fotoUrl
+    dibuatPada
+  }
+}
+
+query GetPengguna($id: UUID!) @auth(level: PUBLIC) {
+  pengguna(id: $id) {
+    id
+    email
+    nama
+    peran
+    telepon
+    alamat
+    fotoUrl
+  }
+}
+
+query GetPenggunaByEmail($email: String!) @auth(level: PUBLIC) {
+  penggunas(where: { email: { eq: $email } }) {
+    id
+    email
+    password
+    nama
+    peran
+    telepon
+    alamat
+    fotoUrl
+  }
+}
+
+# -------------------------------------------------------
+# GURU QUERIES
+# -------------------------------------------------------
+
+query ListGuru @auth(level: PUBLIC) {
+  gurus(orderBy: { nip: ASC }) {
+    id
+    nip
+    jenisKelamin
+    jabatan
+    spesialisasi
+    tempatLahir
+    tanggalLahir
+    pengguna {
+      id
+      nama
+      email
+      password
+      telepon
+      alamat
+    }
+  }
+}
+
+query GetGuru($id: UUID!) @auth(level: PUBLIC) {
+  guru(id: $id) {
+    id
+    nip
+    jenisKelamin
+    jabatan
+    spesialisasi
+    tempatLahir
+    tanggalLahir
+    pengguna {
+      id
+      nama
+      email
+      telepon
+      alamat
+      fotoUrl
+    }
+  }
+}
+
+query GetLastNIP @auth(level: PUBLIC) {
+  gurus(orderBy: { nip: DESC }, limit: 1) {
+    nip
+  }
+}
+
+query GetGuruByPengguna($penggunaId: UUID!) @auth(level: PUBLIC) {
+  gurus(where: { penggunaId: { eq: $penggunaId } }) {
+    id
+  }
+}
+
+# -------------------------------------------------------
+# SISWA QUERIES
+# -------------------------------------------------------
+
+query ListSemuaSiswa @auth(level: PUBLIC) {
+  siswas(orderBy: { nis: ASC }) {
+    id
+    nis
+    jenisKelamin
+    tempatLahir
+    tanggalLahir
+    alamat
+    tahunMasuk
+    pengguna {
+      id
+      nama
+      email
+      password
+      telepon
+      alamat
+    }
+    kelas {
+      id
+      nama
+      tingkat
+    }
+    jurusan {
+      id
+      nama
+    }
+    peminatan {
+      id
+      nama
+    }
+  }
+}
+
+query ListSiswaByKelas($kelasId: UUID!) @auth(level: PUBLIC) {
+  siswas(where: { kelasId: { eq: $kelasId } }, orderBy: { nis: ASC }) {
+    id
+    nis
+    jenisKelamin
+    tempatLahir
+    tanggalLahir
+    alamat
+    tahunMasuk
+    pengguna {
+      id
+      nama
+      email
+      password
+      telepon
+      alamat
+    }
+    kelas {
+      id
+      nama
+      tingkat
+    }
+    jurusan {
+      id
+      nama
+    }
+    peminatan {
+      id
+      nama
+    }
+  }
+}
+
+query GetSiswa($id: UUID!) @auth(level: PUBLIC) {
+  siswa(id: $id) {
+    id
+    nis
+    jenisKelamin
+    tempatLahir
+    tanggalLahir
+    alamat
+    tahunMasuk
+    pengguna {
+      id
+      nama
+      email
+      telepon
+      alamat
+      fotoUrl
+    }
+    kelas {
+      id
+      nama
+      tingkat
+    }
+    jurusan {
+      id
+      nama
+    }
+    peminatan {
+      id
+      nama
+    }
+  }
+}
+
+query GetLastNIS @auth(level: PUBLIC) {
+  siswas(orderBy: { nis: DESC }, limit: 1) {
+    nis
+  }
+}
+
+query GetSiswaByPengguna($penggunaId: UUID!) @auth(level: PUBLIC) {
+  siswas(where: { penggunaId: { eq: $penggunaId } }) {
+    id
+  }
+}
+
+# -------------------------------------------------------
+# KELAS & JURUSAN QUERIES
+# -------------------------------------------------------
+
+query ListSemuaKelas @auth(level: PUBLIC) {
+  kelass(orderBy: [{ tingkat: ASC }, { nama: ASC }]) {
+    id
+    nama
+    tingkat
+    tahunAjaran
+    waliKelas {
+      id
+      nip
+      pengguna {
+        nama
+      }
+    }
+    jurusan {
+      id
+      nama
+    }
+  }
+}
+
+query ListKelasByTingkat($tingkat: Int!) @auth(level: PUBLIC) {
+  kelass(where: { tingkat: { eq: $tingkat } }, orderBy: [{ tingkat: ASC }, { nama: ASC }]) {
+    id
+    nama
+    tingkat
+    tahunAjaran
+    waliKelas {
+      id
+      nip
+      pengguna {
+        nama
+      }
+    }
+    jurusan {
+      id
+      nama
+    }
+  }
+}
+
+query ListJurusan @auth(level: PUBLIC) {
+  jurusans(orderBy: { kode: ASC }) {
+    id
+    kode
+    nama
+  }
+}
+
+query ListMataPelajaran @auth(level: PUBLIC) {
+  mataPelajarans(orderBy: { nama: ASC }) {
+    id
+    kode
+    nama
+  }
+}
+
+# -------------------------------------------------------
+# JADWAL QUERIES
+# -------------------------------------------------------
+
+query GetJadwalByKelas($kelasId: UUID!, $tahunAjaran: String) @auth(level: PUBLIC) {
+  jadwals(
+    where: {
+      kelasId: { eq: $kelasId }
+      tahunAjaran: { eq: $tahunAjaran }
+    }
+    orderBy: [{ hari: ASC }, { jamMulai: ASC }]
+  ) {
+    id
+    jamMulai
+    jamSelesai
+    hari
+    ruangan
+    semester
+    mataPelajaran {
+      nama
+    }
+    guru {
+      nip
+      pengguna {
+        nama
+      }
+    }
+  }
+}
+
+query GetJadwalByGuru($guruId: UUID!, $tahunAjaran: String) @auth(level: PUBLIC) {
+  jadwals(
+    where: {
+      guruId: { eq: $guruId }
+      tahunAjaran: { eq: $tahunAjaran }
+    }
+    orderBy: [{ hari: ASC }, { jamMulai: ASC }]
+  ) {
+    id
+    jamMulai
+    jamSelesai
+    hari
+    ruangan
+    semester
+    mataPelajaran {
+      nama
+    }
+    kelas {
+      nama
+      tingkat
+    }
+  }
+}
+
+# -------------------------------------------------------
+# NILAI QUERIES
+# -------------------------------------------------------
+
+query GetNilaiBySiswa($siswaId: UUID!, $semester: String, $tahunAjaran: String) @auth(level: PUBLIC) {
+  nilais(
+    where: {
+      siswaId: { eq: $siswaId }
+      semester: { eq: $semester }
+      tahunAjaran: { eq: $tahunAjaran }
+    }
+  ) {
+    id
+    nilaiHarian
+    nilaiUts
+    nilaiUas
+    semester
+    tahunAjaran
+    mataPelajaran {
+      nama
+      kode
+    }
+  }
+}
+
+query GetNilaiByKelas($kelasId: UUID!, $mataPelajaranId: UUID!) @auth(level: PUBLIC) {
+  nilais(
+    where: {
+      kelasId: { eq: $kelasId }
+      mataPelajaranId: { eq: $mataPelajaranId }
+    }
+  ) {
+    id
+    nilaiHarian
+    nilaiUts
+    nilaiUas
+    siswa {
+      nis
+      pengguna {
+        nama
+      }
+    }
+  }
+}
+
+# -------------------------------------------------------
+# KEHADIRAN QUERIES
+# -------------------------------------------------------
+
+query GetKehadiranByKelas($kelasId: UUID!, $tanggal: Date!) @auth(level: PUBLIC) {
+  kehadirans(
+    where: {
+      kelasId: { eq: $kelasId }
+      tanggal: { eq: $tanggal }
+    }
+  ) {
+    id
+    status
+    catatan
+    siswa {
+      nis
+      pengguna {
+        nama
+      }
+    }
+  }
+}
+
+query GetKehadiranBySiswa($siswaId: UUID!) @auth(level: PUBLIC) {
+  kehadirans(
+    where: { siswaId: { eq: $siswaId } }
+    orderBy: { tanggal: DESC }
+  ) {
+    id
+    tanggal
+    status
+    catatan
+  }
+}
+
+# -------------------------------------------------------
+# PENGUMUMAN QUERIES
+# -------------------------------------------------------
+
+query ListPengumuman @auth(level: PUBLIC) {
+  pengumumen(orderBy: { dibuatPada: DESC }) {
+    id
+    judul
+    konten
+    isPenting
+    dibuatPada
+    penulis {
+      nama
+    }
+  }
+}
+
+# -------------------------------------------------------
+# PRESTASI QUERIES
+# -------------------------------------------------------
+
+query ListPrestasi($siswaId: UUID) @auth(level: PUBLIC) {
+  prestasis(
+    where: { siswaId: { eq: $siswaId } }
+    orderBy: { tanggal: DESC }
+  ) {
+    id
+    nama
+    tipe
+    tingkat
+    peringkat
+    tanggal
+    deskripsi
+    siswa {
+      id
+      nis
+      pengguna {
+        nama
+      }
+    }
+  }
+}
+
+# -------------------------------------------------------
+# ALUMNI QUERIES
+# -------------------------------------------------------
+
+query ListAlumni($tahunLulus: Int) @auth(level: PUBLIC) {
+  alumnis(
+    where: { tahunLulus: { eq: $tahunLulus } }
+    orderBy: [{ tahunLulus: DESC }, { nama: ASC }]
+  ) {
+    id
+    nis
+    nama
+    tahunLulus
+    status
+    institusi
+    jabatanAtauJurusan
+    email
+    telepon
+    alamat
+    prestasi
+  }
+}

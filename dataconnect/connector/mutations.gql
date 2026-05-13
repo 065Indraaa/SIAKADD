@@ -1,0 +1,420 @@
+# =============================================================
+# SIAKAD — Mutations (Create / Update / Delete)
+# =============================================================
+
+# -------------------------------------------------------
+# PENGGUNA MUTATIONS
+# -------------------------------------------------------
+
+mutation CreatePengguna(
+  $email: String!
+  $password: String
+  $nama: String!
+  $peran: PeranPengguna!
+  $telepon: String
+  $alamat: String
+  $fotoUrl: String
+) @auth(level: PUBLIC) {
+  pengguna_insert(data: {
+    email: $email
+    password: $password
+    nama: $nama
+    peran: $peran
+    telepon: $telepon
+    alamat: $alamat
+    fotoUrl: $fotoUrl
+  })
+}
+
+mutation UpdatePengguna(
+  $id: UUID!
+  $password: String
+  $nama: String
+  $telepon: String
+  $alamat: String
+  $fotoUrl: String
+) @auth(level: PUBLIC) {
+  pengguna_update(id: $id, data: {
+    password: $password
+    nama: $nama
+    telepon: $telepon
+    alamat: $alamat
+    fotoUrl: $fotoUrl
+  })
+}
+
+mutation DeletePengguna($id: UUID!) @auth(level: PUBLIC) {
+  pengguna_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# GURU MUTATIONS
+# -------------------------------------------------------
+
+mutation CreateGuru(
+  $penggunaId: UUID!
+  $nip: String!
+  $jenisKelamin: JenisKelamin!
+  $tempatLahir: String
+  $tanggalLahir: Date
+  $jabatan: JabatanGuru
+  $spesialisasi: String
+) @auth(level: PUBLIC) {
+  guru_insert(data: {
+    penggunaId: $penggunaId
+    nip: $nip
+    jenisKelamin: $jenisKelamin
+    tempatLahir: $tempatLahir
+    tanggalLahir: $tanggalLahir
+    jabatan: $jabatan
+    spesialisasi: $spesialisasi
+  })
+}
+
+mutation UpdateGuru(
+  $id: UUID!
+  $jabatan: JabatanGuru
+  $spesialisasi: String
+  $tempatLahir: String
+  $tanggalLahir: Date
+) @auth(level: PUBLIC) {
+  guru_update(id: $id, data: {
+    jabatan: $jabatan
+    spesialisasi: $spesialisasi
+    tempatLahir: $tempatLahir
+    tanggalLahir: $tanggalLahir
+  })
+}
+
+mutation DeleteGuru($id: UUID!) @auth(level: PUBLIC) {
+  guru_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# SISWA MUTATIONS
+# -------------------------------------------------------
+
+mutation CreateSiswa(
+  $penggunaId: UUID!
+  $nis: String!
+  $jenisKelamin: JenisKelamin!
+  $tempatLahir: String
+  $tanggalLahir: Date
+  $alamat: String
+  $jurusanId: UUID
+  $kelasId: UUID
+  $tahunMasuk: Int
+) @auth(level: PUBLIC) {
+  siswa_insert(data: {
+    penggunaId: $penggunaId
+    nis: $nis
+    jenisKelamin: $jenisKelamin
+    tempatLahir: $tempatLahir
+    tanggalLahir: $tanggalLahir
+    alamat: $alamat
+    jurusanId: $jurusanId
+    kelasId: $kelasId
+    tahunMasuk: $tahunMasuk
+  })
+}
+
+mutation UpdateSiswa(
+  $id: UUID!
+  $jurusanId: UUID
+  $kelasId: UUID
+  $tanggalLahir: Date
+  $tempatLahir: String
+  $alamat: String
+) @auth(level: PUBLIC) {
+  siswa_update(id: $id, data: {
+    jurusanId: $jurusanId
+    kelasId: $kelasId
+    tanggalLahir: $tanggalLahir
+    tempatLahir: $tempatLahir
+    alamat: $alamat
+  })
+}
+
+mutation UpdateSiswaPeminatan(
+  $id: UUID!
+  $peminatanId: UUID
+) @auth(level: PUBLIC) {
+  siswa_update(id: $id, data: {
+    peminatanId: $peminatanId
+  })
+}
+
+mutation DeleteSiswa($id: UUID!) @auth(level: PUBLIC) {
+  siswa_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# KELAS MUTATIONS
+# -------------------------------------------------------
+
+mutation CreateKelas(
+  $nama: String!
+  $tingkat: Int!
+  $tahunAjaran: String!
+  $jurusanId: UUID
+  $waliKelasId: UUID
+) @auth(level: PUBLIC) {
+  kelas_insert(data: {
+    nama: $nama
+    tingkat: $tingkat
+    tahunAjaran: $tahunAjaran
+    jurusanId: $jurusanId
+    waliKelasId: $waliKelasId
+  })
+}
+
+mutation UpdateKelas(
+  $id: UUID!
+  $nama: String
+  $tingkat: Int
+  $waliKelasId: UUID
+  $jurusanId: UUID
+) @auth(level: PUBLIC) {
+  kelas_update(id: $id, data: {
+    nama: $nama
+    tingkat: $tingkat
+    waliKelasId: $waliKelasId
+    jurusanId: $jurusanId
+  })
+}
+
+mutation DeleteKelas($id: UUID!) @auth(level: PUBLIC) {
+  kelas_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# JURUSAN MUTATIONS
+# -------------------------------------------------------
+
+mutation CreateJurusan($kode: String!, $nama: String!) @auth(level: PUBLIC) {
+  jurusan_insert(data: { kode: $kode, nama: $nama })
+}
+
+mutation UpdateJurusan($id: UUID!, $kode: String, $nama: String) @auth(level: PUBLIC) {
+  jurusan_update(id: $id, data: { kode: $kode, nama: $nama })
+}
+
+mutation DeleteJurusan($id: UUID!) @auth(level: PUBLIC) {
+  jurusan_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# MATA PELAJARAN MUTATIONS
+# -------------------------------------------------------
+
+mutation CreateMataPelajaran($kode: String!, $nama: String!) @auth(level: PUBLIC) {
+  mataPelajaran_insert(data: { kode: $kode, nama: $nama })
+}
+
+mutation UpdateMataPelajaran($id: UUID!, $kode: String, $nama: String) @auth(level: PUBLIC) {
+  mataPelajaran_update(id: $id, data: { kode: $kode, nama: $nama })
+}
+
+mutation DeleteMataPelajaran($id: UUID!) @auth(level: PUBLIC) {
+  mataPelajaran_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# JADWAL MUTATIONS
+# -------------------------------------------------------
+
+mutation CreateJadwal(
+  $kelasId: UUID!
+  $mataPelajaranId: UUID!
+  $guruId: UUID!
+  $jamMulai: String!
+  $jamSelesai: String!
+  $hari: String!
+  $ruangan: String
+  $tahunAjaran: String!
+  $semester: String!
+) @auth(level: PUBLIC) {
+  jadwal_insert(data: {
+    kelasId: $kelasId
+    mataPelajaranId: $mataPelajaranId
+    guruId: $guruId
+    jamMulai: $jamMulai
+    jamSelesai: $jamSelesai
+    hari: $hari
+    ruangan: $ruangan
+    tahunAjaran: $tahunAjaran
+    semester: $semester
+  })
+}
+
+mutation DeleteJadwal($id: UUID!) @auth(level: PUBLIC) {
+  jadwal_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# NILAI MUTATIONS
+# -------------------------------------------------------
+
+mutation UpsertNilai(
+  $siswaId: UUID!
+  $kelasId: UUID!
+  $mataPelajaranId: UUID!
+  $semester: String!
+  $tahunAjaran: String!
+  $nilaiHarian: Float
+  $nilaiUts: Float
+  $nilaiUas: Float
+) @auth(level: PUBLIC) {
+  nilai_insert(data: {
+    siswaId: $siswaId
+    kelasId: $kelasId
+    mataPelajaranId: $mataPelajaranId
+    semester: $semester
+    tahunAjaran: $tahunAjaran
+    nilaiHarian: $nilaiHarian
+    nilaiUts: $nilaiUts
+    nilaiUas: $nilaiUas
+  })
+}
+
+# -------------------------------------------------------
+# KEHADIRAN MUTATIONS
+# -------------------------------------------------------
+
+mutation RecordKehadiran(
+  $siswaId: UUID!
+  $kelasId: UUID!
+  $tanggal: Date!
+  $status: StatusKehadiran!
+  $catatan: String
+) @auth(level: PUBLIC) {
+  kehadiran_insert(data: {
+    siswaId: $siswaId
+    kelasId: $kelasId
+    tanggal: $tanggal
+    status: $status
+    catatan: $catatan
+  })
+}
+
+# -------------------------------------------------------
+# PENGUMUMAN MUTATIONS
+# -------------------------------------------------------
+
+mutation CreatePengumuman(
+  $judul: String!
+  $konten: String!
+  $penulisId: UUID!
+  $isPenting: Boolean
+) @auth(level: PUBLIC) {
+  pengumuman_insert(data: {
+    judul: $judul
+    konten: $konten
+    penulisId: $penulisId
+    isPenting: $isPenting
+  })
+}
+
+mutation DeletePengumuman($id: UUID!) @auth(level: PUBLIC) {
+  pengumuman_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# PRESTASI MUTATIONS
+# -------------------------------------------------------
+
+mutation CreatePrestasi(
+  $siswaId: UUID!
+  $nama: String!
+  $tipe: TipePrestasi!
+  $tingkat: String!
+  $peringkat: String!
+  $tanggal: Date!
+  $deskripsi: String
+) @auth(level: PUBLIC) {
+  prestasi_insert(data: {
+    siswaId: $siswaId
+    nama: $nama
+    tipe: $tipe
+    tingkat: $tingkat
+    peringkat: $peringkat
+    tanggal: $tanggal
+    deskripsi: $deskripsi
+  })
+}
+
+mutation DeletePrestasi($id: UUID!) @auth(level: PUBLIC) {
+  prestasi_delete(id: $id)
+}
+# ALUMNI MUTATIONS
+# -------------------------------------------------------
+
+mutation CreateAlumni(
+  $nis: String!
+  $nama: String!
+  $tahunLulus: Int!
+  $status: StatusAlumni!
+  $institusi: String
+  $jabatanAtauJurusan: String
+  $email: String
+  $telepon: String
+  $alamat: String
+  $prestasi: String
+) @auth(level: PUBLIC) {
+  alumni_insert(data: {
+    nis: $nis
+    nama: $nama
+    tahunLulus: $tahunLulus
+    status: $status
+    institusi: $institusi
+    jabatanAtauJurusan: $jabatanAtauJurusan
+    email: $email
+    telepon: $telepon
+    alamat: $alamat
+    prestasi: $prestasi
+  })
+}
+
+mutation UpdateAlumni(
+  $id: UUID!
+  $status: StatusAlumni
+  $institusi: String
+  $jabatanAtauJurusan: String
+  $email: String
+  $telepon: String
+  $alamat: String
+  $prestasi: String
+) @auth(level: PUBLIC) {
+  alumni_update(id: $id, data: {
+    status: $status
+    institusi: $institusi
+    jabatanAtauJurusan: $jabatanAtauJurusan
+    email: $email
+    telepon: $telepon
+    alamat: $alamat
+    prestasi: $prestasi
+  })
+}
+
+mutation DeleteAlumni($id: UUID!) @auth(level: PUBLIC) {
+  alumni_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# DANGEROUS RESET MUTATIONS
+# -------------------------------------------------------
+
+mutation ResetDatabase @auth(level: PUBLIC) {
+  nilai_deleteMany(all: true)
+  jadwal_deleteMany(all: true)
+  prestasi_deleteMany(all: true)
+  kehadiran_deleteMany(all: true)
+  pengumuman_deleteMany(all: true)
+  alumni_deleteMany(all: true)
+  siswa_deleteMany(all: true)
+  guru_deleteMany(all: true)
+  kelas_deleteMany(all: true)
+  jurusan_deleteMany(all: true)
+  mataPelajaran_deleteMany(all: true)
+  pengguna_deleteMany(all: true)
+}

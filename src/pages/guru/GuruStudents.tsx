@@ -1,89 +1,194 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { LookupSelect } from '@/components/ui/lookup-select';
+import { Search, Loader2, Phone, MapPin, RefreshCw, User, Info, Users } from 'lucide-react';
+import { fetchSiswa, UserListItem } from '@/lib/userService';
+import { fetchKelas } from '@/lib/schoolService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
 
 export default function GuruStudents() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedClass, setSelectedClass] = useState('XI-IPA-1');
+  const [selectedKelasId, setSelectedKelasId] = useState<string>('');
+  const [kelasList, setKelasList] = useState<any[]>([]);
+  const [students, setStudents] = useState<UserListItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const students = [
-    { id: 1, name: 'Ahmad Fauzi', nis: '1001', gender: 'L', phone: '081234567890' },
-    { id: 2, name: 'Bela Safira', nis: '1002', gender: 'P', phone: '081234567891' },
-    { id: 3, name: 'Ciko Jeriko', nis: '1003', gender: 'L', phone: '081234567892' },
-    { id: 4, name: 'Dina Mariana', nis: '1004', gender: 'P', phone: '081234567893' },
-  ];
+  const loadKelas = useCallback(async () => {
+    try {
+      const data = await fetchKelas();
+      setKelasList(data);
+      if (data.length > 0 && !selectedKelasId) {
+        setSelectedKelasId(data[0].id);
+      }
+    } catch (e: any) {
+      setError(e.message);
+    }
+  }, [selectedKelasId]);
 
-  const filteredStudents = students.filter(
-    (student) =>
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.nis.includes(searchTerm)
+  useEffect(() => { loadKelas(); }, [loadKelas]);
+
+  const loadStudents = useCallback(async () => {
+    if (!selectedKelasId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchSiswa(selectedKelasId);
+      setStudents(data);
+    } catch (e: any) {
+      setError(e.message || 'Gagal memuat data siswa.');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedKelasId]);
+
+  useEffect(() => { loadStudents(); }, [loadStudents]);
+
+  useAutoRefresh(loadStudents, 20_000);
+
+  const [refreshing, refresh] = useManualRefresh(loadKelas, loadStudents);
+
+  const filtered = students.filter(s =>
+    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.nis || '').includes(searchTerm)
   );
 
+  const kelasItems = kelasList.map(k => ({ value: k.id, label: k.name, hint: `Kelas ${k.level}` }));
+  const currentKelas = kelasList.find(k => k.id === selectedKelasId);
+
   return (
-    <div className="space-y-6 text-slate-100">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight text-white">Data Siswa</h2>
-        <p className="text-slate-400">Lihat profil siswa di kelas yang Anda ajar.</p>
+    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6 text-slate-100">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-white">Data Siswa</h2>
+          <p className="text-slate-300 mt-1">Monitoring profil dan kontak peserta didik per kelas.</p>
+        </div>
+        <Button variant="outline" onClick={refresh} disabled={refreshing}
+          className="h-11 border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 rounded-xl">
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          Segarkan
+        </Button>
       </div>
 
-      <Card className="bg-slate-900/50 backdrop-blur-md border border-white/10 shadow-xl">
-        <CardHeader className="pb-3 border-b border-white/5">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center space-x-4">
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
-                <SelectTrigger className="w-[180px] bg-slate-950 border-white/10 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-white">
-                  <SelectItem value="XI-IPA-1" className="hover:bg-slate-800">XI-IPA-1</SelectItem>
-                  <SelectItem value="XI-IPA-2" className="hover:bg-slate-800">XI-IPA-2</SelectItem>
-                  <SelectItem value="XI-IPS-1" className="hover:bg-slate-800">XI-IPS-1</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
-              <Input
-                placeholder="Cari..."
-                className="pl-8 bg-slate-950 border-white/10 text-white placeholder:text-slate-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+      {error && (
+        <div className="p-4 rounded-xl bg-red-900/30 border border-red-500/30 text-red-300 text-sm flex items-center gap-3">
+          <Info className="h-5 w-5" /> {error}
+        </div>
+      )}
+
+      {/* Filter */}
+      <Card className="bg-slate-900/60 border-white/10 rounded-2xl">
+        <CardContent className="p-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Kelas</Label>
+              <LookupSelect
+                value={selectedKelasId}
+                onChange={setSelectedKelasId}
+                items={kelasItems}
+                placeholder={kelasItems.length ? 'Pilih kelas' : 'Memuat...'}
+                className="h-11 bg-slate-950 border-white/10 rounded-lg text-white"
               />
             </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label className="text-[10px] uppercase tracking-wider font-semibold text-slate-300">Cari Siswa</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input placeholder="Cari nama atau NIS..."
+                  className="pl-10 h-11 bg-slate-950 border-white/10 rounded-lg text-white placeholder:text-slate-400"
+                  value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              </div>
+            </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Table */}
+      <Card className="bg-slate-900/60 border-white/10 rounded-2xl overflow-hidden">
+        <CardHeader className="p-5 border-b border-white/10">
+          <CardTitle className="text-white text-lg font-bold flex items-center gap-2">
+            <Users className="h-5 w-5 text-blue-400" />
+            {currentKelas?.name || 'Pilih kelas'}
+            <Badge className="ml-auto bg-blue-500/10 text-blue-300 border-blue-500/30">
+              {filtered.length} siswa
+            </Badge>
+          </CardTitle>
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="rounded-lg border border-white/10 overflow-hidden">
-            <Table>
-              <TableHeader className="bg-slate-950/50">
-                <TableRow className="border-white/10 hover:bg-transparent">
-                  <TableHead className="text-slate-400">NIS</TableHead>
-                  <TableHead className="text-slate-400">Nama Siswa</TableHead>
-                  <TableHead className="text-slate-400">L/P</TableHead>
-                  <TableHead className="text-slate-400">No. Telepon</TableHead>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader className="bg-slate-950/50">
+              <TableRow className="border-white/10 hover:bg-transparent">
+                <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4 pl-6">Nama & NIS</TableHead>
+                <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4">Gender</TableHead>
+                <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4">Kontak</TableHead>
+                <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4">Alamat</TableHead>
+                <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4 pr-6">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={5} className="text-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
+                </TableCell></TableRow>
+              ) : filtered.length > 0 ? filtered.map((s) => (
+                <TableRow key={s.id} className="border-white/10 hover:bg-white/5">
+                  <TableCell className="py-4 pl-6">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold flex items-center justify-center text-sm">
+                        {s.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white">{s.name}</div>
+                        <div className="text-xs text-slate-400 font-mono">NIS {s.nis || '-'}</div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={`font-medium ${
+                      s.gender === 'L'
+                        ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30'
+                        : s.gender === 'P'
+                        ? 'bg-pink-500/10 text-pink-700 dark:text-pink-300 border-pink-500/30'
+                        : 'bg-muted text-muted-foreground border-border'
+                    }`}>
+                      {s.gender === 'L' ? 'Laki-laki' : s.gender === 'P' ? 'Perempuan' : '-'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-slate-200">
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <Phone className="h-3 w-3 text-slate-400" />
+                      {s.phone || <span className="text-slate-500 italic">-</span>}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-start gap-1.5 text-sm text-slate-200 max-w-xs">
+                      <MapPin className="h-3 w-3 text-slate-400 mt-1 flex-shrink-0" />
+                      <span className="line-clamp-2">{s.address || <span className="text-slate-500 italic">-</span>}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="pr-6">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="text-xs font-semibold text-emerald-400">Aktif</span>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredStudents.length > 0 ? (
-                  filteredStudents.map((student) => (
-                    <TableRow key={student.id} className="border-white/5 hover:bg-white/5 transition-colors">
-                      <TableCell className="text-slate-300">{student.nis}</TableCell>
-                      <TableCell className="font-medium text-white">{student.name}</TableCell>
-                      <TableCell className="text-slate-300">{student.gender}</TableCell>
-                      <TableCell className="text-slate-300">{student.phone}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center text-slate-500">Tidak ada data siswa ditemukan.</TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+              )) : (
+                <TableRow><TableCell colSpan={5} className="h-32 text-center">
+                  <User className="h-10 w-10 text-slate-600 mx-auto mb-2" />
+                  <p className="text-slate-300 font-semibold">Tidak ada siswa ditemukan</p>
+                  <p className="text-sm text-slate-400">Pilih kelas lain atau ubah kata kunci pencarian.</p>
+                </TableCell></TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

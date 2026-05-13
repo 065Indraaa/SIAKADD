@@ -1,169 +1,429 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Search, Plus, Edit2, Trash2, Info, RefreshCw, Loader2, Users, School, Layers } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LookupSelect } from '@/components/ui/lookup-select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { fetchKelas, addKelas, editKelas, fetchJurusan } from '@/lib/schoolService';
+import { fetchGuru, UserListItem } from '@/lib/userService';
+import { deleteKelas } from '@uassiakad/connector';
+import { dataConnect } from '@/lib/userService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
+import { currentTahunAjaran, buildTahunAjaranOptions } from '@/lib/tahunAjaran';
+
+// Kurikulum Merdeka — Fase E (Kelas 10), Fase F (Kelas 11-12)
+const TINGKAT_OPTIONS = [
+  { value: '10', label: 'Kelas 10 — Fase E', hint: 'Kurikulum Merdeka' },
+  { value: '11', label: 'Kelas 11 — Fase F', hint: 'Kurikulum Merdeka' },
+  { value: '12', label: 'Kelas 12 — Fase F', hint: 'Kurikulum Merdeka' },
+];
+
+// Generate class name suggestions based on level + jurusan code
+function suggestKelasName(level: string, jurusanKode: string, roman: boolean = true) {
+  const romanMap: Record<string, string> = { '10': 'X', '11': 'XI', '12': 'XII' };
+  const prefix = roman ? romanMap[level] : level;
+  if (!jurusanKode) return `${prefix}-`;
+  return `${prefix}-${jurusanKode}-`;
+}
 
 export default function AdminClasses() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [classes, setClasses] = useState([
-    { id: 1, name: 'X-A', level: '10', homeroom: 'Budi Santoso', students: 32 },
-    { id: 2, name: 'X-B', level: '10', homeroom: 'Siti Aminah', students: 30 },
-    { id: 3, name: 'XI-IPA-1', level: '11', homeroom: 'Agus Setiawan', students: 34 },
-    { id: 4, name: 'XI-IPS-1', level: '11', homeroom: 'Rini Wulandari', students: 31 },
-    { id: 5, name: 'XII-IPA-1', level: '12', homeroom: 'Joko Widodo', students: 35 },
-  ]);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [guruList, setGuruList] = useState<UserListItem[]>([]);
+  const [jurusanList, setJurusanList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingClass, setEditingClass] = useState<any>(null);
-  const [formData, setFormData] = useState<any>({});
   const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState<any>({});
 
-  const filteredClasses = classes.filter(cls => 
-    cls.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    cls.homeroom.toLowerCase().includes(searchTerm.toLowerCase())
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [kelasData, guruData, jurusanData] = await Promise.all([
+        fetchKelas(),
+        fetchGuru(),
+        fetchJurusan(),
+      ]);
+      setClasses(kelasData);
+      setGuruList(guruData);
+      setJurusanList(jurusanData);
+    } catch (e: any) {
+      setError(e.message || 'Gagal memuat data kelas.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  useAutoRefresh(loadData, 20_000);
+
+  const [refreshing, refresh] = useManualRefresh(loadData);
+
+  const filteredClasses = classes.filter(cls =>
+    cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cls.homeroom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (cls.jurusan || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleOpenDialog = (cls: any = null) => {
+    setError(null);
     if (cls) {
-      setEditingClass(cls);
-      setFormData(cls);
+      setFormData({
+        id: cls.id,
+        name: cls.name,
+        level: String(cls.level),
+        waliKelasId: cls.homeroomId || '',
+        jurusanId: cls.jurusanId || '',
+        tahunAjaran: cls.tahunAjaran || currentTahunAjaran(),
+      });
     } else {
-      setEditingClass(null);
-      setFormData({ name: '', level: '10', homeroom: '', students: 0 });
+      setFormData({
+        name: '',
+        level: '10',
+        waliKelasId: '',
+        jurusanId: '',
+        tahunAjaran: currentTahunAjaran(),
+      });
     }
     setIsDialogOpen(true);
   };
 
-  const handleSaveClass = () => {
-    if (editingClass) {
-      setClasses(classes.map(c => c.id === editingClass.id ? { ...formData, id: c.id } : c));
-    } else {
-      setClasses([...classes, { ...formData, id: Date.now() }]);
+  // Auto-suggest name when level/jurusan changes
+  const updateName = (level: string, jurusanId: string) => {
+    const jurusan = jurusanList.find(j => j.id === jurusanId);
+    const suggestion = suggestKelasName(level, jurusan?.kode || '');
+    setFormData((prev: any) => ({ ...prev, level, jurusanId, name: suggestion }));
+  };
+
+  const handleSaveClass = async () => {
+    if (!formData.name || !formData.level) {
+      setError('Nama kelas dan tingkat wajib diisi.');
+      return;
     }
-    setIsDialogOpen(false);
+    setSaving(true);
+    setError(null);
+    try {
+      const payload = {
+        name: formData.name,
+        level: formData.level,
+        waliKelasId: formData.waliKelasId || undefined,
+        jurusanId: formData.jurusanId || undefined,
+      };
+      if (formData.id) {
+        await editKelas(formData.id, payload);
+      } else {
+        await addKelas(payload);
+      }
+      setIsDialogOpen(false);
+      await loadData();
+    } catch (e: any) {
+      setError(e.message || 'Gagal menyimpan kelas.');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const confirmDelete = (id: number) => {
-    setDeletingId(id);
-    setIsAlertOpen(true);
-  };
+  const confirmDelete = (id: string) => { setDeletingId(id); setIsAlertOpen(true); };
 
-  const handleDelete = () => {
-    if (deletingId) {
-      setClasses(classes.filter(c => c.id !== deletingId));
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    try {
+      await deleteKelas(dataConnect, { id: deletingId });
+      await loadData();
+    } catch (e: any) {
+      setError(e.message || 'Gagal menghapus kelas.');
     }
     setIsAlertOpen(false);
     setDeletingId(null);
   };
 
+  const jurusanItems = jurusanList.map(j => ({
+    value: j.id,
+    label: `${j.kode} — ${j.nama}`,
+    hint: j.nama,
+  }));
+
+  const guruItems = guruList.map(g => ({
+    value: g.guruId!,
+    label: g.name,
+    hint: g.nip ? `NIP ${g.nip}` : undefined,
+  }));
+
   return (
-    <div className="space-y-6 text-slate-100">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-wrap">
+    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-white">Manajemen Kelas</h2>
-          <p className="text-slate-400">Kelola data kelas dan wali kelas.</p>
+          <h2 className="text-3xl font-bold text-white">Manajemen Kelas</h2>
+          <p className="text-slate-300 mt-1">Kelola kelas 10 (umum) dan kelas 11. Kelas 11: Rumpun A (2 kls), B (1 kls), C (2 kls).</p>
         </div>
-        <Button onClick={() => handleOpenDialog()} className="bg-blue-600 hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-          <Plus className="mr-2 h-4 w-4" /> Tambah Kelas
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={refresh} disabled={refreshing}
+            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 p-0"
+            title="Segarkan data">
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button onClick={() => handleOpenDialog()}
+            className="bg-blue-600 hover:bg-blue-500 h-11 px-6 rounded-xl font-semibold text-white">
+            <Plus className="mr-2 h-5 w-5" /> Buat Kelas
+          </Button>
+        </div>
       </div>
 
-      <Card className="bg-slate-900/50 backdrop-blur-md border border-white/10 shadow-xl">
-        <CardHeader className="pb-3 border-b border-white/5">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 flex-wrap">
-            <CardTitle className="text-white">Daftar Kelas</CardTitle>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
-              <Input
-                placeholder="Cari..."
-                className="pl-8 bg-slate-950 border-white/10 text-white placeholder:text-slate-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[
+          { label: 'Total Kelas', val: classes.length, icon: School, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+          { label: 'Tingkat Aktif', val: [...new Set(classes.map(c => c.level))].sort().join(', ') || '-', icon: Layers, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+          { label: 'Wali Kelas Ter-assign', val: classes.filter(c => c.homeroomId).length, icon: Users, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+        ].map((stat, i) => (
+          <Card key={i} className="bg-slate-900/60 border-white/10 rounded-2xl">
+            <CardContent className="p-5 flex items-center gap-4">
+              <div className={`h-12 w-12 rounded-xl ${stat.bg} flex items-center justify-center ${stat.color}`}>
+                <stat.icon className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">{stat.label}</p>
+                <p className="text-2xl font-bold text-white mt-0.5">{stat.val}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-red-900/30 border border-red-500/30 text-red-300 text-sm flex items-center gap-3">
+          <Info className="h-5 w-5 flex-shrink-0" /> {error}
+        </div>
+      )}
+
+      {/* Table */}
+      <Card className="bg-slate-900/60 border-white/10 rounded-2xl overflow-hidden">
+        <CardHeader className="p-5 border-b border-white/10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <CardTitle className="text-white text-lg font-bold">Daftar Kelas Aktif</CardTitle>
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input placeholder="Cari nama kelas, wali, atau jurusan..."
+                className="pl-10 h-11 bg-slate-950 border-white/10 rounded-xl text-white placeholder:text-slate-400"
+                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="rounded-lg border border-white/10 overflow-hidden">
-            <Table>
-              <TableHeader className="bg-slate-950/50">
-                <TableRow className="border-white/10 hover:bg-transparent">
-                  <TableHead className="text-slate-400">Nama Kelas</TableHead>
-                  <TableHead className="text-slate-400">Tingkat</TableHead>
-                  <TableHead className="text-slate-400">Wali Kelas</TableHead>
-                  <TableHead className="text-slate-400">Jumlah Siswa</TableHead>
-                  <TableHead className="text-right text-slate-400">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredClasses.length > 0 ? (
-                  filteredClasses.map((cls) => (
-                    <TableRow key={cls.id} className="border-white/5 hover:bg-white/5 transition-colors">
-                      <TableCell className="font-bold text-blue-400">{cls.name}</TableCell>
-                      <TableCell className="text-slate-300">Kelas {cls.level}</TableCell>
-                      <TableCell className="text-slate-300">{cls.homeroom}</TableCell>
-                      <TableCell className="text-slate-300">{cls.students} Siswa</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(cls)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/20">
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => confirmDelete(cls.id)} className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader className="bg-slate-950/50">
+              <TableRow className="border-white/10 hover:bg-transparent">
+                <TableHead className="p-5 text-slate-200 font-semibold text-xs uppercase tracking-wider">Nama Kelas</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider">Tingkat / Fase</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider">Jurusan</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider">Wali Kelas</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider">Tahun Ajaran</TableHead>
+                <TableHead className="text-right text-slate-200 font-semibold text-xs uppercase tracking-wider pr-6">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={6} className="text-center py-16">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto" />
+                </TableCell></TableRow>
+              ) : filteredClasses.length > 0 ? filteredClasses.map((cls) => {
+                const faseLabel = cls.level === '10' ? 'Fase E' : (cls.level === '11' || cls.level === '12') ? 'Fase F' : '-';
+                return (
+                  <TableRow key={cls.id} className="border-white/10 hover:bg-white/5 group">
+                    <TableCell className="p-5">
+                      <span className="font-bold text-lg text-blue-300">{cls.name}</span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <Badge variant="outline" className="h-6 px-2 bg-white/5 border-white/20 text-white rounded-md font-semibold w-fit">
+                          Kelas {cls.level}
+                        </Badge>
+                        <span className="text-[11px] text-slate-400 font-medium">{faseLabel}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-slate-200 font-medium">
+                      {cls.jurusan || <span className="text-slate-500 italic text-sm">Belum diatur</span>}
+                    </TableCell>
+                    <TableCell>
+                      {cls.homeroom && cls.homeroom !== 'Belum Diatur' ? (
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                          <span className="text-slate-200 font-medium">{cls.homeroom}</span>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow><TableCell colSpan={5} className="text-center text-slate-500 py-10">Tidak ada data kelas ditemukan.</TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                      ) : (
+                        <span className="text-slate-500 italic text-sm">Belum ditugaskan</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-slate-300 text-sm font-medium">
+                      {cls.tahunAjaran || '-'}
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(cls)}
+                          className="h-9 w-9 text-blue-400 hover:text-white hover:bg-blue-600 rounded-lg">
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => confirmDelete(cls.id)}
+                          className="h-9 w-9 text-red-400 hover:text-white hover:bg-red-600 rounded-lg">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              }) : (
+                <TableRow><TableCell colSpan={6} className="text-center py-16">
+                  <School className="h-12 w-12 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-300 font-semibold">Belum ada kelas terdaftar</p>
+                  <p className="text-slate-400 text-sm mt-1">Klik "Buat Kelas" untuk menambahkan kelas baru.</p>
+                </TableCell></TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
       {/* Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-slate-900 border border-white/10 text-white">
-          <DialogHeader>
-            <DialogTitle>{editingClass ? 'Edit Kelas' : 'Tambah Kelas'}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-slate-400">Nama Kelas</Label>
-              <Input className="col-span-3 bg-slate-950 border-white/10" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
+      <Dialog open={isDialogOpen} onOpenChange={(o) => { setIsDialogOpen(o); if (!o) setError(null); }}>
+        <DialogContent className="bg-slate-950 border border-white/10 max-w-md rounded-2xl p-0 overflow-hidden">
+          <div className="p-6 border-b border-white/10 bg-white/5">
+            <DialogTitle className="text-xl font-bold text-white">
+              {formData.id ? 'Ubah Kelas' : 'Buat Kelas Baru'}
+            </DialogTitle>
+            <p className="text-slate-300 text-xs mt-1">
+              Kelas 10: Fase E — dibagi 10 kelas (X-1 s/d X-10), ~30 siswa/kelas.<br />
+              Kelas 11: Rumpun A Kesehatan (2 kls), B Teknik (1 kls), C Sosial (2 kls).
+            </p>
+          </div>
+
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-slate-200 text-xs font-semibold">Tingkat / Fase</Label>
+                <Select value={formData.level || '10'} onValueChange={(v) => updateName(v || '10', formData.jurusanId || '')}>
+                  <SelectTrigger className="h-11 bg-slate-900 border-white/10 rounded-lg text-white">
+                    <SelectValue>
+                      {(v: any) => {
+                        const opt = TINGKAT_OPTIONS.find(o => o.value === v);
+                        return opt?.label || 'Pilih tingkat';
+                      }}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-white/10">
+                    {TINGKAT_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value} className="text-white">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{opt.label}</span>
+                          <span className="text-[10px] text-slate-400">{opt.hint}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-slate-200 text-xs font-semibold">Jurusan</Label>
+                <LookupSelect
+                  value={formData.jurusanId || ''}
+                  onChange={(v) => updateName(formData.level || '10', v)}
+                  items={jurusanItems}
+                  placeholder={jurusanItems.length ? 'Pilih jurusan' : 'Memuat...'}
+                  allowEmpty
+                  emptyLabel="Tanpa Jurusan"
+                  className="h-11 bg-slate-900 border-white/10 rounded-lg text-white"
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-slate-400">Tingkat</Label>
-              <Select value={formData.level} onValueChange={(val) => setFormData({...formData, level: val})}>
-                <SelectTrigger className="col-span-3 bg-slate-950 border-white/10"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-white">
-                  <SelectItem value="10">Kelas 10</SelectItem>
-                  <SelectItem value="11">Kelas 11</SelectItem>
-                  <SelectItem value="12">Kelas 12</SelectItem>
+
+            <div className="space-y-1.5">
+              <Label className="text-slate-200 text-xs font-semibold">Nama Kelas</Label>
+              <Input
+                placeholder="Contoh: X-1, XI-A-1, XII-C-2"
+                className="h-11 bg-slate-900 border-white/10 rounded-lg text-white placeholder:text-slate-500"
+                value={formData.name || ''}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+              <p className="text-[10px] text-slate-400">
+                Kelas 10: X-1 s/d X-10 (tanpa pemisahan gender).<br />
+                Kelas 11: XI-A-1, XI-A-2 (Kesehatan) · XI-B-1 (Teknik) · XI-C-1, XI-C-2 (Sosial).
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-slate-200 text-xs font-semibold">Tahun Ajaran</Label>
+              <Select value={formData.tahunAjaran || currentTahunAjaran()} onValueChange={(v) => setFormData({ ...formData, tahunAjaran: v || currentTahunAjaran() })}>
+                <SelectTrigger className="h-11 bg-slate-900 border-white/10 rounded-lg text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-white/10">
+                  {buildTahunAjaranOptions().map(ta => (
+                    <SelectItem key={ta} value={ta} className="text-white">{ta}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right text-slate-400">Wali Kelas</Label>
-              <Input className="col-span-3 bg-slate-950 border-white/10" value={formData.homeroom} onChange={(e) => setFormData({...formData, homeroom: e.target.value})} />
+
+            <div className="space-y-1.5">
+              <Label className="text-slate-200 text-xs font-semibold">Wali Kelas</Label>
+              <LookupSelect
+                value={formData.waliKelasId || ''}
+                onChange={(v) => setFormData({ ...formData, waliKelasId: v })}
+                items={guruItems}
+                placeholder={guruItems.length ? 'Pilih guru' : 'Belum ada guru'}
+                allowEmpty
+                emptyLabel="Belum Ditentukan"
+                className="h-11 bg-slate-900 border-white/10 rounded-lg text-white"
+              />
             </div>
+
+            {error && (
+              <div className="p-3 rounded-lg bg-red-900/30 border border-red-500/30 text-red-300 text-sm">
+                {error}
+              </div>
+            )}
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="text-slate-400">Batal</Button>
-            <Button onClick={handleSaveClass} className="bg-blue-600 hover:bg-blue-500">Simpan</Button>
-          </DialogFooter>
+
+          <div className="p-6 bg-white/5 border-t border-white/10 flex gap-3">
+            <Button variant="ghost" onClick={() => setIsDialogOpen(false)}
+              className="flex-1 h-11 rounded-lg text-slate-200 hover:bg-white/5">Batal</Button>
+            <Button onClick={handleSaveClass} disabled={saving}
+              className="flex-1 h-11 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">
+              {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : formData.id ? 'Simpan Perubahan' : 'Buat Kelas'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirm */}
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent className="bg-slate-950 border border-red-500/20 rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-white">Hapus Kelas?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-300">
+              Menghapus kelas akan memutus relasi semua siswa di dalamnya. Pastikan siswa sudah dipindahkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-3">
+            <AlertDialogCancel className="h-11 border-white/10 bg-white/5 text-slate-200 rounded-lg px-5">Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="h-11 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-lg px-5">Konfirmasi Hapus</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

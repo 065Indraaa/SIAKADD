@@ -1,0 +1,7 @@
+connectorId: "uassiakad-connector"
+authLevel: "PUBLIC"
+generate:
+  javascriptSdk:
+    outputDir: "../../src/lib/dataconnect"
+    package: "@uassiakad/connector"
+    packageJsonDir: "../../"

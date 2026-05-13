@@ -1,119 +1,293 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Save, CheckCircle2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Search, Plus, Edit2, Trash2, Award, Loader2, RefreshCw, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import {
+  fetchJurusan,
+  addJurusan,
+  editJurusan,
+  removeJurusan,
+} from '@/lib/schoolService';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useManualRefresh } from '@/lib/useManualRefresh';
+
+// Preset peminatan SMAIT Nur Hidayah — Rumpun A/B/C (kelas 11, Kurikulum Merdeka)
+// Sumber: notulensi wawancara 15 Maret 2026
+const JURUSAN_PRESET = {
+  SMAIT: [
+    { kode: 'A', nama: 'Rumpun A — Kelompok Kesehatan (MTK, Fisika, Kimia, Biologi)' },
+    { kode: 'B', nama: 'Rumpun B — Kelompok Teknik (MTK Lanjut, Fisika, Kimia, Biologi)' },
+    { kode: 'C', nama: 'Rumpun C — Kelompok Sosial (Ekonomi, Sosiologi, Geografi, Sejarah)' },
+  ],
+};
 
 export default function AdminMajors() {
+  const [majors, setMajors] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSaved, setIsSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPresetOpen, setIsPresetOpen] = useState(false);
+  const [editingMajor, setEditingMajor] = useState<any>(null);
+  const [formData, setFormData] = useState({ kode: '', nama: '' });
+  const [saving, setSaving] = useState(false);
+  const [seedingPreset, setSeedingPreset] = useState<'SMAIT' | null>(null);
 
-  const [students, setStudents] = useState([
-    { id: 1, name: 'Ahmad Fauzi', class: 'X-A', score: 88.5, interest: 'IPA', assigned: 'IPA' },
-    { id: 2, name: 'Bela Safira', class: 'X-A', score: 82.0, interest: 'IPS', assigned: 'IPS' },
-    { id: 3, name: 'Ciko Jeriko', class: 'X-B', score: 75.5, interest: 'IPA', assigned: 'IPS' },
-    { id: 4, name: 'Dina Mariana', class: 'X-B', score: 91.0, interest: 'IPA', assigned: 'IPA' },
-  ]);
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fetchJurusan();
+      setMajors(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const handleAssignmentChange = (id: number, newAssignment: string) => {
-    setStudents(students.map(s => s.id === id ? { ...s, assigned: newAssignment } : s));
-    setIsSaved(false);
+  useEffect(() => { loadData(); }, [loadData]);
+
+  useAutoRefresh(loadData, 20_000);
+
+  const [refreshing, refresh] = useManualRefresh(loadData);
+
+  const handleOpenAdd = () => {
+    setEditingMajor(null);
+    setFormData({ kode: '', nama: '' });
+    setIsDialogOpen(true);
   };
 
-  const filteredStudents = students.filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
-
-  const handleSave = () => {
-    setTimeout(() => {
-      setIsSaved(true);
-    }, 500);
+  const handleOpenEdit = (major: any) => {
+    setEditingMajor(major);
+    setFormData({ kode: major.kode, nama: major.nama });
+    setIsDialogOpen(true);
   };
+
+  const handleSave = async () => {
+    if (!formData.kode.trim() || !formData.nama.trim()) {
+      alert('Kode dan nama jurusan wajib diisi.');
+      return;
+    }
+    setSaving(true);
+    try {
+      if (editingMajor) {
+        await editJurusan(editingMajor.id, formData);
+      } else {
+        await addJurusan(formData);
+      }
+      setIsDialogOpen(false);
+      await loadData();
+    } catch (e: any) {
+      alert('Gagal menyimpan: ' + (e.message || 'Mungkin kode jurusan sudah dipakai.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSeedPreset = async (type: 'SMAIT') => {
+    setSeedingPreset(type);
+    const preset = JURUSAN_PRESET[type];
+    const existingKodes = new Set(majors.map(m => m.kode));
+    let added = 0;
+    let skipped = 0;
+    for (const p of preset) {
+      if (existingKodes.has(p.kode)) { skipped++; continue; }
+      try {
+        await addJurusan(p);
+        added++;
+      } catch { skipped++; }
+    }
+    setSeedingPreset(null);
+    setIsPresetOpen(false);
+    await loadData();
+    alert(`Preset diterapkan.\n${added} rumpun ditambahkan, ${skipped} dilewati (sudah ada).`);
+  };
+
+  const handleDelete = async (id: string, nama: string) => {
+    if (!confirm(`Hapus jurusan "${nama}"? Siswa/kelas yang menggunakan jurusan ini perlu di-update.`)) return;
+    try {
+      await removeJurusan(id);
+      await loadData();
+    } catch (e: any) {
+      alert('Gagal menghapus: ' + (e.message || 'Masih dipakai oleh siswa/kelas.'));
+    }
+  };
+
+  const filteredMajors = majors.filter(m =>
+    m.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    m.kode.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className="p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6 text-slate-100">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-white">Penjurusan Kelas 11</h2>
-          <p className="text-slate-400">Proses penetapan jurusan untuk siswa yang naik ke kelas 11.</p>
+          <h2 className="text-3xl font-bold text-white">Manajemen Rumpun Peminatan</h2>
+          <p className="text-slate-300 mt-1">Kelola daftar rumpun peminatan SMAIT Nur Hidayah (A/B/C) yang dipilih siswa mulai kelas 11.</p>
         </div>
-        <div className="flex items-center gap-3">
-          {isSaved && (
-            <Badge variant="outline" className="bg-emerald-600/20 text-emerald-400 border-emerald-500/20">
-              <CheckCircle2 className="mr-1 h-3 w-3" /> Tersimpan
-            </Badge>
-          )}
-          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-            <Save className="mr-2 h-4 w-4" /> Simpan Perubahan
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={refresh} disabled={refreshing}
+            className="h-11 w-11 rounded-xl border-white/10 bg-white/5 p-0"
+            title="Segarkan data">
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button onClick={() => setIsPresetOpen(true)}
+            className="bg-amber-600 hover:bg-amber-500 h-11 px-5 rounded-xl font-semibold text-white">
+            <Zap className="mr-2 h-4 w-4" /> Preset Rumpun SMAIT
+          </Button>
+          <Button onClick={handleOpenAdd}
+            className="bg-blue-600 hover:bg-blue-500 h-11 px-5 rounded-xl font-semibold text-white">
+            <Plus className="mr-2 h-4 w-4" /> Tambah Rumpun
           </Button>
         </div>
       </div>
 
-      <Card className="bg-slate-900/50 backdrop-blur-md border border-white/10 shadow-xl">
-        <CardHeader className="pb-3 border-b border-white/5">
+      {/* Main card */}
+      <Card className="bg-slate-900/60 border-white/10 rounded-2xl overflow-hidden">
+        <CardHeader className="p-5 border-b border-white/10">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <CardTitle className="text-white">Daftar Calon Siswa Kelas 11</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-white text-lg font-bold">
+              <Award className="h-5 w-5 text-amber-400" /> Daftar Rumpun ({majors.length})
+            </CardTitle>
             <div className="relative w-full sm:w-72">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
-              <Input
-                placeholder="Cari nama siswa..."
-                className="pl-8 bg-slate-950 border-white/10 text-white placeholder:text-slate-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input placeholder="Cari kode atau nama rumpun..."
+                className="pl-10 h-11 bg-slate-950 border-white/10 text-white placeholder:text-slate-400 rounded-xl"
+                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="rounded-lg border border-white/10 overflow-hidden">
-            <Table>
-              <TableHeader className="bg-slate-950/50">
-                <TableRow className="border-white/10 hover:bg-transparent">
-                  <TableHead className="text-slate-400">Nama Siswa</TableHead>
-                  <TableHead className="text-slate-400">Kelas Asal</TableHead>
-                  <TableHead className="text-slate-400 text-center">Rata-rata Nilai</TableHead>
-                  <TableHead className="text-slate-400 text-center">Minat Siswa</TableHead>
-                  <TableHead className="text-slate-400">Penetapan Jurusan</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredStudents.length > 0 ? (
-                  filteredStudents.map((student) => (
-                    <TableRow key={student.id} className="border-white/5 hover:bg-white/5 transition-colors">
-                      <TableCell className="font-medium text-white">{student.name}</TableCell>
-                      <TableCell className="text-slate-300">{student.class}</TableCell>
-                      <TableCell className="text-center font-medium text-slate-200">{student.score}</TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline" className={student.interest === 'IPA' ? 'bg-blue-600/20 text-blue-400 border-blue-500/20' : 'bg-orange-600/20 text-orange-400 border-orange-500/20'}>
-                          {student.interest}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Select value={student.assigned} onValueChange={(val) => handleAssignmentChange(student.id, val)}>
-                          {/* Tambahkan text-white di sini agar teks terpilih berwarna putih */}
-                          <SelectTrigger className={`w-[180px] bg-slate-950 border-white/10 text-white ${student.assigned !== student.interest ? 'border-amber-500/50' : ''}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-900 border-white/10 text-white">
-                            <SelectItem value="IPA" className="text-white hover:bg-slate-800 focus:bg-slate-800 focus:text-white">Rumpun A (MIPA)</SelectItem>
-                            <SelectItem value="IPS" className="text-white hover:bg-slate-800 focus:bg-slate-800 focus:text-white">Rumpun B (IPS)</SelectItem>
-                            <SelectItem value="BAHASA" className="text-white hover:bg-slate-800 focus:bg-slate-800 focus:text-white">Rumpun C (Bahasa)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center text-slate-500">Tidak ada siswa ditemukan.</TableCell>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader className="bg-slate-950/50">
+              <TableRow className="border-white/10 hover:bg-transparent">
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4 pl-6">Kode</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4">Nama Jurusan</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4 text-right pr-6">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={3} className="text-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
+                </TableCell></TableRow>
+              ) : filteredMajors.length > 0 ? (
+                filteredMajors.map((major) => (
+                  <TableRow key={major.id} className="border-white/10 hover:bg-white/5">
+                    <TableCell className="py-4 pl-6">
+                      <Badge variant="outline" className="bg-slate-800 text-white border-white/20 font-mono text-sm px-3 py-1">
+                        {major.kode}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-semibold text-white text-base">{major.nama}</TableCell>
+                    <TableCell className="text-right py-4 pr-6">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(major)}
+                          className="h-9 w-9 text-blue-400 hover:text-white hover:bg-blue-600 rounded-lg">
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(major.id, major.nama)}
+                          className="h-9 w-9 text-red-400 hover:text-white hover:bg-red-600 rounded-lg">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="h-32 text-center">
+                    <div className="flex flex-col items-center justify-center text-slate-400 gap-2">
+                      <Award className="h-10 w-10 opacity-40" />
+                      <p className="font-semibold text-slate-200">Belum ada rumpun peminatan</p>
+                      <p className="text-sm">Gunakan preset Rumpun SMAIT atau tambah manual.</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="bg-slate-950 border border-white/10 text-white rounded-2xl p-0 overflow-hidden max-w-md">
+          <DialogHeader className="p-6 bg-white/5 border-b border-white/10">
+            <DialogTitle className="text-xl font-bold">
+              {editingMajor ? 'Ubah Rumpun' : 'Tambah Rumpun'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-6 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="kode" className="text-slate-200 text-xs font-semibold">Kode Rumpun</Label>
+              <Input
+                id="kode"
+                value={formData.kode}
+                onChange={(e) => setFormData({ ...formData, kode: e.target.value.toUpperCase() })}
+                placeholder="Contoh: A, B, C"
+                className="h-11 bg-slate-900 border-white/10 rounded-lg text-white placeholder:text-slate-500 font-mono uppercase"
+              />
+              <p className="text-[10px] text-slate-400">Kode singkat berupa huruf besar (1-6 karakter).</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="nama" className="text-slate-200 text-xs font-semibold">Nama Lengkap</Label>
+              <Input
+                id="nama"
+                value={formData.nama}
+                onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+                placeholder="Contoh: Rumpun A — Kelompok Kesehatan"
+                className="h-11 bg-slate-900 border-white/10 rounded-lg text-white placeholder:text-slate-500"
+              />
+            </div>
+          </div>
+          <DialogFooter className="p-6 bg-slate-900/50 flex flex-row gap-3 border-t border-white/10">
+            <Button variant="ghost" onClick={() => setIsDialogOpen(false)}
+              className="flex-1 h-11 rounded-lg text-slate-200 hover:bg-white/5">Batal</Button>
+            <Button onClick={handleSave} disabled={saving}
+              className="flex-1 h-11 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingMajor ? 'Perbarui' : 'Simpan'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preset Dialog */}
+      <Dialog open={isPresetOpen} onOpenChange={setIsPresetOpen}>
+        <DialogContent className="bg-slate-950 border border-white/10 text-white rounded-2xl p-0 overflow-hidden max-w-lg">
+          <DialogHeader className="p-6 border-b border-white/10 bg-gradient-to-br from-amber-600/10 to-transparent">
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <Zap className="h-5 w-5 text-amber-400" /> Preset Rumpun Peminatan SMAIT Nur Hidayah
+            </DialogTitle>
+            <p className="text-sm text-slate-300 mt-1">Tambahkan tiga rumpun peminatan (A, B, C) sesuai kebijakan sekolah. Rumpun yang sudah ada akan dilewati.</p>
+          </DialogHeader>
+          <div className="p-6">
+            <div className="p-5 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-3">
+              <div>
+                <h3 className="text-white font-bold text-lg">SMAIT Nur Hidayah</h3>
+                <p className="text-xs text-slate-300">3 rumpun peminatan — dipilih siswa mulai kelas 10 semester 2</p>
+              </div>
+              <div className="space-y-1.5 text-sm">
+                {JURUSAN_PRESET.SMAIT.map(j => (
+                  <div key={j.kode} className="flex items-center gap-2 bg-slate-950/50 p-2 rounded-lg">
+                    <Badge className="bg-blue-600 text-white text-xs font-mono px-2">Rumpun {j.kode}</Badge>
+                    <span className="text-slate-200 text-xs">{j.nama}</span>
+                  </div>
+                ))}
+              </div>
+              <Button onClick={() => handleSeedPreset('SMAIT')} disabled={seedingPreset !== null}
+                className="w-full h-11 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">
+                {seedingPreset === 'SMAIT' ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Terapkan Preset Rumpun A/B/C'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
