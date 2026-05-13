@@ -128,3 +128,8 @@
     @apply font-sans;
     }
 }
+
+@import "tailwindcss";
+
+/* ✅ Aktifkan dark mode pakai class strategy */
+@custom-variant dark (&:is(.dark *));
