@@ -64,6 +64,38 @@ export default function SiswaGrades() {
     : '0.00';
 
   return (
+<<<<<<< HEAD
+    <div className="space-y-6 text-slate-800 dark:text-slate-100">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Nilai & Rapor
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400">Lihat hasil evaluasi belajar Anda.</p>
+        </div>
+        <Button
+          variant="outline"
+          className="border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-gray-300"
+          onClick={() => alert('Fitur unduh rapor belum tersedia')}
+        >
+          <Download className="mr-2 h-4 w-4" /> Unduh Rapor
+        </Button>
+      </div>
+
+      <Card className="bg-white border-slate-200 shadow-sm dark:bg-slate-900/50 dark:border-white/10 dark:shadow-xl dark:backdrop-blur-md">
+        <CardHeader className="pb-3 border-b border-slate-200 dark:border-white/5">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <CardTitle className="text-slate-900 dark:text-white">Rapor Semester</CardTitle>
+            <div className="flex space-x-2">
+              <Select defaultValue="2024-1">
+                <SelectTrigger className="w-[180px] bg-white border-slate-300 text-slate-900 dark:bg-slate-950 dark:border-white/10 dark:text-white">
+                  <SelectValue placeholder="Pilih Semester" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200 text-slate-900 dark:bg-slate-900 dark:border-white/10 dark:text-white">
+                  <SelectItem value="2024-1">2024/2025 - Ganjil</SelectItem>
+                  <SelectItem value="2023-2">2023/2024 - Genap</SelectItem>
+                  <SelectItem value="2023-1">2023/2024 - Ganjil</SelectItem>
+=======
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
@@ -116,11 +148,46 @@ export default function SiswaGrades() {
                   {SEMESTER_OPTIONS.map(s => (
                     <SelectItem key={s} value={s} className="focus:bg-blue-600">Semester {s}</SelectItem>
                   ))}
+>>>>>>> 75ba1c482785795b5c0a639ee927110c79e258f9
                 </SelectContent>
               </Select>
             </div>
           </div>
         </CardHeader>
+<<<<<<< HEAD
+        <CardContent className="pt-6">
+          <div className="rounded-lg border border-slate-200 overflow-hidden dark:border-white/10">
+            <Table>
+              <TableHeader className="bg-slate-50 dark:bg-slate-950/50">
+                <TableRow className="border-slate-200 hover:bg-transparent dark:border-white/10">
+                  <TableHead className="text-slate-500 dark:text-slate-400">Mata Pelajaran</TableHead>
+                  <TableHead className="text-center text-slate-500 dark:text-slate-400">Nilai Harian</TableHead>
+                  <TableHead className="text-center text-slate-500 dark:text-slate-400">UTS</TableHead>
+                  <TableHead className="text-center text-slate-500 dark:text-slate-400">UAS</TableHead>
+                  <TableHead className="text-right text-slate-500 dark:text-slate-400">Nilai Akhir</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {grades.map((grade) => (
+                  <TableRow
+                    key={grade.id}
+                    className="border-slate-100 hover:bg-slate-50 dark:border-white/5 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <TableCell className="font-medium text-slate-900 dark:text-white">
+                      {grade.subject}
+                    </TableCell>
+                    <TableCell className="text-center text-slate-700 dark:text-slate-200">
+                      {grade.nh}
+                    </TableCell>
+                    <TableCell className="text-center text-slate-700 dark:text-slate-200">
+                      {grade.uts}
+                    </TableCell>
+                    <TableCell className="text-center text-slate-700 dark:text-slate-200">
+                      {grade.uas}
+                    </TableCell>
+                    <TableCell className="text-right font-bold text-blue-600 dark:text-blue-400">
+                      {grade.final}
+=======
 
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -164,6 +231,7 @@ export default function SiswaGrades() {
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-10 text-slate-500 text-sm">
                       Belum ada nilai untuk Semester {semester} T.A. {tahunAjaran}.
+>>>>>>> 75ba1c482785795b5c0a639ee927110c79e258f9
                     </TableCell>
                   </TableRow>
                 )}

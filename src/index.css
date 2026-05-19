@@ -127,6 +127,16 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   html {
+<<<<<<< HEAD
+    @apply font-sans;
+    }
+}
+
+@import "tailwindcss";
+
+/* ✅ Aktifkan dark mode pakai class strategy */
+@custom-variant dark (&:is(.dark *));
+=======
     @apply scroll-smooth;
   }
   h1, h2, h3, h4, h5, h6 {
@@ -531,3 +541,4 @@
 .dark .scola-portal label.text-slate-200 {
   color: oklch(0.85 0 0) !important;
 }
+>>>>>>> 75ba1c482785795b5c0a639ee927110c79e258f9
