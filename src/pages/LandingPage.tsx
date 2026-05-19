@@ -21,7 +21,7 @@ import {
   Moon,
   Menu,
   ArrowRight,
-  Sparkles,
+  Info,
   LineChart,
   FileSpreadsheet,
   CalendarClock,
@@ -36,7 +36,31 @@ import {
 } from 'lucide-react';
 import Chatbot from '../components/Chatbot';
 import { useTheme } from '@/contexts/ThemeContext';
-import schoolHero from '../../photo_2026-05-18_06-40-38.jpg';
+
+/*
+ * PANDUAN GAMBAR LANDING PAGE
+ * ─────────────────────────────────────────────────────────────
+ * Letakkan file gambar di folder /public/images/ lalu referensikan
+ * dengan path absolut (/images/nama-file.jpg).
+ *
+ * Gambar yang dibutuhkan:
+ *
+ * 1. /public/images/hero.jpg
+ *    Foto utama hero section (full-width, gelap di atasnya).
+ *    Rekomendasi: foto depan gedung SMAIT Nur Hidayah dari luar,
+ *    atau foto suasana upacara/kegiatan besar di lapangan.
+ *    Ukuran ideal: 1920×1080 px, landscape.
+ *
+ * 2. /public/images/profil.jpg
+ *    Foto untuk kartu profil sekolah (section Profil).
+ *    Rekomendasi: foto koridor, ruang kelas, atau area masjid sekolah.
+ *    Ukuran ideal: 800×600 px, landscape.
+ *
+ * Sementara gambar belum tersedia, hero menggunakan gradient fallback.
+ * ─────────────────────────────────────────────────────────────
+ */
+const HERO_IMAGE = '/images/hero.jpg';
+const PROFIL_IMAGE = '/images/profil.jpg';
 
 const SCHOOL = {
   name: 'SMAIT Nur Hidayah',
@@ -251,7 +275,12 @@ export default function LandingPage() {
 
       <section className="relative isolate overflow-hidden pt-24">
         <div className="absolute inset-0">
-          <img src={schoolHero} alt="SMAIT Nur Hidayah" className="h-full w-full object-cover" />
+          <img
+              src={HERO_IMAGE}
+              alt="SMAIT Nur Hidayah Sukoharjo"
+              className="h-full w-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
           <div className="absolute inset-0 bg-slate-950/80" />
           <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-slate-950 to-transparent" />
         </div>
@@ -259,7 +288,7 @@ export default function LandingPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl py-20 lg:py-28">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
-              <Sparkles className="h-3 w-3 text-blue-300" />
+              <Info className="h-3 w-3 text-blue-300" />
               Akreditasi A | Berdiri 2008 | 15+ tahun pengalaman
             </div>
 
@@ -356,7 +385,22 @@ export default function LandingPage() {
             </div>
 
             <div className={`overflow-hidden rounded-3xl border ${mutedSurfaceClass}`}>
-              <img src={schoolHero} alt="Lingkungan SMAIT Nur Hidayah" className="h-72 w-full object-cover sm:h-96" />
+              <img
+                src={PROFIL_IMAGE}
+                alt="Lingkungan SMAIT Nur Hidayah"
+                className="h-72 w-full object-cover sm:h-96"
+                onError={(e) => {
+                  const el = e.target as HTMLImageElement;
+                  el.style.display = 'none';
+                  const parent = el.parentElement;
+                  if (parent) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'h-72 sm:h-96 w-full flex items-center justify-center bg-slate-800 text-slate-500 text-sm';
+                    placeholder.textContent = 'Foto sekolah — letakkan di /public/images/profil.jpg';
+                    parent.insertBefore(placeholder, el);
+                  }
+                }}
+              />
               <div className="grid gap-4 p-6 sm:grid-cols-2">
                 {[
                   { icon: Building2, title: 'Yayasan', value: SCHOOL.yayasan },
@@ -731,7 +775,7 @@ export default function LandingPage() {
             <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-4 text-white">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20">
-                  <Sparkles className="h-4 w-4" />
+                  <MessageCircle className="h-4 w-4" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold leading-none">Asisten SCOLA</p>

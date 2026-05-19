@@ -93,7 +93,7 @@ function SiswaOverview() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-medium text-muted-foreground mb-1">Selamat datang kembali 👋</p>
+          <p className="text-xs font-medium text-muted-foreground mb-1">Selamat datang kembali</p>
           <h2 className="text-2xl font-bold text-foreground">Halo, {firstName}!</h2>
           <p className="text-sm text-muted-foreground mt-1">
             {new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
