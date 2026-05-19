@@ -121,7 +121,7 @@ export default function SiswaSchedule() {
               </SelectContent>
             </Select>
 
-            <Select value={tahunAjaran} onValueChange={(v) => setTahunAjaran(v)}>
+            <Select value={tahunAjaran} onValueChange={(v) => { if (v) setTahunAjaran(v); }}>
               <SelectTrigger className="w-[140px] bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-lg h-10 text-sm font-medium">
                 <SelectValue />
               </SelectTrigger>
