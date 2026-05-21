@@ -155,7 +155,7 @@ function GuruOverview() {
           </div>
           <div className="p-4 space-y-2">
             {[
-              { label: 'Input Nilai', sub: 'Harian · UTS · UAS', href: 'grades', icon: CheckCircle, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+              { label: 'Pengisian Nilai', sub: 'Harian · UTS · UAS', href: 'grades', icon: CheckCircle, color: 'text-blue-500', bg: 'bg-blue-500/10' },
               { label: 'Catat Prestasi', sub: 'Sertifikasi · Lomba', href: 'achievements', icon: Award, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
               { label: 'Data Murid', sub: 'Profil · Kehadiran', href: 'students', icon: Users, color: 'text-purple-500', bg: 'bg-purple-500/10' },
             ].map((item, i) => (
@@ -179,7 +179,7 @@ function GuruOverview() {
 
 export default function GuruDashboard() {
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto">
       <Routes>
         <Route path="/" element={<GuruOverview />} />
         <Route path="/students" element={<GuruStudents />} />

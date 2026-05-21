@@ -242,7 +242,7 @@ export default function GuruGrades() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-white">Input Nilai Siswa</h2>
+          <h2 className="text-3xl font-bold text-white">Pengisian Nilai Siswa</h2>
           <p className="text-slate-300 mt-1">Masukkan nilai harian, UTS, dan UAS. Nilai akhir dihitung otomatis.</p>
         </div>
         <div className="flex gap-2">
@@ -275,13 +275,13 @@ export default function GuruGrades() {
                   loadingAssignments
                     ? 'Memuat jadwal mengajar...'
                     : assignmentItems.length
-                      ? 'Pilih kelas & mapel'
+                      ? 'Pilih kelas dan mata pelajaran'
                       : 'Belum ada jadwal mengajar'
                 }
                 className="h-11 bg-slate-950 border-white/10 rounded-lg text-white"
               />
               <p className="text-[10px] text-slate-400">
-                Daftar ini diambil otomatis dari jadwal mengajar yang sudah diatur admin untuk Anda.
+                Daftar ini diambil otomatis dari jadwal mengajar yang sudah diatur administrator untuk Anda.
               </p>
             </div>
             <div className="space-y-1.5">
@@ -312,8 +312,8 @@ export default function GuruGrades() {
           <div>
             <p className="font-semibold text-amber-100">Belum ada jadwal mengajar untuk Anda</p>
             <p className="mt-1 text-amber-200/90">
-              Input nilai hanya tersedia untuk kelas dan mata pelajaran yang tercantum di jadwal mengajar.
-              Silakan hubungi admin agar jadwal mengajar Anda dibuat terlebih dahulu untuk semester {semester} T.A. {tahunAjaran}.
+              Pengisian nilai hanya tersedia untuk kelas dan mata pelajaran yang tercantum di jadwal mengajar.
+              Silakan hubungi administrator agar jadwal mengajar Anda dibuat terlebih dahulu untuk semester {semester} tahun ajaran {tahunAjaran}.
             </p>
           </div>
         </div>
@@ -401,7 +401,7 @@ export default function GuruGrades() {
                   <p className="text-sm text-slate-400">
                     {selectedAssignment
                       ? 'Kelas ini belum memiliki siswa terdaftar.'
-                      : 'Pilih kelas & mata pelajaran yang Anda ampu dulu.'}
+                      : 'Pilih kelas dan mata pelajaran yang Anda ampu terlebih dahulu.'}
                   </p>
                 </TableCell></TableRow>
               )}

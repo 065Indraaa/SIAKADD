@@ -153,7 +153,7 @@ export default function GuruAchievements() {
               <Star className="h-4 w-4 text-emerald-500 fill-emerald-500" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Daftar Prestasi</span>
            </div>
-          <h2 className="text-4xl font-black tracking-tighter text-white font-heading underline decoration-emerald-600/30 underline-offset-8 italic">Prestasi Siswa</h2>
+           <h2 className="text-4xl font-black tracking-tighter text-white font-heading underline decoration-emerald-600/30 underline-offset-8">Prestasi Siswa</h2>
           <p className="text-slate-400 font-medium mt-3">Arsip penghargaan dan pencapaian luar biasa siswa SMA.</p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
@@ -170,7 +170,7 @@ export default function GuruAchievements() {
       <Card className="bg-slate-900/40 backdrop-blur-3xl border border-white/5 shadow-2xl rounded-[2.5rem] overflow-hidden">
         <CardHeader className="p-8 border-b border-white/5">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <CardTitle className="text-white font-heading text-2xl font-black italic">Log Pencapaian</CardTitle>
+            <CardTitle className="text-white font-heading text-2xl font-black">Catatan Pencapaian</CardTitle>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
               <Input placeholder="Cari prestasi atau nama..."
@@ -187,7 +187,7 @@ export default function GuruAchievements() {
                 <TableHead>Penerima (Siswa)</TableHead>
                 <TableHead>Tingkat / Peringkat</TableHead>
                 <TableHead>Waktu</TableHead>
-                <TableHead className="text-right pr-10">Operasi</TableHead>
+                <TableHead className="text-right pr-10">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -244,7 +244,7 @@ export default function GuruAchievements() {
         <DialogContent className="bg-slate-950 border border-white/10 max-w-lg rounded-[2.5rem] p-0 overflow-hidden shadow-2xl">
            <div className="p-8 border-b border-white/5 bg-gradient-to-br from-emerald-600/10 to-transparent">
               <DialogTitle className="text-2xl font-black tracking-tight text-white font-heading underline decoration-emerald-500/30 underline-offset-8">
-                Pencatatan Baru
+                Pencatatan Prestasi Baru
               </DialogTitle>
               <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mt-3">Tambahkan sertifikasi atau juara siswa ke dalam sistem.</p>
            </div>
@@ -262,7 +262,7 @@ export default function GuruAchievements() {
                       label: s.name,
                       hint: `NIS ${s.nis || '-'}${s.className ? ' · ' + s.className : ''}`,
                     }))}
-                  placeholder={allSiswa.length ? 'Pilih Siswa' : 'Memuat daftar siswa...'}
+                  placeholder={allSiswa.length ? 'Pilih siswa' : 'Memuat daftar siswa...'}
                   className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold"
                 />
               </div>
@@ -297,7 +297,7 @@ export default function GuruAchievements() {
                        <SelectTrigger className="h-14 bg-slate-900 border-white/5 rounded-2xl text-white font-bold"><SelectValue /></SelectTrigger>
                        <SelectContent className="bg-slate-900 border-white/10 rounded-2xl">
                           <SelectItem value="Akademik" className="rounded-xl">Akademik</SelectItem>
-                          <SelectItem value="NonAkademik" className="rounded-xl">Non-Akademik (Olahraga, Seni, dll)</SelectItem>
+                           <SelectItem value="NonAkademik" className="rounded-xl">Nonakademik (Olahraga, Seni, dan lainnya)</SelectItem>
                        </SelectContent>
                     </Select>
                  </div>
@@ -318,7 +318,7 @@ export default function GuruAchievements() {
            <div className="p-8 bg-white/5 border-t border-white/5 flex gap-3">
               <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="flex-1 h-14 rounded-2xl text-slate-400 font-bold hover:text-white">Batal</Button>
               <Button onClick={handleSave} disabled={saving} className="flex-1 h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-500 font-black shadow-xl shadow-emerald-600/20 text-white">
-                {saving ? <Loader2 className="h-6 w-6 animate-spin" /> : 'Finalisasi Data'}
+                 {saving ? <Loader2 className="h-6 w-6 animate-spin" /> : 'Simpan Data'}
               </Button>
            </div>
         </DialogContent>
@@ -329,7 +329,7 @@ export default function GuruAchievements() {
           <AlertDialogHeader className="pb-4">
             <AlertDialogTitle className="text-2xl font-black text-white font-heading">Hapus Rekam Jejak?</AlertDialogTitle>
             <AlertDialogDescription className="text-slate-400">
-               Data prestasi yang dihapus akan hilang dari Curriculum Vitae siswa secara <span className="text-red-400 font-bold">permanen</span>.
+               Data prestasi yang dihapus akan hilang dari riwayat siswa secara <span className="text-red-400 font-bold">permanen</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3">

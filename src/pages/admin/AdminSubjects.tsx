@@ -16,7 +16,7 @@ import {
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useManualRefresh } from '@/lib/useManualRefresh';
 
-// Mata Pelajaran Preset — Kurikulum Merdeka (disesuaikan dengan Rumpun A/B/C SMAIT Nur Hidayah)
+// Daftar bawaan mata pelajaran Kurikulum Merdeka (disesuaikan dengan Rumpun A/B/C SMAIT Nur Hidayah)
 const MAPEL_PRESET = {
   Umum: [
     { kode: 'PAI', nama: 'Pendidikan Agama dan Budi Pekerti' },
@@ -122,13 +122,13 @@ export default function AdminSubjects() {
     }
     setSeedingCategory(null);
     await loadData();
-    alert(`Preset ${category}: ${added} ditambahkan, ${skipped} dilewati.`);
+      alert(`Daftar bawaan ${category}: ${added} ditambahkan, ${skipped} dilewati.`);
   };
 
   const handleSeedAll = async () => {
     if (!confirm('Tambahkan semua mata pelajaran Kurikulum Merdeka (Umum + Rumpun A + Rumpun B + Rumpun C)?')) return;
     setSeedingCategory('ALL');
-    // Gabung + dedup by kode karena mapel seperti MTK-L dipakai Rumpun A & B
+    // Gabung dan hilangkan duplikasi berdasarkan kode karena beberapa mata pelajaran dipakai lebih dari satu rumpun.
     const combined = [
       ...MAPEL_PRESET.Umum,
       ...MAPEL_PRESET.RumpunA,
@@ -147,11 +147,11 @@ export default function AdminSubjects() {
     setSeedingCategory(null);
     setIsPresetOpen(false);
     await loadData();
-    alert(`Preset lengkap: ${added} ditambahkan, ${skipped} dilewati.`);
+    alert(`Daftar bawaan lengkap: ${added} ditambahkan, ${skipped} dilewati.`);
   };
 
   const handleDelete = async (id: string, nama: string) => {
-    if (!confirm(`Hapus mata pelajaran "${nama}"? Jadwal yang menggunakan mapel ini akan bermasalah.`)) return;
+    if (!confirm(`Hapus mata pelajaran "${nama}"? Jadwal yang menggunakan mata pelajaran ini akan bermasalah.`)) return;
     try {
       await removeMataPelajaran(id);
       await loadData();
@@ -180,11 +180,11 @@ export default function AdminSubjects() {
           </Button>
           <Button onClick={() => setIsPresetOpen(true)}
             className="bg-amber-600 hover:bg-amber-500 h-11 px-5 rounded-xl font-semibold text-white">
-            <Zap className="mr-2 h-4 w-4" /> Preset Merdeka
+            <Zap className="mr-2 h-4 w-4" /> Daftar Bawaan
           </Button>
           <Button onClick={handleOpenAdd}
             className="bg-blue-600 hover:bg-blue-500 h-11 px-5 rounded-xl font-semibold text-white">
-            <Plus className="mr-2 h-4 w-4" /> Tambah Mapel
+            <Plus className="mr-2 h-4 w-4" /> Tambah Mata Pelajaran
           </Button>
         </div>
       </div>
@@ -198,7 +198,7 @@ export default function AdminSubjects() {
             </CardTitle>
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input placeholder="Cari kode atau nama mapel..."
+              <Input placeholder="Cari kode atau nama mata pelajaran..."
                 className="pl-10 h-11 bg-slate-950 border-white/10 text-white placeholder:text-slate-400 rounded-xl"
                 value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
@@ -295,14 +295,14 @@ export default function AdminSubjects() {
         </DialogContent>
       </Dialog>
 
-      {/* Preset Dialog */}
+      {/* Dialog daftar bawaan */}
       <Dialog open={isPresetOpen} onOpenChange={setIsPresetOpen}>
         <DialogContent className="bg-slate-950 border border-white/10 text-white rounded-2xl p-0 overflow-hidden max-w-3xl">
           <DialogHeader className="p-6 border-b border-white/10 bg-gradient-to-br from-amber-600/10 to-transparent">
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              <Zap className="h-5 w-5 text-amber-400" /> Preset Mata Pelajaran Kurikulum Merdeka
+               <Zap className="h-5 w-5 text-amber-400" /> Daftar Bawaan Mata Pelajaran Kurikulum Merdeka
             </DialogTitle>
-            <DialogDescription className="text-slate-300 mt-1">Pilih kategori yang ingin ditambahkan. Mapel yang sudah ada akan dilewati.</DialogDescription>
+             <DialogDescription className="text-slate-300 mt-1">Pilih kategori yang ingin ditambahkan. Mata pelajaran yang sudah ada akan dilewati.</DialogDescription>
           </DialogHeader>
           <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
             <Button onClick={handleSeedAll} disabled={seedingCategory !== null}
@@ -317,7 +317,7 @@ export default function AdminSubjects() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {(Object.keys(MAPEL_PRESET) as Array<keyof typeof MAPEL_PRESET>).map(cat => {
                 const labelMap: Record<string, string> = {
-                  Umum: 'Mapel Umum',
+                  Umum: 'Mata Pelajaran Umum',
                   RumpunA: 'Rumpun A — Kesehatan',
                   RumpunB: 'Rumpun B — Teknik',
                   RumpunC: 'Rumpun C — Sosial',
@@ -328,7 +328,7 @@ export default function AdminSubjects() {
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-white font-bold">{label}</h3>
                       <Badge variant="outline" className="text-xs text-slate-300 border-white/20">
-                        {MAPEL_PRESET[cat].length} mapel
+                        {MAPEL_PRESET[cat].length} mata pelajaran
                       </Badge>
                     </div>
                     <div className="space-y-1 text-xs mb-3 max-h-32 overflow-y-auto">

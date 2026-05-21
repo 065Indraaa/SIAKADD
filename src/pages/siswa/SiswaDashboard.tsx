@@ -208,7 +208,7 @@ function SiswaOverview() {
               Kelas: <span className="text-foreground font-medium">{user?.className || 'Belum diatur'}</span>
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Semester {currentSemester()} T.A. {currentTahunAjaran()} sedang berjalan.
+              Semester {currentSemester()} tahun ajaran {currentTahunAjaran()} sedang berjalan.
             </p>
           </div>
         </div>

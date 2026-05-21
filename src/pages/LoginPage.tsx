@@ -64,14 +64,14 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* Content */}
+      {/* Konten */}
       <div className="relative z-10 flex-1 flex items-center justify-center px-6 py-10">
         <div className="w-full max-w-md">
           <Card className="bg-slate-900/60 border border-white/10 rounded-2xl overflow-hidden">
             <CardHeader className="pt-8 pb-3 text-center">
               <CardTitle className="text-2xl font-bold text-white tracking-tight">Masuk ke portal</CardTitle>
               <CardDescription className="text-slate-400 text-sm mt-1">
-                Gunakan akun yang telah diberikan oleh admin sekolah.
+                Gunakan akun yang telah diberikan oleh administrator sekolah.
               </CardDescription>
             </CardHeader>
             <CardContent className="px-8 pb-8 pt-2">
@@ -84,7 +84,7 @@ export default function LoginPage() {
                 )}
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-xs font-semibold text-slate-300">Email</Label>
+                  <Label htmlFor="email" className="text-xs font-semibold text-slate-300">Surel</Label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                     <Input
@@ -134,7 +134,7 @@ export default function LoginPage() {
                 </Button>
 
                 <p className="text-xs text-slate-500 text-center leading-relaxed">
-                  Lupa kata sandi? Hubungi admin sekolah untuk pengaturan ulang.
+                  Lupa kata sandi? Hubungi administrator sekolah untuk pengaturan ulang.
                 </p>
               </form>
             </CardContent>

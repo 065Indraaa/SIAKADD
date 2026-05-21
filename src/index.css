@@ -128,8 +128,6 @@
   }
   html {
     @apply scroll-smooth;
-
-/* ✅ Aktifkan dark mode pakai class strategy */
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -532,4 +530,83 @@
 .dark .scola-portal .text-slate-200.text-xs,
 .dark .scola-portal label.text-slate-200 {
   color: oklch(0.85 0 0) !important;
+}
+
+/* Penyesuaian layar kecil agar seluruh halaman portal tetap rapi. */
+@media (max-width: 640px) {
+  .scola-portal > div {
+    padding: 1rem !important;
+    gap: 1rem !important;
+  }
+
+  .scola-portal h1,
+  .scola-portal h2.text-4xl,
+  .scola-portal h2.text-3xl {
+    font-size: 1.5rem !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.03em !important;
+  }
+
+  .scola-portal h3.text-2xl,
+  .scola-portal h3.text-xl {
+    font-size: 1.125rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .scola-portal .scola-page-header {
+    margin-bottom: 1rem;
+  }
+
+  .scola-portal .scola-card,
+  .scola-portal .scola-stat-card,
+  .scola-portal [class*="rounded-3xl"],
+  .scola-portal [class*="rounded-[2.5rem]"] {
+    border-radius: 1rem !important;
+  }
+
+  .scola-portal [class*="p-8"] {
+    padding: 1rem !important;
+  }
+
+  .scola-portal [class*="px-8"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .scola-portal [class*="py-8"] {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  .scola-portal [class*="grid-cols-2"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .scola-portal table {
+    min-width: 720px;
+  }
+
+  .scola-portal .overflow-hidden:has(table) {
+    overflow-x: auto !important;
+  }
+
+  .scola-portal th,
+  .scola-portal td,
+  .scola-table thead th,
+  .scola-table tbody td {
+    padding: 0.875rem 1rem !important;
+    white-space: nowrap;
+  }
+
+  .scola-portal .overflow-x-auto,
+  .scola-portal [class*="overflow-x-auto"] {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scola-portal input,
+  .scola-portal select,
+  .scola-portal textarea,
+  .scola-portal button {
+    max-width: 100%;
+  }
 }

@@ -59,7 +59,7 @@ export default function SiswaGrades() {
             Nilai & Rapor
           </h2>
           <p className="text-muted-foreground mt-2 text-sm max-w-xl">
-            Nilai semester yang telah diinput guru mata pelajaran. Rapot final terbuka setelah administrasi lunas.
+            Nilai semester yang telah diisi guru mata pelajaran. Rapor akhir terbuka setelah administrasi lunas.
           </p>
         </div>
         <Button
@@ -182,7 +182,7 @@ export default function SiswaGrades() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-10 text-muted-foreground text-sm">
-                      Belum ada nilai untuk Semester {semester} T.A. {tahunAjaran}.
+                      Belum ada nilai untuk Semester {semester} tahun ajaran {tahunAjaran}.
                     </TableCell>
                   </TableRow>
                 )}

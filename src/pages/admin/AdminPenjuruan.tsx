@@ -169,7 +169,7 @@ export default function AdminPenjuruan() {
           <p className="font-semibold text-blue-100">Panduan Penjurusan SMAIT Nur Hidayah</p>
           <p className="mt-1 text-blue-200/90">
             Siswa memilih rumpun peminatan mulai <strong>kelas 10 semester 2</strong>. Penempatan mengacu pada
-            pilihan siswa, nilai tes dan rapot, serta kuota kelas: <strong>Rumpun A (Kesehatan) 2 kelas</strong>,
+            pilihan siswa, nilai tes dan rapor, serta kuota kelas: <strong>Rumpun A (Kesehatan) 2 kelas</strong>,
             <strong> Rumpun B (Teknik) 1 kelas</strong>, <strong>Rumpun C (Sosial) 2 kelas</strong>. Jika pilihan
             utama tidak tersedia, siswa dapat dialihkan ke rumpun alternatif.
           </p>
@@ -182,7 +182,7 @@ export default function AdminPenjuruan() {
           { label: 'Total Siswa', val: stats.total, color: 'text-blue-400', bg: 'bg-blue-500/10' },
           { label: 'Sudah Ditetapkan', val: stats.sudahPilih, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
           { label: 'Belum Ditetapkan', val: stats.belumPilih, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-          { label: 'Perubahan Pending', val: stats.perubahan, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+          { label: 'Perubahan Tertunda', val: stats.perubahan, color: 'text-purple-400', bg: 'bg-purple-500/10' },
         ].map((s, i) => (
           <Card key={i} className="bg-slate-900/60 border-white/10 rounded-xl">
             <CardContent className="p-4">

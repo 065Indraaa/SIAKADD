@@ -311,7 +311,7 @@ export default function AdminSchedules() {
         <DialogContent className="bg-slate-950 border border-white/10 text-white rounded-2xl p-0 overflow-hidden max-w-lg">
           <div className="p-6 border-b border-white/10 bg-white/5">
             <DialogTitle className="text-xl font-bold">Tambah Jadwal Baru</DialogTitle>
-            <p className="text-slate-300 text-xs mt-1">Untuk kelas {currentKelasName}, T.A. {tahunAjaran}.</p>
+            <p className="text-slate-300 text-xs mt-1">Untuk kelas {currentKelasName}, tahun ajaran {tahunAjaran}.</p>
           </div>
           <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-1.5">

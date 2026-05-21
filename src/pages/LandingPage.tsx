@@ -45,7 +45,7 @@ import { useTheme } from '@/contexts/ThemeContext';
  *
  * Gambar yang dibutuhkan:
  *
- * 1. /public/images/hero.jpg
+ * 1. /public/images/hero.jpeg
  *    Foto utama hero section (full-width, gelap di atasnya).
  *    Rekomendasi: foto depan gedung SMAIT Nur Hidayah dari luar,
  *    atau foto suasana upacara/kegiatan besar di lapangan.
@@ -59,13 +59,13 @@ import { useTheme } from '@/contexts/ThemeContext';
  * Sementara gambar belum tersedia, hero menggunakan gradient fallback.
  * ─────────────────────────────────────────────────────────────
  */
-const HERO_IMAGE = '/images/hero.jpg';
+const HERO_IMAGE = '/images/hero.jpeg';
 const PROFIL_IMAGE = '/images/profil.jpg';
 
 const SCHOOL = {
   name: 'SMAIT Nur Hidayah',
   fullName: 'SMA Islam Terpadu Nur Hidayah Sukoharjo',
-  tagline: 'Membentuk Generasi Rabbani yang Berprestasi',
+  tagline: 'Membentuk generasi rabbani, unggul, dan berdaya saing',
   founded: 2008,
   address: 'Jl. Pandawa No.10, Dusun III, Pucangan, Kec. Kartasura, Kab. Sukoharjo, Jawa Tengah 57168',
   phone: '+62 271 768 6521',
@@ -82,7 +82,7 @@ const SCHOOL = {
 
 const HERO_STATS = [
   { icon: Shield, label: 'Akreditasi', value: 'A' },
-  { icon: Award, label: 'Alumni', value: '90% ke PT impian', note: 'Data angkatan 14, 2024' },
+  { icon: Award, label: 'Alumni', value: '90% diterima di perguruan tinggi tujuan', note: 'Data angkatan 14 tahun 2024' },
   { icon: Trophy, label: 'Ekstrakurikuler', value: '30+' },
   { icon: FileCheck2, label: 'PPDB', value: 'Jalur rapor dan reguler' },
 ];
@@ -118,12 +118,12 @@ const PPDB_PROGRAMS = [
   {
     icon: Percent,
     title: 'Jalur Rapor dan Beasiswa',
-    desc: 'Rata-rata nilai mapel inti minimal 85. Tersedia beasiswa 75%, 50%, dan 25% untuk peringkat tertentu dari jalur rapor.',
+    desc: 'Rata-rata nilai mata pelajaran inti minimal 85. Tersedia beasiswa 75%, 50%, dan 25% untuk peringkat tertentu dari jalur rapor.',
   },
   {
     icon: FileCheck2,
     title: 'Jalur Reguler',
-    desc: 'Seleksi akademik untuk Matematika, Bahasa Indonesia, dan Bahasa Inggris. Peringkat terbaik mendapat cashback.',
+    desc: 'Seleksi akademik untuk Matematika, Bahasa Indonesia, dan Bahasa Inggris. Peringkat terbaik mendapatkan keringanan biaya.',
   },
   {
     icon: BookOpen,
@@ -140,13 +140,13 @@ const PPDB_PROGRAMS = [
 const SYSTEM_FEATURES = [
   {
     icon: FileSpreadsheet,
-    title: 'Input nilai terintegrasi',
-    desc: 'Guru mata pelajaran menginput nilai langsung ke sistem, lalu wali kelas memantau dan memverifikasi.',
+    title: 'Pengisian nilai terintegrasi',
+    desc: 'Guru mata pelajaran mengisi nilai langsung ke sistem, lalu wali kelas memantau dan memverifikasi.',
   },
   {
     icon: LineChart,
-    title: 'Rapot online semesteran',
-    desc: 'Siswa bisa melihat nilai, tren perkembangan, dan rekap semester dari portal yang sama.',
+    title: 'Rapor daring semesteran',
+    desc: 'Siswa dapat melihat nilai, perkembangan akademik, dan rekap semester dari portal yang sama.',
   },
   {
     icon: CalendarClock,
@@ -165,8 +165,8 @@ const SYSTEM_FEATURES = [
   },
   {
     icon: MessageCircle,
-    title: 'Chatbot dan notifikasi',
-    desc: 'Asisten virtual dan notifikasi internal membantu pengguna menavigasi informasi akademik.',
+    title: 'Asisten virtual dan notifikasi',
+    desc: 'Asisten virtual dan notifikasi internal membantu pengguna menemukan informasi akademik dengan lebih cepat.',
   },
 ] as const;
 
@@ -206,15 +206,15 @@ export default function LandingPage() {
 
   return (
     <div className={`min-h-screen overflow-x-hidden ${shellClass}`} style={{ fontFamily: "'Inter', sans-serif" }}>
-      <header className={`fixed top-0 z-50 w-full border-b backdrop-blur-xl ${isDark ? 'bg-slate-950/85 border-white/10' : 'bg-white/85 border-slate-200'}`}>
+      <header className={`fixed top-0 z-50 w-full border-b backdrop-blur-xl ${isDark ? 'bg-slate-950/85 border-white/10' : 'bg-white/90 border-slate-200/80 shadow-sm'}`}>
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/30">
               <GraduationCap className="h-5 w-5 text-white" />
             </div>
             <div>
-              <div className="text-sm font-bold leading-none text-white">SCOLA</div>
-              <div className="mt-0.5 text-[11px] text-slate-400">SMAIT Nur Hidayah Sukoharjo</div>
+              <div className={`text-sm font-bold leading-none ${isDark ? 'text-white' : 'text-slate-950'}`}>SCOLA</div>
+              <div className={`mt-0.5 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>SMAIT Nur Hidayah Sukoharjo</div>
             </div>
           </div>
 
@@ -237,7 +237,7 @@ export default function LandingPage() {
             </button>
             <Link to="/login" className="hidden sm:block">
               <Button className="h-10 rounded-xl bg-blue-600 px-5 font-semibold text-white hover:bg-blue-500">
-                Portal Akademik <ArrowRight className="ml-2 h-4 w-4" />
+                Masuk Portal <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <button
@@ -253,14 +253,21 @@ export default function LandingPage() {
         {isMobileMenuOpen && (
           <div className={`border-t px-4 py-4 md:hidden ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
             <div className="flex flex-col gap-3">
-              {['Profil', 'Jurusan', 'PPDB', 'Sistem', 'Fasilitas', 'Alumni'].map((item) => (
+              {[
+                { label: 'Profil', href: '#profil' },
+                { label: 'Jurusan', href: '#jurusan' },
+                { label: 'PPDB', href: '#ppdb' },
+                { label: 'Sistem', href: '#sistem' },
+                { label: 'Fasilitas', href: '#fasilitas' },
+                { label: 'Alumni', href: '#alumni' },
+              ].map((item) => (
                 <a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
+                  key={item.label}
+                  href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`text-sm font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}
                 >
-                  {item}
+                  {item.label}
                 </a>
               ))}
               <Link to="/login" className="w-full">
@@ -274,37 +281,37 @@ export default function LandingPage() {
       </header>
 
       <section className="relative isolate overflow-hidden pt-24">
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-slate-950">
           <img
               src={HERO_IMAGE}
               alt="SMAIT Nur Hidayah Sukoharjo"
               className="h-full w-full object-cover"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
-          <div className="absolute inset-0 bg-slate-950/80" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/82 to-slate-950/45" />
           <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-slate-950 to-transparent" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl py-20 lg:py-28">
+          <div className="max-w-4xl py-16 sm:py-20 lg:py-28">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
               <Info className="h-3 w-3 text-blue-300" />
-              Akreditasi A | Berdiri 2008 | 15+ tahun pengalaman
+              Akreditasi A · Berdiri sejak 2008 · Terhubung dalam satu portal akademik
             </div>
 
             <h1 className="mt-6 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
-              SMAIT Nur Hidayah
+              Layanan akademik sekolah yang tertata, jelas, dan mudah diakses
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-              Portal akademik SCOLA untuk nilai, jadwal, penjurusan, prestasi, alumni, dan layanan belajar
-              yang terhubung langsung dengan kebutuhan sekolah.
+              SCOLA menyatukan data nilai, jadwal, penjurusan, prestasi, dan alumni dalam satu portal resmi
+              untuk mendukung layanan akademik SMAIT Nur Hidayah Sukoharjo.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link to="/login">
                 <Button className="h-11 rounded-xl bg-blue-600 px-6 font-semibold text-white hover:bg-blue-500">
-                  Masuk Portal <ArrowRight className="ml-2 h-4 w-4" />
+                  Masuk Portal Akademik <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <a href="#ppdb">
@@ -320,7 +327,7 @@ export default function LandingPage() {
                   variant="outline"
                   className={`h-11 rounded-xl px-6 font-semibold ${isDark ? 'border-white/15 bg-transparent text-white hover:bg-white/5' : 'border-slate-200 bg-white text-slate-900 hover:bg-slate-50'}`}
                 >
-                  Website Sekolah
+                  Situs Sekolah
                 </Button>
               </a>
             </div>
@@ -344,7 +351,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="profil" className={`py-20 ${isDark ? 'bg-slate-900/30' : 'bg-slate-100/70'}`}>
+      <section id="profil" className={`py-16 sm:py-20 ${isDark ? 'bg-slate-900/30' : 'bg-slate-100/70'}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div className="space-y-6">
@@ -354,7 +361,7 @@ export default function LandingPage() {
               </div>
               <div className="space-y-4">
                 <h2 className={`text-3xl font-bold sm:text-4xl ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  Sekolah Islam Terpadu di Kartasura, Sukoharjo
+                  Sekolah Islam terpadu di Kartasura, Sukoharjo
                 </h2>
                 <p className={`max-w-2xl text-base leading-8 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                   {SCHOOL.name} berdiri sejak {SCHOOL.founded} di bawah {SCHOOL.yayasan} dan tergabung dalam
@@ -396,7 +403,7 @@ export default function LandingPage() {
                   if (parent) {
                     const placeholder = document.createElement('div');
                     placeholder.className = 'h-72 sm:h-96 w-full flex items-center justify-center bg-slate-800 text-slate-500 text-sm';
-                    placeholder.textContent = 'Foto sekolah — letakkan di /public/images/profil.jpg';
+                        placeholder.textContent = 'Foto sekolah belum tersedia di /public/images/profil.jpg';
                     parent.insertBefore(placeholder, el);
                   }
                 }}
@@ -405,8 +412,8 @@ export default function LandingPage() {
                 {[
                   { icon: Building2, title: 'Yayasan', value: SCHOOL.yayasan },
                   { icon: Phone, title: 'Telepon', value: SCHOOL.phone },
-                  { icon: Mail, title: 'Email', value: SCHOOL.email },
-                  { icon: Globe, title: 'Website', value: 'smaitnh.sch.id' },
+                  { icon: Mail, title: 'Surel', value: SCHOOL.email },
+                  { icon: Globe, title: 'Situs', value: 'smaitnh.sch.id' },
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
@@ -429,7 +436,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="jurusan" className="py-20">
+      <section id="jurusan" className="py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">
@@ -437,7 +444,7 @@ export default function LandingPage() {
               Rumpun Peminatan
             </div>
             <h2 className={`mt-4 text-3xl font-bold sm:text-4xl ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Tiga rumpun peminatan di kelas 11
+              Tiga rumpun peminatan untuk arah studi lanjut
             </h2>
             <p className={`mt-4 text-base leading-8 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
               Siswa memilih rumpun peminatan mulai kelas 10 semester 2 berdasarkan minat, bakat, nilai rapor,
@@ -485,7 +492,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="ppdb" className={`py-20 ${isDark ? 'bg-slate-900/30' : 'bg-slate-100/70'}`}>
+      <section id="ppdb" className={`py-16 sm:py-20 ${isDark ? 'bg-slate-900/30' : 'bg-slate-100/70'}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">
@@ -493,7 +500,7 @@ export default function LandingPage() {
               PPDB
             </div>
             <h2 className={`mt-4 text-3xl font-bold sm:text-4xl ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Jalur masuk dan program unggulan
+              Jalur masuk dan program unggulan sekolah
             </h2>
             <p className={`mt-4 text-base leading-8 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
               Referensi resmi PPDB menonjolkan jalur rapor, jalur reguler, program tahfizh, wisma, dan beasiswa
@@ -523,7 +530,7 @@ export default function LandingPage() {
                   Alur pendaftaran
                 </p>
                 <h3 className={`mt-2 text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  isi formulir, unggah berkas, lalu ikuti seleksi
+                  Isi formulir, unggah berkas, lalu ikuti seleksi
                 </h3>
                 <p className={`mt-3 text-sm leading-7 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                   Pendaftaran dibuka melalui <a href={SCHOOL.ppdbUrl} className="text-blue-500 hover:underline">{SCHOOL.ppdbUrl.replace('https://', '')}</a>.
@@ -537,7 +544,7 @@ export default function LandingPage() {
                   <p className={`mt-1 text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{SCHOOL.ppdbWhatsapp}</p>
                 </div>
                 <div className={`rounded-2xl border p-4 ${isDark ? 'border-emerald-500/20 bg-emerald-500/10' : 'border-emerald-200 bg-emerald-50'}`}>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-500">Hotline sekolah</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-500">Kontak sekolah</p>
                   <p className={`mt-2 text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{SCHOOL.phone}</p>
                   <p className={`mt-1 text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{SCHOOL.email}</p>
                 </div>
@@ -547,7 +554,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="sistem" className="py-20">
+      <section id="sistem" className="py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">
@@ -559,7 +566,7 @@ export default function LandingPage() {
             </h2>
             <p className={`mt-4 text-base leading-8 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
               Administrasi guru, penjadwalan, penjurusan, prestasi, dan alumni terhubung dalam satu portal untuk
-              tiga role utama: admin, guru, dan siswa.
+              tiga pengguna utama: administrator, guru, dan siswa.
             </p>
           </div>
 
@@ -593,7 +600,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="fasilitas" className={`py-20 ${isDark ? 'bg-slate-900/30' : 'bg-slate-100/70'}`}>
+      <section id="fasilitas" className={`py-16 sm:py-20 ${isDark ? 'bg-slate-900/30' : 'bg-slate-100/70'}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">
@@ -627,7 +634,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="alumni" className="py-20">
+      <section id="alumni" className="py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-10 max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">
@@ -667,7 +674,7 @@ export default function LandingPage() {
                   Akses data
                 </p>
                 <div className={`mt-2 text-base font-semibold leading-7 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  Admin, BK, dan pihak sekolah
+                  Administrator, BK, dan pihak sekolah
                 </div>
                 <p className={`mt-1 text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                   Data pribadi alumni tetap dijaga.
@@ -678,7 +685,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <div className={`rounded-3xl border p-8 md:p-12 ${surfaceClass}`}>
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -687,8 +694,8 @@ export default function LandingPage() {
                   Masuk ke portal akademik
                 </h2>
                 <p className={`mt-3 text-sm leading-7 md:text-base ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                  Akun dibuat oleh admin sekolah. Gunakan email dan kata sandi yang sudah diberikan untuk masuk ke
-                  dashboard masing-masing role.
+                  Akun dibuat oleh administrator sekolah. Gunakan surel dan kata sandi yang sudah diberikan untuk masuk ke
+                  beranda masing-masing peran.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
@@ -756,22 +763,22 @@ export default function LandingPage() {
                 <li><a href="#profil" className="hover:text-blue-500">Profil Sekolah</a></li>
                 <li><a href="#jurusan" className="hover:text-blue-500">Rumpun Peminatan</a></li>
                 <li><a href="#ppdb" className="hover:text-blue-500">PPDB</a></li>
-                <li><a href="#sistem" className="hover:text-blue-500">Fitur Portal</a></li>
+                <li><a href="#sistem" className="hover:text-blue-500">Fitur Portal Akademik</a></li>
                 <li><Link to="/login" className="hover:text-blue-500">Portal Akademik</Link></li>
               </ul>
             </div>
           </div>
 
           <div className={`flex flex-col items-center justify-between gap-3 border-t pt-6 text-xs md:flex-row ${isDark ? 'border-white/10 text-slate-400' : 'border-slate-200 text-slate-600'}`}>
-            <p>(c) 2026 SCOLA | Digunakan oleh {SCHOOL.name}</p>
-            <p>NPSN: {SCHOOL.npsn} | Akreditasi {SCHOOL.accreditation}</p>
+            <p>© 2026 SCOLA · Digunakan oleh {SCHOOL.name}</p>
+            <p>NPSN: {SCHOOL.npsn} · Akreditasi {SCHOOL.accreditation}</p>
           </div>
         </div>
       </footer>
 
-      <div className="fixed bottom-6 right-6 z-[200] flex flex-col items-end gap-3">
+      <div className="fixed bottom-4 right-4 z-[200] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
         {isChatOpen && (
-          <div className={`flex h-[560px] w-[380px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-2xl border shadow-2xl ${isDark ? 'border-white/10 bg-slate-900' : 'border-slate-200 bg-white'}`}>
+          <div className={`flex h-[min(560px,calc(100vh-7rem))] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border shadow-2xl ${isDark ? 'border-white/10 bg-slate-900' : 'border-slate-200 bg-white'}`}>
             <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-4 text-white">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20">
@@ -785,7 +792,7 @@ export default function LandingPage() {
               <button
                 onClick={() => setIsChatOpen(false)}
                 className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/20"
-                aria-label="Tutup chatbot"
+                aria-label="Tutup asisten"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -799,7 +806,7 @@ export default function LandingPage() {
         <button
           onClick={() => setIsChatOpen(!isChatOpen)}
           className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-600/40 transition-all hover:scale-105 active:scale-95"
-          aria-label="Buka chatbot"
+          aria-label="Buka asisten"
         >
           {isChatOpen ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
         </button>

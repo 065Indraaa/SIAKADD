@@ -161,7 +161,7 @@ export default function SiswaProfile() {
                 <Mail className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Email</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Surel</p>
                 <p className="text-sm font-semibold text-foreground mt-0.5 break-all">{displayEmail}</p>
               </div>
             </div>

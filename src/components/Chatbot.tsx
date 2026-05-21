@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { useAuth } from '../contexts/AuthContext';
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY ;
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 interface Message {
@@ -26,7 +26,7 @@ Motto: Membentuk Generasi Rabbani yang Berprestasi
 SISTEM KELAS:
 - Kelas 10: sepuluh kelas (X-1 s/d X-10) campur tanpa pemisahan gender.
   Setiap kelas berisi sekitar 30 siswa. Penempatan kelas berdasarkan gabungan nilai tes
-  masuk dan nilai rapot sebelumnya, diproses oleh tim BK.
+  masuk dan nilai rapor sebelumnya, diproses oleh tim BK.
 - Kelas 11: siswa dibagi ulang berdasarkan rumpun peminatan yang dipilih mulai kelas 10 semester 2.
 
 PROGRAM PEMINATAN (mulai kelas 11):
@@ -54,24 +54,24 @@ Siswa TIDAK diperbolehkan membawa ponsel atau laptop ke sekolah.
 Portal akademik diakses menggunakan tablet resmi yang diizinkan di sekolah,
 atau dari perangkat pribadi di luar jam sekolah.
 
-SISTEM AKADEMIK ONLINE:
-- Input nilai dilakukan oleh guru mata pelajaran langsung ke sistem.
+SISTEM AKADEMIK DARING:
+- Pengisian nilai dilakukan oleh guru mata pelajaran langsung ke sistem.
   Wali kelas memantau dan memverifikasi nilai siswa di kelasnya tanpa setoran file manual.
-- Rapot online dapat diakses siswa setiap semester, menampilkan tren naik/turun nilai
+- Rapor daring dapat diakses siswa setiap semester, menampilkan perkembangan nilai
   serta peta persaingan dengan siswa lain yang menargetkan jurusan kampus yang sama.
-- Rapot online baru dapat dibuka jika administrasi sekolah sudah lunas.
-- Pengambilan rapot fisik tetap dilakukan tatap muka antara orang tua dan wali kelas.
+- Rapor daring baru dapat dibuka jika administrasi sekolah sudah lunas.
+- Pengambilan rapor fisik tetap dilakukan tatap muka antara orang tua dan wali kelas.
 - Sistem juga mencatat prestasi siswa (akademik, olahraga, keagamaan),
   pelanggaran, frekuensi kunjungan ke BK, serta keanggotaan ekstrakurikuler.
 - Penjadwalan pelajaran menggunakan sistem penjadwalan otomatis agar tidak bentrok
   antar guru maupun antar kelas.
 
 DATA ALUMNI:
-Track record alumni mulai dirapikan sejak tahun 2023. Data lulusan lama masih dalam
+Riwayat alumni mulai dirapikan sejak tahun 2023. Data lulusan lama masih dalam
 proses digitalisasi dari arsip Excel ke sistem.
 
 AKSES PENGGUNA:
-Akun portal akademik hanya tersedia untuk siswa, guru, dan admin.
+Akun portal akademik hanya tersedia untuk siswa, guru, dan administrator.
 Belum tersedia akun khusus orang tua. Komunikasi sekolah dengan orang tua
 masih dilakukan melalui wali kelas secara langsung, telepon, WhatsApp,
 atau kunjungan ke rumah bila diperlukan.
@@ -94,8 +94,8 @@ Mujahidun Linafsihi, Harishun 'ala Waqtihi, Munazzhamun fi Syu'unihi, Qodirun 'a
 
 TENTANG APLIKASI SCOLA:
 SCOLA adalah Sistem Informasi Akademik berbasis cloud untuk SMAIT Nur Hidayah.
-Fitur: Login multi-role (Admin/Guru/Siswa), Import massal via Excel, Export PDF/Excel,
-Chatbot AI, Penjurusan Kurikulum Merdeka (Rumpun A/B/C), Pencatatan Nilai, Prestasi,
+Fitur: akses masuk berbagai peran (Administrator/Guru/Siswa), impor massal melalui Excel, ekspor PDF/Excel,
+asisten virtual, Penjurusan Kurikulum Merdeka (Rumpun A/B/C), Pencatatan Nilai, Prestasi,
 Pelanggaran & BK, Ekstrakurikuler, dan Data Alumni.
 `;
 
@@ -111,10 +111,10 @@ export default function Chatbot({ context }: { context: string }) {
     // Sapaan awal berbasis nama pengguna (bukan Akhi/Ukhti).
     const displayName = user?.name?.trim() || '';
     const greetings: Record<string, string> = {
-      admin: `Halo${displayName ? `, ${displayName}` : ''}. Saya SCOLA AI, asisten SMAIT Nur Hidayah. Ada yang bisa saya bantu — misalnya kelola data siswa, guru, jadwal, atau info sekolah?`,
-      guru: `Halo${displayName ? `, ${displayName}` : ''}. Saya SCOLA AI. Saya bisa bantu urusan input nilai, penjadwalan, atau informasi kelas. Ada yang ingin ditanyakan?`,
-      siswa: `Halo${displayName ? `, ${displayName}` : ''}. Saya SCOLA AI. Silakan tanyakan soal jadwal, nilai, rumpun peminatan, atau info SMAIT Nur Hidayah.`,
-      public: `Halo${displayName ? `, ${displayName}` : ''}. Saya SCOLA AI dan bisa menjelaskan tentang SMAIT Nur Hidayah Sukoharjo, sistem pembagian kelas, rumpun peminatan, dan cara kerja portal akademik.`,
+      admin: `Halo${displayName ? `, ${displayName}` : ''}. Saya Asisten SCOLA, asisten SMAIT Nur Hidayah. Saya dapat membantu pengelolaan data siswa, guru, jadwal, dan informasi sekolah.`,
+      guru: `Halo${displayName ? `, ${displayName}` : ''}. Saya Asisten SCOLA. Saya dapat membantu pengisian nilai, penjadwalan, atau informasi kelas.`,
+      siswa: `Halo${displayName ? `, ${displayName}` : ''}. Saya Asisten SCOLA. Silakan tanyakan jadwal, nilai, rumpun peminatan, atau informasi SMAIT Nur Hidayah.`,
+      public: `Halo${displayName ? `, ${displayName}` : ''}. Saya Asisten SCOLA dan dapat menjelaskan SMAIT Nur Hidayah Sukoharjo, pembagian kelas, rumpun peminatan, dan portal akademik.`,
     };
     setMessages([{ role: 'assistant', content: greetings[context] || greetings.public }]);
   }, [context, user?.name]);
@@ -128,12 +128,12 @@ export default function Chatbot({ context }: { context: string }) {
   const getSystemPrompt = (): string => {
     const roleContext: Record<string, string> = {
       admin: 'Pengguna saat ini adalah ADMINISTRATOR sekolah. Bantu menjawab tentang manajemen data akademik, penggunaan fitur SCOLA, dan kebijakan sekolah.',
-      guru: `Pengguna adalah GURU${user?.specialization ? ` mata pelajaran ${user.specialization}` : ''}${user?.jabatan && user.jabatan !== 'Guru' ? ` dengan jabatan ${user.jabatan}` : ''}. Bantu dengan pertanyaan input nilai, absensi, dan administrasi kelas.`,
+      guru: `Pengguna adalah GURU${user?.specialization ? ` mata pelajaran ${user.specialization}` : ''}${user?.jabatan && user.jabatan !== 'Guru' ? ` dengan jabatan ${user.jabatan}` : ''}. Bantu dengan pertanyaan pengisian nilai, kehadiran, dan administrasi kelas.`,
       siswa: `Pengguna adalah SISWA${user?.className ? ` kelas ${user.className}` : ''}. Bantu dengan info pelajaran, jadwal, nilai, dan info sekolah.`,
       public: 'Pengguna adalah PENGUNJUNG/CALON SISWA. Bantu dengan info sistem pembagian kelas, rumpun peminatan A/B/C, fasilitas, dan cara kerja portal akademik SMAIT Nur Hidayah Sukoharjo.',
     };
 
-    return `Kamu adalah SCOLA AI, asisten virtual SMAIT Nur Hidayah Sukoharjo. Jawab dalam Bahasa Indonesia yang hangat, profesional, dan ringkas.
+    return `Kamu adalah Asisten SCOLA, asisten virtual SMAIT Nur Hidayah Sukoharjo. Jawab dalam Bahasa Indonesia yang hangat, profesional, dan ringkas.
 
 GAYA BAHASA:
 - Sapa pengguna dengan nama yang sudah diberikan di bawah. Jangan gunakan panggilan "Akhi", "Ukhti", "Ustadz", atau "Ustadzah".
@@ -176,7 +176,7 @@ PANDUAN JAWABAN:
           model: GROQ_MODEL,
           messages: [
             { role: 'system', content: getSystemPrompt() },
-            ...newMessages.filter(m => m.role !== 'system').slice(-10), // last 10 for context
+            ...newMessages.filter(m => m.role !== 'system').slice(-10),
           ],
           temperature: 0.7,
           max_tokens: 800,
@@ -194,9 +194,9 @@ PANDUAN JAWABAN:
       const reply = data?.choices?.[0]?.message?.content || 'Maaf, saya tidak bisa menjawab saat ini.';
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (e: any) {
-      console.error('Groq error:', e);
-      setError(e.message || 'Terjadi kesalahan saat menghubungi AI.');
-      setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Maaf, saya sedang mengalami gangguan. Silakan coba lagi sebentar.' }]);
+      console.error('Kesalahan Groq:', e);
+      setError(e.message || 'Terjadi kesalahan saat menghubungi asisten.');
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Maaf, saya sedang mengalami gangguan. Silakan coba lagi beberapa saat lagi.' }]);
     } finally {
       setIsLoading(false);
     }
@@ -208,17 +208,17 @@ PANDUAN JAWABAN:
     'Apakah boleh bawa HP ke sekolah?',
     'Bagaimana cara melihat nilai?',
   ] : context === 'siswa' ? [
-    'Cara lihat rapot online?',
+    'Cara melihat rapor daring?',
     'Bagaimana memilih rumpun A/B/C?',
     'Cara cek persaingan jurusan kampus',
   ] : context === 'guru' ? [
-    'Cara input nilai harian?',
+    'Cara mengisi nilai harian?',
     'Bagaimana catat prestasi siswa?',
     'Cara catat poin BK siswa?',
   ] : [
-    'Import siswa via Excel?',
-    'Export akun ke PDF?',
-    'Seed data demo',
+    'Impor siswa melalui Excel?',
+    'Ekspor akun ke PDF?',
+    'Buat data demo',
   ];
 
   return (

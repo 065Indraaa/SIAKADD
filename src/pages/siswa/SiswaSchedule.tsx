@@ -188,8 +188,8 @@ export default function SiswaSchedule() {
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-20 text-slate-500 font-bold uppercase tracking-widest text-xs">
                       {user?.kelasId
-                        ? `Belum ada jadwal untuk semester ${semester} T.A. ${tahunAjaran}.`
-                        : 'Kelas Anda belum ditentukan. Hubungi wali kelas atau admin.'}
+                        ? `Belum ada jadwal untuk semester ${semester} tahun ajaran ${tahunAjaran}.`
+                        : 'Kelas Anda belum ditentukan. Hubungi wali kelas atau administrator.'}
                     </TableCell>
                   </TableRow>
                 )}
