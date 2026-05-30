@@ -22,12 +22,9 @@ export default function SiswaAlumni() {
     setError(null);
     try {
       const data = await fetchAlumni(tahunFilter === 'semua' ? undefined : tahunFilter);
-      // Hanya tampilkan alumni yang sudah ada data institusi/jabatan
-      // (alumni yang belum diisi tidak ditampilkan ke siswa)
-      const withData = data.filter(a =>
-        (a.status === 'Kuliah' || a.status === 'Kerja') &&
-        (a.institution || a.position)
-      );
+      // Tampilkan semua alumni yang sudah ada data institusi/jabatan
+      // tanpa memfilter berdasarkan status agar siswa bisa melihat referensi lengkap.
+      const withData = data.filter(a => a.institution || a.position);
       setAlumni(withData);
     } catch (e: any) {
       setError(e.message || 'Gagal memuat data alumni.');

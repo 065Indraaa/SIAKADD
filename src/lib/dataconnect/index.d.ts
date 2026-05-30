@@ -1,4 +1,4 @@
-import { ConnectorConfig, DataConnect, QueryRef, QueryPromise, MutationRef, MutationPromise } from 'firebase/data-connect';
+import { ConnectorConfig, DataConnect, QueryRef, QueryPromise, ExecuteQueryOptions, MutationRef, MutationPromise } from 'firebase/data-connect';
 
 export const connectorConfig: ConnectorConfig;
 
@@ -232,6 +232,14 @@ export interface DeleteMataPelajaranVariables {
   id: UUIDString;
 }
 
+export interface DeleteNilaiData {
+  nilai_delete?: Nilai_Key | null;
+}
+
+export interface DeleteNilaiVariables {
+  id: UUIDString;
+}
+
 export interface DeletePenggunaData {
   pengguna_delete?: Pengguna_Key | null;
 }
@@ -307,12 +315,15 @@ export interface GetJadwalByGuruData {
     ruangan?: string | null;
     semester: string;
     mataPelajaran: {
+      id: UUIDString;
+      kode: string;
       nama: string;
-    };
+    } & MataPelajaran_Key;
       kelas: {
+        id: UUIDString;
         nama: string;
         tingkat: number;
-      };
+      } & Kelas_Key;
   } & Jadwal_Key)[];
 }
 
@@ -330,14 +341,17 @@ export interface GetJadwalByKelasData {
     ruangan?: string | null;
     semester: string;
     mataPelajaran: {
+      id: UUIDString;
+      kode: string;
       nama: string;
-    };
+    } & MataPelajaran_Key;
       guru: {
+        id: UUIDString;
         nip: string;
         pengguna: {
           nama: string;
         };
-      };
+      } & Guru_Key;
   } & Jadwal_Key)[];
 }
 
@@ -396,12 +410,15 @@ export interface GetNilaiByKelasData {
     nilaiHarian?: number | null;
     nilaiUts?: number | null;
     nilaiUas?: number | null;
+    semester: string;
+    tahunAjaran: string;
     siswa: {
+      id: UUIDString;
       nis: string;
       pengguna: {
         nama: string;
       };
-    };
+    } & Siswa_Key;
   } & Nilai_Key)[];
 }
 
@@ -435,8 +452,12 @@ export interface GetPenggunaByEmailData {
   penggunas: ({
     id: UUIDString;
     email: string;
+    password?: string | null;
     nama: string;
     peran: PeranPengguna;
+    telepon?: string | null;
+    alamat?: string | null;
+    fotoUrl?: string | null;
   } & Pengguna_Key)[];
 }
 
@@ -652,6 +673,13 @@ export interface ListPrestasiData {
     peringkat: string;
     tanggal: DateString;
     deskripsi?: string | null;
+    siswa: {
+      id: UUIDString;
+      nis: string;
+      pengguna: {
+        nama: string;
+      };
+    } & Siswa_Key;
   } & Prestasi_Key)[];
 }
 
@@ -1275,6 +1303,18 @@ export const deleteAlumniRef: DeleteAlumniRef;
 export function deleteAlumni(vars: DeleteAlumniVariables): MutationPromise<DeleteAlumniData, DeleteAlumniVariables>;
 export function deleteAlumni(dc: DataConnect, vars: DeleteAlumniVariables): MutationPromise<DeleteAlumniData, DeleteAlumniVariables>;
 
+interface DeleteNilaiRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteNilaiVariables): MutationRef<DeleteNilaiData, DeleteNilaiVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeleteNilaiVariables): MutationRef<DeleteNilaiData, DeleteNilaiVariables>;
+  operationName: string;
+}
+export const deleteNilaiRef: DeleteNilaiRef;
+
+export function deleteNilai(vars: DeleteNilaiVariables): MutationPromise<DeleteNilaiData, DeleteNilaiVariables>;
+export function deleteNilai(dc: DataConnect, vars: DeleteNilaiVariables): MutationPromise<DeleteNilaiData, DeleteNilaiVariables>;
+
 interface ResetDatabaseRef {
   /* Allow users to create refs without passing in DataConnect */
   (): MutationRef<ResetDatabaseData, undefined>;
@@ -1296,8 +1336,8 @@ interface ListPenggunaRef {
 }
 export const listPenggunaRef: ListPenggunaRef;
 
-export function listPengguna(vars?: ListPenggunaVariables): QueryPromise<ListPenggunaData, ListPenggunaVariables>;
-export function listPengguna(dc: DataConnect, vars?: ListPenggunaVariables): QueryPromise<ListPenggunaData, ListPenggunaVariables>;
+export function listPengguna(vars?: ListPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<ListPenggunaData, ListPenggunaVariables>;
+export function listPengguna(dc: DataConnect, vars?: ListPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<ListPenggunaData, ListPenggunaVariables>;
 
 interface GetPenggunaRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1308,8 +1348,8 @@ interface GetPenggunaRef {
 }
 export const getPenggunaRef: GetPenggunaRef;
 
-export function getPengguna(vars: GetPenggunaVariables): QueryPromise<GetPenggunaData, GetPenggunaVariables>;
-export function getPengguna(dc: DataConnect, vars: GetPenggunaVariables): QueryPromise<GetPenggunaData, GetPenggunaVariables>;
+export function getPengguna(vars: GetPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetPenggunaData, GetPenggunaVariables>;
+export function getPengguna(dc: DataConnect, vars: GetPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetPenggunaData, GetPenggunaVariables>;
 
 interface GetPenggunaByEmailRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1320,8 +1360,8 @@ interface GetPenggunaByEmailRef {
 }
 export const getPenggunaByEmailRef: GetPenggunaByEmailRef;
 
-export function getPenggunaByEmail(vars: GetPenggunaByEmailVariables): QueryPromise<GetPenggunaByEmailData, GetPenggunaByEmailVariables>;
-export function getPenggunaByEmail(dc: DataConnect, vars: GetPenggunaByEmailVariables): QueryPromise<GetPenggunaByEmailData, GetPenggunaByEmailVariables>;
+export function getPenggunaByEmail(vars: GetPenggunaByEmailVariables, options?: ExecuteQueryOptions): QueryPromise<GetPenggunaByEmailData, GetPenggunaByEmailVariables>;
+export function getPenggunaByEmail(dc: DataConnect, vars: GetPenggunaByEmailVariables, options?: ExecuteQueryOptions): QueryPromise<GetPenggunaByEmailData, GetPenggunaByEmailVariables>;
 
 interface ListGuruRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1332,8 +1372,8 @@ interface ListGuruRef {
 }
 export const listGuruRef: ListGuruRef;
 
-export function listGuru(): QueryPromise<ListGuruData, undefined>;
-export function listGuru(dc: DataConnect): QueryPromise<ListGuruData, undefined>;
+export function listGuru(options?: ExecuteQueryOptions): QueryPromise<ListGuruData, undefined>;
+export function listGuru(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListGuruData, undefined>;
 
 interface GetGuruRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1344,8 +1384,8 @@ interface GetGuruRef {
 }
 export const getGuruRef: GetGuruRef;
 
-export function getGuru(vars: GetGuruVariables): QueryPromise<GetGuruData, GetGuruVariables>;
-export function getGuru(dc: DataConnect, vars: GetGuruVariables): QueryPromise<GetGuruData, GetGuruVariables>;
+export function getGuru(vars: GetGuruVariables, options?: ExecuteQueryOptions): QueryPromise<GetGuruData, GetGuruVariables>;
+export function getGuru(dc: DataConnect, vars: GetGuruVariables, options?: ExecuteQueryOptions): QueryPromise<GetGuruData, GetGuruVariables>;
 
 interface GetLastNipRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1356,8 +1396,8 @@ interface GetLastNipRef {
 }
 export const getLastNipRef: GetLastNipRef;
 
-export function getLastNip(): QueryPromise<GetLastNipData, undefined>;
-export function getLastNip(dc: DataConnect): QueryPromise<GetLastNipData, undefined>;
+export function getLastNip(options?: ExecuteQueryOptions): QueryPromise<GetLastNipData, undefined>;
+export function getLastNip(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<GetLastNipData, undefined>;
 
 interface GetGuruByPenggunaRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1368,8 +1408,8 @@ interface GetGuruByPenggunaRef {
 }
 export const getGuruByPenggunaRef: GetGuruByPenggunaRef;
 
-export function getGuruByPengguna(vars: GetGuruByPenggunaVariables): QueryPromise<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
-export function getGuruByPengguna(dc: DataConnect, vars: GetGuruByPenggunaVariables): QueryPromise<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
+export function getGuruByPengguna(vars: GetGuruByPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
+export function getGuruByPengguna(dc: DataConnect, vars: GetGuruByPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
 
 interface ListSemuaSiswaRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1380,8 +1420,8 @@ interface ListSemuaSiswaRef {
 }
 export const listSemuaSiswaRef: ListSemuaSiswaRef;
 
-export function listSemuaSiswa(): QueryPromise<ListSemuaSiswaData, undefined>;
-export function listSemuaSiswa(dc: DataConnect): QueryPromise<ListSemuaSiswaData, undefined>;
+export function listSemuaSiswa(options?: ExecuteQueryOptions): QueryPromise<ListSemuaSiswaData, undefined>;
+export function listSemuaSiswa(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListSemuaSiswaData, undefined>;
 
 interface ListSiswaByKelasRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1392,8 +1432,8 @@ interface ListSiswaByKelasRef {
 }
 export const listSiswaByKelasRef: ListSiswaByKelasRef;
 
-export function listSiswaByKelas(vars: ListSiswaByKelasVariables): QueryPromise<ListSiswaByKelasData, ListSiswaByKelasVariables>;
-export function listSiswaByKelas(dc: DataConnect, vars: ListSiswaByKelasVariables): QueryPromise<ListSiswaByKelasData, ListSiswaByKelasVariables>;
+export function listSiswaByKelas(vars: ListSiswaByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListSiswaByKelasData, ListSiswaByKelasVariables>;
+export function listSiswaByKelas(dc: DataConnect, vars: ListSiswaByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListSiswaByKelasData, ListSiswaByKelasVariables>;
 
 interface GetSiswaRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1404,8 +1444,8 @@ interface GetSiswaRef {
 }
 export const getSiswaRef: GetSiswaRef;
 
-export function getSiswa(vars: GetSiswaVariables): QueryPromise<GetSiswaData, GetSiswaVariables>;
-export function getSiswa(dc: DataConnect, vars: GetSiswaVariables): QueryPromise<GetSiswaData, GetSiswaVariables>;
+export function getSiswa(vars: GetSiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetSiswaData, GetSiswaVariables>;
+export function getSiswa(dc: DataConnect, vars: GetSiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetSiswaData, GetSiswaVariables>;
 
 interface GetLastNisRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1416,8 +1456,8 @@ interface GetLastNisRef {
 }
 export const getLastNisRef: GetLastNisRef;
 
-export function getLastNis(): QueryPromise<GetLastNisData, undefined>;
-export function getLastNis(dc: DataConnect): QueryPromise<GetLastNisData, undefined>;
+export function getLastNis(options?: ExecuteQueryOptions): QueryPromise<GetLastNisData, undefined>;
+export function getLastNis(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<GetLastNisData, undefined>;
 
 interface GetSiswaByPenggunaRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1428,8 +1468,8 @@ interface GetSiswaByPenggunaRef {
 }
 export const getSiswaByPenggunaRef: GetSiswaByPenggunaRef;
 
-export function getSiswaByPengguna(vars: GetSiswaByPenggunaVariables): QueryPromise<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
-export function getSiswaByPengguna(dc: DataConnect, vars: GetSiswaByPenggunaVariables): QueryPromise<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
+export function getSiswaByPengguna(vars: GetSiswaByPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
+export function getSiswaByPengguna(dc: DataConnect, vars: GetSiswaByPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
 
 interface ListSemuaKelasRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1440,8 +1480,8 @@ interface ListSemuaKelasRef {
 }
 export const listSemuaKelasRef: ListSemuaKelasRef;
 
-export function listSemuaKelas(): QueryPromise<ListSemuaKelasData, undefined>;
-export function listSemuaKelas(dc: DataConnect): QueryPromise<ListSemuaKelasData, undefined>;
+export function listSemuaKelas(options?: ExecuteQueryOptions): QueryPromise<ListSemuaKelasData, undefined>;
+export function listSemuaKelas(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListSemuaKelasData, undefined>;
 
 interface ListKelasByTingkatRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1452,8 +1492,8 @@ interface ListKelasByTingkatRef {
 }
 export const listKelasByTingkatRef: ListKelasByTingkatRef;
 
-export function listKelasByTingkat(vars: ListKelasByTingkatVariables): QueryPromise<ListKelasByTingkatData, ListKelasByTingkatVariables>;
-export function listKelasByTingkat(dc: DataConnect, vars: ListKelasByTingkatVariables): QueryPromise<ListKelasByTingkatData, ListKelasByTingkatVariables>;
+export function listKelasByTingkat(vars: ListKelasByTingkatVariables, options?: ExecuteQueryOptions): QueryPromise<ListKelasByTingkatData, ListKelasByTingkatVariables>;
+export function listKelasByTingkat(dc: DataConnect, vars: ListKelasByTingkatVariables, options?: ExecuteQueryOptions): QueryPromise<ListKelasByTingkatData, ListKelasByTingkatVariables>;
 
 interface ListJurusanRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1464,8 +1504,8 @@ interface ListJurusanRef {
 }
 export const listJurusanRef: ListJurusanRef;
 
-export function listJurusan(): QueryPromise<ListJurusanData, undefined>;
-export function listJurusan(dc: DataConnect): QueryPromise<ListJurusanData, undefined>;
+export function listJurusan(options?: ExecuteQueryOptions): QueryPromise<ListJurusanData, undefined>;
+export function listJurusan(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListJurusanData, undefined>;
 
 interface ListMataPelajaranRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1476,8 +1516,8 @@ interface ListMataPelajaranRef {
 }
 export const listMataPelajaranRef: ListMataPelajaranRef;
 
-export function listMataPelajaran(): QueryPromise<ListMataPelajaranData, undefined>;
-export function listMataPelajaran(dc: DataConnect): QueryPromise<ListMataPelajaranData, undefined>;
+export function listMataPelajaran(options?: ExecuteQueryOptions): QueryPromise<ListMataPelajaranData, undefined>;
+export function listMataPelajaran(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListMataPelajaranData, undefined>;
 
 interface GetJadwalByKelasRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1488,8 +1528,8 @@ interface GetJadwalByKelasRef {
 }
 export const getJadwalByKelasRef: GetJadwalByKelasRef;
 
-export function getJadwalByKelas(vars: GetJadwalByKelasVariables): QueryPromise<GetJadwalByKelasData, GetJadwalByKelasVariables>;
-export function getJadwalByKelas(dc: DataConnect, vars: GetJadwalByKelasVariables): QueryPromise<GetJadwalByKelasData, GetJadwalByKelasVariables>;
+export function getJadwalByKelas(vars: GetJadwalByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetJadwalByKelasData, GetJadwalByKelasVariables>;
+export function getJadwalByKelas(dc: DataConnect, vars: GetJadwalByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetJadwalByKelasData, GetJadwalByKelasVariables>;
 
 interface GetJadwalByGuruRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1500,8 +1540,8 @@ interface GetJadwalByGuruRef {
 }
 export const getJadwalByGuruRef: GetJadwalByGuruRef;
 
-export function getJadwalByGuru(vars: GetJadwalByGuruVariables): QueryPromise<GetJadwalByGuruData, GetJadwalByGuruVariables>;
-export function getJadwalByGuru(dc: DataConnect, vars: GetJadwalByGuruVariables): QueryPromise<GetJadwalByGuruData, GetJadwalByGuruVariables>;
+export function getJadwalByGuru(vars: GetJadwalByGuruVariables, options?: ExecuteQueryOptions): QueryPromise<GetJadwalByGuruData, GetJadwalByGuruVariables>;
+export function getJadwalByGuru(dc: DataConnect, vars: GetJadwalByGuruVariables, options?: ExecuteQueryOptions): QueryPromise<GetJadwalByGuruData, GetJadwalByGuruVariables>;
 
 interface GetNilaiBySiswaRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1512,8 +1552,8 @@ interface GetNilaiBySiswaRef {
 }
 export const getNilaiBySiswaRef: GetNilaiBySiswaRef;
 
-export function getNilaiBySiswa(vars: GetNilaiBySiswaVariables): QueryPromise<GetNilaiBySiswaData, GetNilaiBySiswaVariables>;
-export function getNilaiBySiswa(dc: DataConnect, vars: GetNilaiBySiswaVariables): QueryPromise<GetNilaiBySiswaData, GetNilaiBySiswaVariables>;
+export function getNilaiBySiswa(vars: GetNilaiBySiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetNilaiBySiswaData, GetNilaiBySiswaVariables>;
+export function getNilaiBySiswa(dc: DataConnect, vars: GetNilaiBySiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetNilaiBySiswaData, GetNilaiBySiswaVariables>;
 
 interface GetNilaiByKelasRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1524,8 +1564,8 @@ interface GetNilaiByKelasRef {
 }
 export const getNilaiByKelasRef: GetNilaiByKelasRef;
 
-export function getNilaiByKelas(vars: GetNilaiByKelasVariables): QueryPromise<GetNilaiByKelasData, GetNilaiByKelasVariables>;
-export function getNilaiByKelas(dc: DataConnect, vars: GetNilaiByKelasVariables): QueryPromise<GetNilaiByKelasData, GetNilaiByKelasVariables>;
+export function getNilaiByKelas(vars: GetNilaiByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetNilaiByKelasData, GetNilaiByKelasVariables>;
+export function getNilaiByKelas(dc: DataConnect, vars: GetNilaiByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetNilaiByKelasData, GetNilaiByKelasVariables>;
 
 interface GetKehadiranByKelasRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1536,8 +1576,8 @@ interface GetKehadiranByKelasRef {
 }
 export const getKehadiranByKelasRef: GetKehadiranByKelasRef;
 
-export function getKehadiranByKelas(vars: GetKehadiranByKelasVariables): QueryPromise<GetKehadiranByKelasData, GetKehadiranByKelasVariables>;
-export function getKehadiranByKelas(dc: DataConnect, vars: GetKehadiranByKelasVariables): QueryPromise<GetKehadiranByKelasData, GetKehadiranByKelasVariables>;
+export function getKehadiranByKelas(vars: GetKehadiranByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetKehadiranByKelasData, GetKehadiranByKelasVariables>;
+export function getKehadiranByKelas(dc: DataConnect, vars: GetKehadiranByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetKehadiranByKelasData, GetKehadiranByKelasVariables>;
 
 interface GetKehadiranBySiswaRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1548,8 +1588,8 @@ interface GetKehadiranBySiswaRef {
 }
 export const getKehadiranBySiswaRef: GetKehadiranBySiswaRef;
 
-export function getKehadiranBySiswa(vars: GetKehadiranBySiswaVariables): QueryPromise<GetKehadiranBySiswaData, GetKehadiranBySiswaVariables>;
-export function getKehadiranBySiswa(dc: DataConnect, vars: GetKehadiranBySiswaVariables): QueryPromise<GetKehadiranBySiswaData, GetKehadiranBySiswaVariables>;
+export function getKehadiranBySiswa(vars: GetKehadiranBySiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetKehadiranBySiswaData, GetKehadiranBySiswaVariables>;
+export function getKehadiranBySiswa(dc: DataConnect, vars: GetKehadiranBySiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetKehadiranBySiswaData, GetKehadiranBySiswaVariables>;
 
 interface ListPengumumanRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1560,8 +1600,8 @@ interface ListPengumumanRef {
 }
 export const listPengumumanRef: ListPengumumanRef;
 
-export function listPengumuman(): QueryPromise<ListPengumumanData, undefined>;
-export function listPengumuman(dc: DataConnect): QueryPromise<ListPengumumanData, undefined>;
+export function listPengumuman(options?: ExecuteQueryOptions): QueryPromise<ListPengumumanData, undefined>;
+export function listPengumuman(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListPengumumanData, undefined>;
 
 interface ListPrestasiRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1572,8 +1612,8 @@ interface ListPrestasiRef {
 }
 export const listPrestasiRef: ListPrestasiRef;
 
-export function listPrestasi(vars?: ListPrestasiVariables): QueryPromise<ListPrestasiData, ListPrestasiVariables>;
-export function listPrestasi(dc: DataConnect, vars?: ListPrestasiVariables): QueryPromise<ListPrestasiData, ListPrestasiVariables>;
+export function listPrestasi(vars?: ListPrestasiVariables, options?: ExecuteQueryOptions): QueryPromise<ListPrestasiData, ListPrestasiVariables>;
+export function listPrestasi(dc: DataConnect, vars?: ListPrestasiVariables, options?: ExecuteQueryOptions): QueryPromise<ListPrestasiData, ListPrestasiVariables>;
 
 interface ListAlumniRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1584,6 +1624,6 @@ interface ListAlumniRef {
 }
 export const listAlumniRef: ListAlumniRef;
 
-export function listAlumni(vars?: ListAlumniVariables): QueryPromise<ListAlumniData, ListAlumniVariables>;
-export function listAlumni(dc: DataConnect, vars?: ListAlumniVariables): QueryPromise<ListAlumniData, ListAlumniVariables>;
+export function listAlumni(vars?: ListAlumniVariables, options?: ExecuteQueryOptions): QueryPromise<ListAlumniData, ListAlumniVariables>;
+export function listAlumni(dc: DataConnect, vars?: ListAlumniVariables, options?: ExecuteQueryOptions): QueryPromise<ListAlumniData, ListAlumniVariables>;
 

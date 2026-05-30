@@ -115,6 +115,7 @@ export default function AdminSchedules() {
     setError(null);
     try {
       await addJadwalData(formData);
+      await new Promise(r => setTimeout(r, 500)); // Tunggu DB commit
       setIsDialogOpen(false);
       await loadSchedules();
     } catch (e: any) {
@@ -129,6 +130,7 @@ export default function AdminSchedules() {
     if (!deletingId) return;
     try {
       await removeJadwalData(deletingId);
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       await loadSchedules();
     } catch (e: any) {
       alert('Gagal menghapus: ' + (e.message || 'Error'));

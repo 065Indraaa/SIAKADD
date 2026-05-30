@@ -64,6 +64,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*CreateAlumni*](#createalumni)
   - [*UpdateAlumni*](#updatealumni)
   - [*DeleteAlumni*](#deletealumni)
+  - [*DeleteNilai*](#deletenilai)
   - [*ResetDatabase*](#resetdatabase)
 
 # Accessing the connector
@@ -114,7 +115,7 @@ Below are examples of how to use the `uassiakad-connector` connector's generated
 ## ListPengguna
 You can execute the `ListPengguna` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listPengguna(vars?: ListPenggunaVariables): QueryPromise<ListPenggunaData, ListPenggunaVariables>;
+listPengguna(vars?: ListPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<ListPenggunaData, ListPenggunaVariables>;
 
 interface ListPenggunaRef {
   ...
@@ -125,7 +126,7 @@ export const listPenggunaRef: ListPenggunaRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listPengguna(dc: DataConnect, vars?: ListPenggunaVariables): QueryPromise<ListPenggunaData, ListPenggunaVariables>;
+listPengguna(dc: DataConnect, vars?: ListPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<ListPenggunaData, ListPenggunaVariables>;
 
 interface ListPenggunaRef {
   ...
@@ -237,7 +238,7 @@ executeQuery(ref).then((response) => {
 ## GetPengguna
 You can execute the `GetPengguna` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getPengguna(vars: GetPenggunaVariables): QueryPromise<GetPenggunaData, GetPenggunaVariables>;
+getPengguna(vars: GetPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetPenggunaData, GetPenggunaVariables>;
 
 interface GetPenggunaRef {
   ...
@@ -248,7 +249,7 @@ export const getPenggunaRef: GetPenggunaRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getPengguna(dc: DataConnect, vars: GetPenggunaVariables): QueryPromise<GetPenggunaData, GetPenggunaVariables>;
+getPengguna(dc: DataConnect, vars: GetPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetPenggunaData, GetPenggunaVariables>;
 
 interface GetPenggunaRef {
   ...
@@ -354,7 +355,7 @@ executeQuery(ref).then((response) => {
 ## GetPenggunaByEmail
 You can execute the `GetPenggunaByEmail` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getPenggunaByEmail(vars: GetPenggunaByEmailVariables): QueryPromise<GetPenggunaByEmailData, GetPenggunaByEmailVariables>;
+getPenggunaByEmail(vars: GetPenggunaByEmailVariables, options?: ExecuteQueryOptions): QueryPromise<GetPenggunaByEmailData, GetPenggunaByEmailVariables>;
 
 interface GetPenggunaByEmailRef {
   ...
@@ -365,7 +366,7 @@ export const getPenggunaByEmailRef: GetPenggunaByEmailRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getPenggunaByEmail(dc: DataConnect, vars: GetPenggunaByEmailVariables): QueryPromise<GetPenggunaByEmailData, GetPenggunaByEmailVariables>;
+getPenggunaByEmail(dc: DataConnect, vars: GetPenggunaByEmailVariables, options?: ExecuteQueryOptions): QueryPromise<GetPenggunaByEmailData, GetPenggunaByEmailVariables>;
 
 interface GetPenggunaByEmailRef {
   ...
@@ -397,8 +398,12 @@ export interface GetPenggunaByEmailData {
   penggunas: ({
     id: UUIDString;
     email: string;
+    password?: string | null;
     nama: string;
     peran: PeranPengguna;
+    telepon?: string | null;
+    alamat?: string | null;
+    fotoUrl?: string | null;
   } & Pengguna_Key)[];
 }
 ```
@@ -468,7 +473,7 @@ executeQuery(ref).then((response) => {
 ## ListGuru
 You can execute the `ListGuru` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listGuru(): QueryPromise<ListGuruData, undefined>;
+listGuru(options?: ExecuteQueryOptions): QueryPromise<ListGuruData, undefined>;
 
 interface ListGuruRef {
   ...
@@ -479,7 +484,7 @@ export const listGuruRef: ListGuruRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listGuru(dc: DataConnect): QueryPromise<ListGuruData, undefined>;
+listGuru(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListGuruData, undefined>;
 
 interface ListGuruRef {
   ...
@@ -575,7 +580,7 @@ executeQuery(ref).then((response) => {
 ## GetGuru
 You can execute the `GetGuru` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getGuru(vars: GetGuruVariables): QueryPromise<GetGuruData, GetGuruVariables>;
+getGuru(vars: GetGuruVariables, options?: ExecuteQueryOptions): QueryPromise<GetGuruData, GetGuruVariables>;
 
 interface GetGuruRef {
   ...
@@ -586,7 +591,7 @@ export const getGuruRef: GetGuruRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getGuru(dc: DataConnect, vars: GetGuruVariables): QueryPromise<GetGuruData, GetGuruVariables>;
+getGuru(dc: DataConnect, vars: GetGuruVariables, options?: ExecuteQueryOptions): QueryPromise<GetGuruData, GetGuruVariables>;
 
 interface GetGuruRef {
   ...
@@ -700,7 +705,7 @@ executeQuery(ref).then((response) => {
 ## GetLastNIP
 You can execute the `GetLastNIP` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getLastNip(): QueryPromise<GetLastNipData, undefined>;
+getLastNip(options?: ExecuteQueryOptions): QueryPromise<GetLastNipData, undefined>;
 
 interface GetLastNipRef {
   ...
@@ -711,7 +716,7 @@ export const getLastNipRef: GetLastNipRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getLastNip(dc: DataConnect): QueryPromise<GetLastNipData, undefined>;
+getLastNip(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<GetLastNipData, undefined>;
 
 interface GetLastNipRef {
   ...
@@ -793,7 +798,7 @@ executeQuery(ref).then((response) => {
 ## GetGuruByPengguna
 You can execute the `GetGuruByPengguna` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getGuruByPengguna(vars: GetGuruByPenggunaVariables): QueryPromise<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
+getGuruByPengguna(vars: GetGuruByPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
 
 interface GetGuruByPenggunaRef {
   ...
@@ -804,7 +809,7 @@ export const getGuruByPenggunaRef: GetGuruByPenggunaRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getGuruByPengguna(dc: DataConnect, vars: GetGuruByPenggunaVariables): QueryPromise<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
+getGuruByPengguna(dc: DataConnect, vars: GetGuruByPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetGuruByPenggunaData, GetGuruByPenggunaVariables>;
 
 interface GetGuruByPenggunaRef {
   ...
@@ -904,7 +909,7 @@ executeQuery(ref).then((response) => {
 ## ListSemuaSiswa
 You can execute the `ListSemuaSiswa` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listSemuaSiswa(): QueryPromise<ListSemuaSiswaData, undefined>;
+listSemuaSiswa(options?: ExecuteQueryOptions): QueryPromise<ListSemuaSiswaData, undefined>;
 
 interface ListSemuaSiswaRef {
   ...
@@ -915,7 +920,7 @@ export const listSemuaSiswaRef: ListSemuaSiswaRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listSemuaSiswa(dc: DataConnect): QueryPromise<ListSemuaSiswaData, undefined>;
+listSemuaSiswa(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListSemuaSiswaData, undefined>;
 
 interface ListSemuaSiswaRef {
   ...
@@ -1024,7 +1029,7 @@ executeQuery(ref).then((response) => {
 ## ListSiswaByKelas
 You can execute the `ListSiswaByKelas` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listSiswaByKelas(vars: ListSiswaByKelasVariables): QueryPromise<ListSiswaByKelasData, ListSiswaByKelasVariables>;
+listSiswaByKelas(vars: ListSiswaByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListSiswaByKelasData, ListSiswaByKelasVariables>;
 
 interface ListSiswaByKelasRef {
   ...
@@ -1035,7 +1040,7 @@ export const listSiswaByKelasRef: ListSiswaByKelasRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listSiswaByKelas(dc: DataConnect, vars: ListSiswaByKelasVariables): QueryPromise<ListSiswaByKelasData, ListSiswaByKelasVariables>;
+listSiswaByKelas(dc: DataConnect, vars: ListSiswaByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListSiswaByKelasData, ListSiswaByKelasVariables>;
 
 interface ListSiswaByKelasRef {
   ...
@@ -1162,7 +1167,7 @@ executeQuery(ref).then((response) => {
 ## GetSiswa
 You can execute the `GetSiswa` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getSiswa(vars: GetSiswaVariables): QueryPromise<GetSiswaData, GetSiswaVariables>;
+getSiswa(vars: GetSiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetSiswaData, GetSiswaVariables>;
 
 interface GetSiswaRef {
   ...
@@ -1173,7 +1178,7 @@ export const getSiswaRef: GetSiswaRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getSiswa(dc: DataConnect, vars: GetSiswaVariables): QueryPromise<GetSiswaData, GetSiswaVariables>;
+getSiswa(dc: DataConnect, vars: GetSiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetSiswaData, GetSiswaVariables>;
 
 interface GetSiswaRef {
   ...
@@ -1300,7 +1305,7 @@ executeQuery(ref).then((response) => {
 ## GetLastNIS
 You can execute the `GetLastNIS` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getLastNis(): QueryPromise<GetLastNisData, undefined>;
+getLastNis(options?: ExecuteQueryOptions): QueryPromise<GetLastNisData, undefined>;
 
 interface GetLastNisRef {
   ...
@@ -1311,7 +1316,7 @@ export const getLastNisRef: GetLastNisRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getLastNis(dc: DataConnect): QueryPromise<GetLastNisData, undefined>;
+getLastNis(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<GetLastNisData, undefined>;
 
 interface GetLastNisRef {
   ...
@@ -1393,7 +1398,7 @@ executeQuery(ref).then((response) => {
 ## GetSiswaByPengguna
 You can execute the `GetSiswaByPengguna` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getSiswaByPengguna(vars: GetSiswaByPenggunaVariables): QueryPromise<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
+getSiswaByPengguna(vars: GetSiswaByPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
 
 interface GetSiswaByPenggunaRef {
   ...
@@ -1404,7 +1409,7 @@ export const getSiswaByPenggunaRef: GetSiswaByPenggunaRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getSiswaByPengguna(dc: DataConnect, vars: GetSiswaByPenggunaVariables): QueryPromise<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
+getSiswaByPengguna(dc: DataConnect, vars: GetSiswaByPenggunaVariables, options?: ExecuteQueryOptions): QueryPromise<GetSiswaByPenggunaData, GetSiswaByPenggunaVariables>;
 
 interface GetSiswaByPenggunaRef {
   ...
@@ -1504,7 +1509,7 @@ executeQuery(ref).then((response) => {
 ## ListSemuaKelas
 You can execute the `ListSemuaKelas` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listSemuaKelas(): QueryPromise<ListSemuaKelasData, undefined>;
+listSemuaKelas(options?: ExecuteQueryOptions): QueryPromise<ListSemuaKelasData, undefined>;
 
 interface ListSemuaKelasRef {
   ...
@@ -1515,7 +1520,7 @@ export const listSemuaKelasRef: ListSemuaKelasRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listSemuaKelas(dc: DataConnect): QueryPromise<ListSemuaKelasData, undefined>;
+listSemuaKelas(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListSemuaKelasData, undefined>;
 
 interface ListSemuaKelasRef {
   ...
@@ -1611,7 +1616,7 @@ executeQuery(ref).then((response) => {
 ## ListKelasByTingkat
 You can execute the `ListKelasByTingkat` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listKelasByTingkat(vars: ListKelasByTingkatVariables): QueryPromise<ListKelasByTingkatData, ListKelasByTingkatVariables>;
+listKelasByTingkat(vars: ListKelasByTingkatVariables, options?: ExecuteQueryOptions): QueryPromise<ListKelasByTingkatData, ListKelasByTingkatVariables>;
 
 interface ListKelasByTingkatRef {
   ...
@@ -1622,7 +1627,7 @@ export const listKelasByTingkatRef: ListKelasByTingkatRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listKelasByTingkat(dc: DataConnect, vars: ListKelasByTingkatVariables): QueryPromise<ListKelasByTingkatData, ListKelasByTingkatVariables>;
+listKelasByTingkat(dc: DataConnect, vars: ListKelasByTingkatVariables, options?: ExecuteQueryOptions): QueryPromise<ListKelasByTingkatData, ListKelasByTingkatVariables>;
 
 interface ListKelasByTingkatRef {
   ...
@@ -1736,7 +1741,7 @@ executeQuery(ref).then((response) => {
 ## ListJurusan
 You can execute the `ListJurusan` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listJurusan(): QueryPromise<ListJurusanData, undefined>;
+listJurusan(options?: ExecuteQueryOptions): QueryPromise<ListJurusanData, undefined>;
 
 interface ListJurusanRef {
   ...
@@ -1747,7 +1752,7 @@ export const listJurusanRef: ListJurusanRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listJurusan(dc: DataConnect): QueryPromise<ListJurusanData, undefined>;
+listJurusan(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListJurusanData, undefined>;
 
 interface ListJurusanRef {
   ...
@@ -1831,7 +1836,7 @@ executeQuery(ref).then((response) => {
 ## ListMataPelajaran
 You can execute the `ListMataPelajaran` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listMataPelajaran(): QueryPromise<ListMataPelajaranData, undefined>;
+listMataPelajaran(options?: ExecuteQueryOptions): QueryPromise<ListMataPelajaranData, undefined>;
 
 interface ListMataPelajaranRef {
   ...
@@ -1842,7 +1847,7 @@ export const listMataPelajaranRef: ListMataPelajaranRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listMataPelajaran(dc: DataConnect): QueryPromise<ListMataPelajaranData, undefined>;
+listMataPelajaran(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListMataPelajaranData, undefined>;
 
 interface ListMataPelajaranRef {
   ...
@@ -1926,7 +1931,7 @@ executeQuery(ref).then((response) => {
 ## GetJadwalByKelas
 You can execute the `GetJadwalByKelas` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getJadwalByKelas(vars: GetJadwalByKelasVariables): QueryPromise<GetJadwalByKelasData, GetJadwalByKelasVariables>;
+getJadwalByKelas(vars: GetJadwalByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetJadwalByKelasData, GetJadwalByKelasVariables>;
 
 interface GetJadwalByKelasRef {
   ...
@@ -1937,7 +1942,7 @@ export const getJadwalByKelasRef: GetJadwalByKelasRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getJadwalByKelas(dc: DataConnect, vars: GetJadwalByKelasVariables): QueryPromise<GetJadwalByKelasData, GetJadwalByKelasVariables>;
+getJadwalByKelas(dc: DataConnect, vars: GetJadwalByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetJadwalByKelasData, GetJadwalByKelasVariables>;
 
 interface GetJadwalByKelasRef {
   ...
@@ -1975,14 +1980,17 @@ export interface GetJadwalByKelasData {
     ruangan?: string | null;
     semester: string;
     mataPelajaran: {
+      id: UUIDString;
+      kode: string;
       nama: string;
-    };
+    } & MataPelajaran_Key;
       guru: {
+        id: UUIDString;
         nip: string;
         pengguna: {
           nama: string;
         };
-      };
+      } & Guru_Key;
   } & Jadwal_Key)[];
 }
 ```
@@ -2054,7 +2062,7 @@ executeQuery(ref).then((response) => {
 ## GetJadwalByGuru
 You can execute the `GetJadwalByGuru` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getJadwalByGuru(vars: GetJadwalByGuruVariables): QueryPromise<GetJadwalByGuruData, GetJadwalByGuruVariables>;
+getJadwalByGuru(vars: GetJadwalByGuruVariables, options?: ExecuteQueryOptions): QueryPromise<GetJadwalByGuruData, GetJadwalByGuruVariables>;
 
 interface GetJadwalByGuruRef {
   ...
@@ -2065,7 +2073,7 @@ export const getJadwalByGuruRef: GetJadwalByGuruRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getJadwalByGuru(dc: DataConnect, vars: GetJadwalByGuruVariables): QueryPromise<GetJadwalByGuruData, GetJadwalByGuruVariables>;
+getJadwalByGuru(dc: DataConnect, vars: GetJadwalByGuruVariables, options?: ExecuteQueryOptions): QueryPromise<GetJadwalByGuruData, GetJadwalByGuruVariables>;
 
 interface GetJadwalByGuruRef {
   ...
@@ -2103,12 +2111,15 @@ export interface GetJadwalByGuruData {
     ruangan?: string | null;
     semester: string;
     mataPelajaran: {
+      id: UUIDString;
+      kode: string;
       nama: string;
-    };
+    } & MataPelajaran_Key;
       kelas: {
+        id: UUIDString;
         nama: string;
         tingkat: number;
-      };
+      } & Kelas_Key;
   } & Jadwal_Key)[];
 }
 ```
@@ -2180,7 +2191,7 @@ executeQuery(ref).then((response) => {
 ## GetNilaiBySiswa
 You can execute the `GetNilaiBySiswa` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getNilaiBySiswa(vars: GetNilaiBySiswaVariables): QueryPromise<GetNilaiBySiswaData, GetNilaiBySiswaVariables>;
+getNilaiBySiswa(vars: GetNilaiBySiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetNilaiBySiswaData, GetNilaiBySiswaVariables>;
 
 interface GetNilaiBySiswaRef {
   ...
@@ -2191,7 +2202,7 @@ export const getNilaiBySiswaRef: GetNilaiBySiswaRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getNilaiBySiswa(dc: DataConnect, vars: GetNilaiBySiswaVariables): QueryPromise<GetNilaiBySiswaData, GetNilaiBySiswaVariables>;
+getNilaiBySiswa(dc: DataConnect, vars: GetNilaiBySiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetNilaiBySiswaData, GetNilaiBySiswaVariables>;
 
 interface GetNilaiBySiswaRef {
   ...
@@ -2306,7 +2317,7 @@ executeQuery(ref).then((response) => {
 ## GetNilaiByKelas
 You can execute the `GetNilaiByKelas` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getNilaiByKelas(vars: GetNilaiByKelasVariables): QueryPromise<GetNilaiByKelasData, GetNilaiByKelasVariables>;
+getNilaiByKelas(vars: GetNilaiByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetNilaiByKelasData, GetNilaiByKelasVariables>;
 
 interface GetNilaiByKelasRef {
   ...
@@ -2317,7 +2328,7 @@ export const getNilaiByKelasRef: GetNilaiByKelasRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getNilaiByKelas(dc: DataConnect, vars: GetNilaiByKelasVariables): QueryPromise<GetNilaiByKelasData, GetNilaiByKelasVariables>;
+getNilaiByKelas(dc: DataConnect, vars: GetNilaiByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetNilaiByKelasData, GetNilaiByKelasVariables>;
 
 interface GetNilaiByKelasRef {
   ...
@@ -2352,12 +2363,15 @@ export interface GetNilaiByKelasData {
     nilaiHarian?: number | null;
     nilaiUts?: number | null;
     nilaiUas?: number | null;
+    semester: string;
+    tahunAjaran: string;
     siswa: {
+      id: UUIDString;
       nis: string;
       pengguna: {
         nama: string;
       };
-    };
+    } & Siswa_Key;
   } & Nilai_Key)[];
 }
 ```
@@ -2429,7 +2443,7 @@ executeQuery(ref).then((response) => {
 ## GetKehadiranByKelas
 You can execute the `GetKehadiranByKelas` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getKehadiranByKelas(vars: GetKehadiranByKelasVariables): QueryPromise<GetKehadiranByKelasData, GetKehadiranByKelasVariables>;
+getKehadiranByKelas(vars: GetKehadiranByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetKehadiranByKelasData, GetKehadiranByKelasVariables>;
 
 interface GetKehadiranByKelasRef {
   ...
@@ -2440,7 +2454,7 @@ export const getKehadiranByKelasRef: GetKehadiranByKelasRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getKehadiranByKelas(dc: DataConnect, vars: GetKehadiranByKelasVariables): QueryPromise<GetKehadiranByKelasData, GetKehadiranByKelasVariables>;
+getKehadiranByKelas(dc: DataConnect, vars: GetKehadiranByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetKehadiranByKelasData, GetKehadiranByKelasVariables>;
 
 interface GetKehadiranByKelasRef {
   ...
@@ -2551,7 +2565,7 @@ executeQuery(ref).then((response) => {
 ## GetKehadiranBySiswa
 You can execute the `GetKehadiranBySiswa` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-getKehadiranBySiswa(vars: GetKehadiranBySiswaVariables): QueryPromise<GetKehadiranBySiswaData, GetKehadiranBySiswaVariables>;
+getKehadiranBySiswa(vars: GetKehadiranBySiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetKehadiranBySiswaData, GetKehadiranBySiswaVariables>;
 
 interface GetKehadiranBySiswaRef {
   ...
@@ -2562,7 +2576,7 @@ export const getKehadiranBySiswaRef: GetKehadiranBySiswaRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getKehadiranBySiswa(dc: DataConnect, vars: GetKehadiranBySiswaVariables): QueryPromise<GetKehadiranBySiswaData, GetKehadiranBySiswaVariables>;
+getKehadiranBySiswa(dc: DataConnect, vars: GetKehadiranBySiswaVariables, options?: ExecuteQueryOptions): QueryPromise<GetKehadiranBySiswaData, GetKehadiranBySiswaVariables>;
 
 interface GetKehadiranBySiswaRef {
   ...
@@ -2665,7 +2679,7 @@ executeQuery(ref).then((response) => {
 ## ListPengumuman
 You can execute the `ListPengumuman` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listPengumuman(): QueryPromise<ListPengumumanData, undefined>;
+listPengumuman(options?: ExecuteQueryOptions): QueryPromise<ListPengumumanData, undefined>;
 
 interface ListPengumumanRef {
   ...
@@ -2676,7 +2690,7 @@ export const listPengumumanRef: ListPengumumanRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listPengumuman(dc: DataConnect): QueryPromise<ListPengumumanData, undefined>;
+listPengumuman(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListPengumumanData, undefined>;
 
 interface ListPengumumanRef {
   ...
@@ -2765,7 +2779,7 @@ executeQuery(ref).then((response) => {
 ## ListPrestasi
 You can execute the `ListPrestasi` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listPrestasi(vars?: ListPrestasiVariables): QueryPromise<ListPrestasiData, ListPrestasiVariables>;
+listPrestasi(vars?: ListPrestasiVariables, options?: ExecuteQueryOptions): QueryPromise<ListPrestasiData, ListPrestasiVariables>;
 
 interface ListPrestasiRef {
   ...
@@ -2776,7 +2790,7 @@ export const listPrestasiRef: ListPrestasiRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listPrestasi(dc: DataConnect, vars?: ListPrestasiVariables): QueryPromise<ListPrestasiData, ListPrestasiVariables>;
+listPrestasi(dc: DataConnect, vars?: ListPrestasiVariables, options?: ExecuteQueryOptions): QueryPromise<ListPrestasiData, ListPrestasiVariables>;
 
 interface ListPrestasiRef {
   ...
@@ -2813,6 +2827,13 @@ export interface ListPrestasiData {
     peringkat: string;
     tanggal: DateString;
     deskripsi?: string | null;
+    siswa: {
+      id: UUIDString;
+      nis: string;
+      pengguna: {
+        nama: string;
+      };
+    } & Siswa_Key;
   } & Prestasi_Key)[];
 }
 ```
@@ -2886,7 +2907,7 @@ executeQuery(ref).then((response) => {
 ## ListAlumni
 You can execute the `ListAlumni` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
-listAlumni(vars?: ListAlumniVariables): QueryPromise<ListAlumniData, ListAlumniVariables>;
+listAlumni(vars?: ListAlumniVariables, options?: ExecuteQueryOptions): QueryPromise<ListAlumniData, ListAlumniVariables>;
 
 interface ListAlumniRef {
   ...
@@ -2897,7 +2918,7 @@ export const listAlumniRef: ListAlumniRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listAlumni(dc: DataConnect, vars?: ListAlumniVariables): QueryPromise<ListAlumniData, ListAlumniVariables>;
+listAlumni(dc: DataConnect, vars?: ListAlumniVariables, options?: ExecuteQueryOptions): QueryPromise<ListAlumniData, ListAlumniVariables>;
 
 interface ListAlumniRef {
   ...
@@ -6569,6 +6590,115 @@ console.log(data.alumni_delete);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.alumni_delete);
+});
+```
+
+## DeleteNilai
+You can execute the `DeleteNilai` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+deleteNilai(vars: DeleteNilaiVariables): MutationPromise<DeleteNilaiData, DeleteNilaiVariables>;
+
+interface DeleteNilaiRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteNilaiVariables): MutationRef<DeleteNilaiData, DeleteNilaiVariables>;
+}
+export const deleteNilaiRef: DeleteNilaiRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+deleteNilai(dc: DataConnect, vars: DeleteNilaiVariables): MutationPromise<DeleteNilaiData, DeleteNilaiVariables>;
+
+interface DeleteNilaiRef {
+  ...
+  (dc: DataConnect, vars: DeleteNilaiVariables): MutationRef<DeleteNilaiData, DeleteNilaiVariables>;
+}
+export const deleteNilaiRef: DeleteNilaiRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteNilaiRef:
+```typescript
+const name = deleteNilaiRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `DeleteNilai` mutation requires an argument of type `DeleteNilaiVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface DeleteNilaiVariables {
+  id: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `DeleteNilai` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `DeleteNilaiData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface DeleteNilaiData {
+  nilai_delete?: Nilai_Key | null;
+}
+```
+### Using `DeleteNilai`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, deleteNilai, DeleteNilaiVariables } from '@uassiakad/connector';
+
+// The `DeleteNilai` mutation requires an argument of type `DeleteNilaiVariables`:
+const deleteNilaiVars: DeleteNilaiVariables = {
+  id: ..., 
+};
+
+// Call the `deleteNilai()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await deleteNilai(deleteNilaiVars);
+// Variables can be defined inline as well.
+const { data } = await deleteNilai({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await deleteNilai(dataConnect, deleteNilaiVars);
+
+console.log(data.nilai_delete);
+
+// Or, you can use the `Promise` API.
+deleteNilai(deleteNilaiVars).then((response) => {
+  const data = response.data;
+  console.log(data.nilai_delete);
+});
+```
+
+### Using `DeleteNilai`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, deleteNilaiRef, DeleteNilaiVariables } from '@uassiakad/connector';
+
+// The `DeleteNilai` mutation requires an argument of type `DeleteNilaiVariables`:
+const deleteNilaiVars: DeleteNilaiVariables = {
+  id: ..., 
+};
+
+// Call the `deleteNilaiRef()` function to get a reference to the mutation.
+const ref = deleteNilaiRef(deleteNilaiVars);
+// Variables can be defined inline as well.
+const ref = deleteNilaiRef({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = deleteNilaiRef(dataConnect, deleteNilaiVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.nilai_delete);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.nilai_delete);
 });
 ```
 

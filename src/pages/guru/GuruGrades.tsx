@@ -7,10 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { LookupSelect } from '@/components/ui/lookup-select';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Save, Loader2, RefreshCw, CheckCircle2, Info, BookOpen, Calculator, AlertTriangle } from 'lucide-react';
-import { fetchJadwalGuru } from '@/lib/schoolService';
+import { Save, Loader2, RefreshCw, CheckCircle2, Info, BookOpen, Calculator, AlertTriangle, Trash2 } from 'lucide-react';
+import { fetchJadwalGuru, fetchKelas, fetchMataPelajaran } from '@/lib/schoolService';
 import { fetchSiswa } from '@/lib/userService';
-import { upsertNilai, getNilaiByKelas, getNilaiByKelasRef } from '@uassiakad/connector';
+import { getGuruByPengguna, upsertNilai, getNilaiByKelasRef, deleteNilai } from '@uassiakad/connector';
 import { executeQuery } from 'firebase/data-connect';
 import { dataConnect } from '@/lib/userService';
 import { useNotifications } from '@/contexts/NotificationContext';
@@ -58,30 +58,48 @@ export default function GuruGrades() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Ambil daftar kelas+mapel yang benar-benar diajar guru ini
-  // berdasarkan jadwal yang sudah dibuat oleh admin.
+  // Ambil daftar kelas dan mata pelajaran yang benar-benar diajar guru ini
+  // berdasarkan jadwal yang sudah dibuat oleh administrator.
   const loadAssignments = useCallback(async () => {
-    if (!user?.guruId) return;
     setLoadingAssignments(true);
     setError(null);
     try {
-      const jadwalData = await fetchJadwalGuru(user.guruId, tahunAjaran);
+      let guruId = user?.guruId;
+      if (!guruId && user?.penggunaId) {
+        const lookup = await getGuruByPengguna(dataConnect, { penggunaId: user.penggunaId });
+        guruId = lookup.data.gurus[0]?.id;
+      }
+      if (!guruId) {
+        setAssignments([]);
+        setSelectedKey('');
+        return;
+      }
+
+      const [jadwalData, kelasData, mapelData] = await Promise.all([
+        fetchJadwalGuru(guruId, tahunAjaran),
+        fetchKelas(),
+        fetchMataPelajaran(),
+      ]);
+      const kelasByName = new Map(kelasData.map((k: any) => [String(k.name).toLowerCase(), k]));
+      const mapelByName = new Map(mapelData.map((m: any) => [String(m.nama).toLowerCase(), m]));
       const filtered = (jadwalData || []).filter((j: any) => !j.semester || j.semester === semester);
       const uniq = new Map<string, TeachingAssignment>();
       filtered.forEach((j: any) => {
-        const kelasId = j.kelas?.id;
-        const mapelId = j.mataPelajaran?.id;
+        const kelasFallback = j.kelas?.nama ? kelasByName.get(String(j.kelas.nama).toLowerCase()) : null;
+        const mapelFallback = j.mataPelajaran?.nama ? mapelByName.get(String(j.mataPelajaran.nama).toLowerCase()) : null;
+        const kelasId = j.kelas?.id || kelasFallback?.id;
+        const mapelId = j.mataPelajaran?.id || mapelFallback?.id;
         if (!kelasId || !mapelId) return;
         const key = `${kelasId}__${mapelId}`;
         if (!uniq.has(key)) {
           uniq.set(key, {
             key,
             kelasId,
-            kelasNama: j.kelas?.nama || '-',
-            kelasLevel: j.kelas?.tingkat,
+            kelasNama: j.kelas?.nama || kelasFallback?.name || '-',
+            kelasLevel: j.kelas?.tingkat || kelasFallback?.level,
             mataPelajaranId: mapelId,
-            mataPelajaranKode: j.mataPelajaran?.kode || '',
-            mataPelajaranNama: j.mataPelajaran?.nama || '-',
+            mataPelajaranKode: j.mataPelajaran?.kode || mapelFallback?.kode || '',
+            mataPelajaranNama: j.mataPelajaran?.nama || mapelFallback?.nama || '-',
           });
         }
       });
@@ -97,15 +115,19 @@ export default function GuruGrades() {
         return list[0].key; // fallback ke pertama
       });
     } catch (e: any) {
-      setError(e.message || 'Gagal memuat daftar kelas & mata pelajaran yang Anda ampu.');
+      setError(e.message || 'Gagal memuat daftar kelas dan mata pelajaran yang Anda ampu.');
     } finally {
       setLoadingAssignments(false);
     }
   // selectedKey SENGAJA tidak dimasukkan ke deps untuk mencegah infinite loop.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.guruId, semester, tahunAjaran]);
+  }, [user?.guruId, user?.penggunaId, semester, tahunAjaran]);
 
-  useEffect(() => { loadAssignments(); }, [loadAssignments]);
+  useEffect(() => {
+    if (user && user.role === 'guru') {
+      loadAssignments();
+    }
+  }, [loadAssignments, user]);
 
   const selectedAssignment = useMemo(
     () => assignments.find(a => a.key === selectedKey) || null,
@@ -129,12 +151,14 @@ export default function GuruGrades() {
       }), { fetchPolicy: 'SERVER_ONLY' });
       const gradesMap = new Map<string, any>();
       gradesRes.data.nilais.forEach((n: any) => {
-        if (n.semester !== semester || n.tahunAjaran !== tahunAjaran) return;
+        if (n.semester && n.semester !== semester) return;
+        if (n.tahunAjaran && n.tahunAjaran !== tahunAjaran) return;
+        if (n.siswa?.id) gradesMap.set(n.siswa.id, n);
         if (n.siswa?.nis) gradesMap.set(n.siswa.nis, n);
       });
 
       setStudents(siswaData.map(s => {
-        const existing = s.nis ? gradesMap.get(s.nis) : null;
+        const existing = (s.siswaId ? gradesMap.get(s.siswaId) : null) || (s.nis ? gradesMap.get(s.nis) : null);
         return {
           siswaId: s.siswaId || s.id,
           nis: s.nis || '',
@@ -223,11 +247,29 @@ export default function GuruGrades() {
           });
         }
       }
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       await loadStudentsWithGrades();
     } catch (e: any) {
       setError(e.message || 'Gagal menyimpan nilai.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteNilai = async (siswa: SiswaGrade) => {
+    if (!siswa.existingId) return;
+    if (!confirm(`Hapus nilai untuk ${siswa.name}?`)) return;
+    try {
+      await deleteNilai(dataConnect, { id: siswa.existingId });
+      await loadStudentsWithGrades();
+      addNotif({
+        type: 'success', kind: 'akademik',
+        targetRoles: ['guru'],
+        title: 'Nilai Dihapus',
+        body: `Nilai ${siswa.name} telah dihapus.`,
+      });
+    } catch (e: any) {
+      setError(`Gagal menghapus nilai ${siswa.name}: ${e.message}`);
     }
   };
 
@@ -356,11 +398,12 @@ export default function GuruGrades() {
                 <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4 text-center">UTS</TableHead>
                 <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4 text-center">UAS</TableHead>
                 <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4 text-right pr-6">Nilai Akhir</TableHead>
+                <TableHead className="text-slate-200 text-xs uppercase tracking-wider font-semibold py-4 text-center">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-12">
+                <TableRow><TableCell colSpan={6} className="text-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
                 </TableCell></TableRow>
               ) : students.length > 0 ? students.map((s) => {
@@ -392,10 +435,20 @@ export default function GuruGrades() {
                         {final > 0 ? final.toFixed(1) : '—'}
                       </span>
                     </TableCell>
+                    <TableCell className="text-center">
+                      {s.existingId ? (
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteNilai(s)}
+                          className="h-8 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-slate-500">—</span>
+                      )}
+                    </TableCell>
                   </TableRow>
                 );
               }) : (
-                <TableRow><TableCell colSpan={5} className="h-32 text-center">
+                <TableRow><TableCell colSpan={6} className="h-32 text-center">
                   <BookOpen className="h-10 w-10 text-slate-600 mx-auto mb-2" />
                   <p className="text-slate-300 font-semibold">Belum ada siswa</p>
                   <p className="text-sm text-slate-400">

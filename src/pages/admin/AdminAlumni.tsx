@@ -120,6 +120,7 @@ export default function AdminAlumni() {
           position: formData.major,
         });
       }
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       setIsDialogOpen(false);
       await loadData();
     } catch (e: any) {
@@ -139,6 +140,7 @@ export default function AdminAlumni() {
     if (!deletingId) return;
     try {
       await removeAlumniData(deletingId);
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       await loadData();
     } catch (e) {
       console.error(e);

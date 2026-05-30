@@ -53,7 +53,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       { label: 'Jurusan', href: '/admin/majors', icon: Award },
       { label: 'Penjuruan', href: '/admin/penjuruan', icon: MoveRight },
       { label: 'Alumni', href: '/admin/alumni', icon: GraduationCap },
-      { label: 'Pengaturan', href: '/admin/settings', icon: Settings },
     ];
     if (user?.role === 'guru') return [
       { label: 'Beranda', href: '/guru', icon: LayoutDashboard },

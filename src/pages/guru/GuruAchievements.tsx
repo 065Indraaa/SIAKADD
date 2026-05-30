@@ -61,6 +61,13 @@ export default function GuruAchievements() {
       ]);
       setAllSiswa(siswaData);
 
+      // Lookup map dari data siswa yang sudah di-fetch agar nama tidak hilang
+      // meskipun relasi p.siswa.pengguna tidak di-populate oleh Data Connect.
+      const siswaMap = new Map<string, string>();
+      siswaData.forEach((s: UserListItem) => {
+        if (s.siswaId) siswaMap.set(s.siswaId, s.name);
+      });
+
       const mapped: Prestasi[] = (prestasiRes.data.prestasis || []).map((p: any) => ({
         id: p.id,
         nama: p.nama,
@@ -69,9 +76,9 @@ export default function GuruAchievements() {
         peringkat: p.peringkat,
         tanggal: p.tanggal,
         deskripsi: p.deskripsi,
-        // Ambil siswaId dan nama dari relasi siswa yang sudah di-join di query
         siswaId: p.siswa?.id,
-        siswaName: p.siswa?.pengguna?.nama || 'Siswa Terhapus',
+        // Prioritaskan lookup map, lalu relasi query, lalu fallback
+        siswaName: siswaMap.get(p.siswa?.id) || p.siswa?.pengguna?.nama || 'Siswa Terhapus',
       }));
       setAchievements(mapped);
     } catch (e: any) {
@@ -124,6 +131,7 @@ export default function GuruAchievements() {
         tanggal: formData.tanggal,
         deskripsi: formData.deskripsi,
       });
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       setIsDialogOpen(false);
       await loadData();
     } catch (e: any) {
@@ -137,6 +145,7 @@ export default function GuruAchievements() {
     if (!deletingId) return;
     try {
       await deletePrestasi(dataConnect, { id: deletingId });
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       await loadData();
     } catch (e: any) {
       setError(e.message);

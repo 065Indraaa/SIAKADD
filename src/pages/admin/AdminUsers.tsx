@@ -460,6 +460,7 @@ export default function AdminUsers() {
         alamat: graduateTarget.address || undefined,
         prestasi: graduateForm.prestasi || undefined,
       });
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       addNotif({
         type: 'success', kind: 'akademik',
         title: 'Siswa Diluluskan',
@@ -480,6 +481,7 @@ export default function AdminUsers() {
     const user = users.find(u => u.id === deletingId);
     try {
       await deleteUserById(deletingId);
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       addNotif({
         type: 'warning', kind: 'system',
         title: 'Pengguna Dihapus',
@@ -574,6 +576,7 @@ export default function AdminUsers() {
                 }
               }
 
+              await new Promise(r => setTimeout(r, 500)); // Tunggu DB commit
               addNotif({
                 type: errors.length > 0 ? 'warning' : 'success',
                 kind: 'akademik',
@@ -594,6 +597,7 @@ export default function AdminUsers() {
             setLoading(true);
             try {
               await seedDemoData();
+              await new Promise(r => setTimeout(r, 500)); // Tunggu DB commit
               addNotif({
                 type: 'success', kind: 'system',
                 title: 'Data Contoh Dibuat',
@@ -611,6 +615,7 @@ export default function AdminUsers() {
             setLoading(true);
             try {
               await clearAllData();
+              await new Promise(r => setTimeout(r, 600)); // Tunggu DB commit
               addNotif({
                 type: 'warning', kind: 'system',
                 title: 'Basis Data Dikosongkan',

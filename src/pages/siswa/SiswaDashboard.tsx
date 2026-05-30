@@ -10,6 +10,9 @@ import SiswaSchedule from './SiswaSchedule';
 import SiswaAchievements from './SiswaAchievements';
 import SiswaMajoring from './SiswaMajoring';
 import SiswaAlumni from './SiswaAlumni';
+import { dataConnect } from '@/lib/userService';
+import { getSiswaRef } from '@uassiakad/connector';
+import { executeQuery } from 'firebase/data-connect';
 
 function SiswaOverview() {
   const { user } = useAuth();
@@ -33,8 +36,14 @@ function SiswaOverview() {
       setLoading(true);
       try {
         if (user?.siswaId) {
+          let kelasId = user.kelasId;
+          if (!kelasId) {
+            const siswaRes = await executeQuery(getSiswaRef(dataConnect, { id: user.siswaId }), { fetchPolicy: 'SERVER_ONLY' });
+            kelasId = siswaRes.data.siswa?.kelas?.id;
+          }
+
           const [jadwal, nilai, prestasi] = await Promise.all([
-            user.kelasId ? fetchJadwalKelas(user.kelasId) : Promise.resolve([]),
+            kelasId ? fetchJadwalKelas(kelasId) : Promise.resolve([]),
             fetchNilaiSiswa(user.siswaId, currentSemester(), currentTahunAjaran()),
             fetchPrestasiSiswa(user.siswaId),
           ]);

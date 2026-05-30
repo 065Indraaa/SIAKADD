@@ -127,6 +127,7 @@ export default function AdminClasses() {
       } else {
         await addKelas(payload);
       }
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       setIsDialogOpen(false);
       await loadData();
     } catch (e: any) {
@@ -142,6 +143,7 @@ export default function AdminClasses() {
     if (!deletingId) return;
     try {
       await deleteKelas(dataConnect, { id: deletingId });
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       await loadData();
     } catch (e: any) {
       setError(e.message || 'Gagal menghapus kelas.');

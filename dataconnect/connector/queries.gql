@@ -295,9 +295,12 @@ query GetJadwalByKelas($kelasId: UUID!, $tahunAjaran: String) @auth(level: PUBLI
     ruangan
     semester
     mataPelajaran {
+      id
+      kode
       nama
     }
     guru {
+      id
       nip
       pengguna {
         nama
@@ -321,9 +324,12 @@ query GetJadwalByGuru($guruId: UUID!, $tahunAjaran: String) @auth(level: PUBLIC)
     ruangan
     semester
     mataPelajaran {
+      id
+      kode
       nama
     }
     kelas {
+      id
       nama
       tingkat
     }
@@ -366,7 +372,10 @@ query GetNilaiByKelas($kelasId: UUID!, $mataPelajaranId: UUID!) @auth(level: PUB
     nilaiHarian
     nilaiUts
     nilaiUas
+    semester
+    tahunAjaran
     siswa {
+      id
       nis
       pengguna {
         nama

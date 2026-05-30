@@ -79,6 +79,7 @@ export default function AdminMajors() {
       } else {
         await addJurusan(formData);
       }
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       setIsDialogOpen(false);
       await loadData();
     } catch (e: any) {
@@ -101,6 +102,7 @@ export default function AdminMajors() {
         added++;
       } catch { skipped++; }
     }
+    await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
     setSeedingPreset(null);
     setIsPresetOpen(false);
     await loadData();
@@ -111,6 +113,7 @@ export default function AdminMajors() {
     if (!confirm(`Hapus jurusan "${nama}"? Siswa/kelas yang menggunakan jurusan ini perlu di-update.`)) return;
     try {
       await removeJurusan(id);
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       await loadData();
     } catch (e: any) {
       alert('Gagal menghapus: ' + (e.message || 'Masih dipakai oleh siswa/kelas.'));

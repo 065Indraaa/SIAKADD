@@ -224,13 +224,6 @@ export default function AdminDashboard() {
       <Route path="/penjuruan" element={<AdminPenjuruan />} />
       <Route path="/alumni" element={<AdminAlumni />} />
       <Route path="/subjects" element={<AdminSubjects />} />
-      <Route path="/settings" element={
-        <div className="p-8">
-          <div className="scola-card p-8 text-slate-400 text-sm">
-            Halaman Pengaturan — Segera hadir.
-          </div>
-        </div>
-      } />
     </Routes>
   );
 }

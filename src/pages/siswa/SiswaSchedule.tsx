@@ -6,14 +6,12 @@ import { Clock, Zap, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchJadwalKelas } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { currentSemester, currentTahunAjaran } from '@/lib/tahunAjaran';
+import { dataConnect } from '@/lib/userService';
+import { getSiswaRef } from '@uassiakad/connector';
+import { executeQuery } from 'firebase/data-connect';
 
 const SEMESTER_OPTIONS = ['Ganjil', 'Genap'];
-
-function currentTahunAjaran(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  return now.getMonth() >= 6 ? `${y}/${y + 1}` : `${y - 1}/${y}`;
-}
 
 function buildTahunAjaranOptions(): string[] {
   const now = new Date();
@@ -25,20 +23,33 @@ export default function SiswaSchedule() {
   const { user } = useAuth();
   const [schedule, setSchedule] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [semester, setSemester] = useState<'Ganjil' | 'Genap'>('Ganjil');
+  const [semester, setSemester] = useState<'Ganjil' | 'Genap'>(currentSemester());
   const [tahunAjaran, setTahunAjaran] = useState(currentTahunAjaran());
   const [clock, setClock] = useState(() => new Date());
+  const [kelasInfo, setKelasInfo] = useState<{ id?: string; nama?: string }>({ id: user?.kelasId, nama: user?.className });
 
   const tahunAjaranOptions = useMemo(() => buildTahunAjaranOptions(), []);
 
   const loadSchedule = useCallback(async () => {
-    if (!user?.kelasId) {
-      setSchedule([]);
-      return;
-    }
     setLoading(true);
     try {
-      const data = await fetchJadwalKelas(user.kelasId, tahunAjaran);
+      let kelasId = user?.kelasId || kelasInfo.id;
+      let kelasNama = user?.className || kelasInfo.nama;
+
+      if ((!kelasId || !kelasNama) && user?.siswaId) {
+        const siswaRes = await executeQuery(getSiswaRef(dataConnect, { id: user.siswaId }), { fetchPolicy: 'SERVER_ONLY' });
+        const kelas = siswaRes.data.siswa?.kelas;
+        kelasId = kelas?.id || kelasId;
+        kelasNama = kelas?.nama || kelasNama;
+        setKelasInfo({ id: kelasId, nama: kelasNama });
+      }
+
+      if (!kelasId) {
+        setSchedule([]);
+        return;
+      }
+
+      const data = await fetchJadwalKelas(kelasId, tahunAjaran);
       const filtered = (data || []).filter((d: any) => !d.semester || d.semester === semester);
       const timeSlots = Array.from(new Set(filtered.map((d: any) => `${d.jamMulai} - ${d.jamSelesai}`))).sort();
       
@@ -55,11 +66,12 @@ export default function SiswaSchedule() {
       });
       setSchedule(gridData);
     } catch (e) {
-      console.error(e);
+      console.error('Gagal memuat jadwal siswa:', e);
+      setSchedule([]);
     } finally {
       setLoading(false);
     }
-  }, [user?.kelasId, semester, tahunAjaran]);
+  }, [kelasInfo.id, kelasInfo.nama, semester, tahunAjaran, user?.className, user?.kelasId, user?.siswaId]);
 
   useEffect(() => { loadSchedule(); }, [loadSchedule]);
   useAutoRefresh(loadSchedule, 20_000);
@@ -86,7 +98,7 @@ export default function SiswaSchedule() {
             Jadwal Pelajaran
           </h2>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-xl">
-            Rencana pembelajaran mingguan untuk kelas <span className="text-slate-900 dark:text-white font-semibold">{user?.className || '—'}</span>.
+            Rencana pembelajaran mingguan untuk kelas <span className="text-slate-900 dark:text-white font-semibold">{user?.className || kelasInfo.nama || '—'}</span>.
           </p>
         </div>
 
@@ -187,7 +199,7 @@ export default function SiswaSchedule() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-20 text-slate-500 font-bold uppercase tracking-widest text-xs">
-                      {user?.kelasId
+                      {user?.kelasId || kelasInfo.id
                         ? `Belum ada jadwal untuk semester ${semester} tahun ajaran ${tahunAjaran}.`
                         : 'Kelas Anda belum ditentukan. Hubungi wali kelas atau administrator.'}
                     </TableCell>

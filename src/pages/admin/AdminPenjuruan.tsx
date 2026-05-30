@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,7 +36,7 @@ export default function AdminPenjuruan() {
   const [jurusans, setJurusans] = useState<any[]>([]);
   const [tingkatFilter, setTingkatFilter] = useState<string>('semua');
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [siswaData, jurusanData] = await Promise.all([fetchSiswa(), fetchJurusan()]);
@@ -58,9 +58,9 @@ export default function AdminPenjuruan() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { loadData(); }, [loadData]);
 
   useAutoRefresh(loadData, 20_000);
 
@@ -99,6 +99,7 @@ export default function AdminPenjuruan() {
       }
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 3000);
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       await loadData();
       addNotif({
         type: errors.length > 0 ? 'warning' : 'success',

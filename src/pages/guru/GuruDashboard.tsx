@@ -8,7 +8,7 @@ import GuruStudents from './GuruStudents';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchJadwalGuru } from '@/lib/schoolService';
 import { currentTahunAjaran, currentSemester } from '@/lib/tahunAjaran';
-import { listPrestasi } from '@uassiakad/connector';
+import { getGuruByPengguna, listPrestasi } from '@uassiakad/connector';
 import { dataConnect } from '@/lib/userService';
 
 function GuruOverview() {
@@ -30,7 +30,11 @@ function GuruOverview() {
   const loadGuruData = async () => {
     setLoading(true);
     try {
-      const myGuruId = user?.guruId;
+      let myGuruId = user?.guruId;
+      if (!myGuruId && user?.penggunaId) {
+        const lookup = await getGuruByPengguna(dataConnect, { penggunaId: user.penggunaId });
+        myGuruId = lookup.data.gurus[0]?.id;
+      }
 
       if (myGuruId) {
         const jadwal = await fetchJadwalGuru(myGuruId, currentTahunAjaran());

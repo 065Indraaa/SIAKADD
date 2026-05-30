@@ -393,6 +393,81 @@
 .scola-portal .bg-violet-500\/10 { background: oklch(0.6 0.2 290 / 10%) !important; }
 .scola-portal .bg-red-500\/10 { background: oklch(0.577 0.245 27 / 10%) !important; }
 
+/* ─── Light Mode Dialog / Modal Overrides ──────────────────
+   Dialog shadcn di-render ke body via portal, di luar .scola-portal.
+   Gunakan selector html.light agar hanya aktif di light mode.
+   ────────────────────────────────────────────────────────── */
+html.light [data-radix-popper-content-wrapper],
+html.light [role="dialog"] {
+  --dialog-bg: var(--card);
+  --dialog-fg: var(--foreground);
+  --dialog-border: var(--border);
+}
+
+html.light [role="dialog"] .bg-slate-950,
+html.light [role="dialog"] .bg-slate-900,
+html.light [role="dialog"] .bg-slate-900\/60,
+html.light [role="dialog"] .bg-slate-900\/50,
+html.light [role="dialog"] .bg-slate-900\/40,
+html.light [role="dialog"] .bg-slate-900\/30,
+html.light [role="dialog"] .bg-slate-900\/20 {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+html.light [role="dialog"] .text-white,
+html.light [role="dialog"] .text-slate-100,
+html.light [role="dialog"] .text-slate-200,
+html.light [role="dialog"] .text-slate-300 {
+  color: var(--foreground) !important;
+}
+
+html.light [role="dialog"] .text-slate-400 {
+  color: var(--muted-foreground) !important;
+}
+
+html.light [role="dialog"] .text-slate-500 {
+  color: var(--muted-foreground) !important;
+  opacity: 0.85;
+}
+
+html.light [role="dialog"] .border-white\/10,
+html.light [role="dialog"] .border-white\/5,
+html.light [role="dialog"] .border-white\/\[0\.06\],
+html.light [role="dialog"] .border-white\/\[0\.04\] {
+  border-color: var(--border) !important;
+}
+
+html.light [role="dialog"] .bg-slate-950\/50,
+html.light [role="dialog"] .bg-slate-950\/30,
+html.light [role="dialog"] .bg-slate-950\/20,
+html.light [role="dialog"] .bg-white\/5,
+html.light [role="dialog"] .bg-white\/\[0\.03\],
+html.light [role="dialog"] .bg-white\/\[0\.04\],
+html.light [role="dialog"] .bg-white\/\[0\.05\] {
+  background: var(--muted) !important;
+}
+
+html.light [role="dialog"] input,
+html.light [role="dialog"] textarea,
+html.light [role="dialog"] select {
+  background: var(--input) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+
+html.light [role="dialog"] input::placeholder,
+html.light [role="dialog"] textarea::placeholder {
+  color: var(--muted-foreground) !important;
+  opacity: 0.7;
+}
+
+html.light [role="dialog"] .hover\:bg-white\/5:hover,
+html.light [role="dialog"] .hover\:bg-white\/\[0\.02\]:hover,
+html.light [role="dialog"] .hover\:bg-white\/\[0\.03\]:hover {
+  background: var(--accent) !important;
+}
+
 /* ─── Input Overrides ────────────────────────────────────── */
 .scola-input {
   background: var(--input) !important;

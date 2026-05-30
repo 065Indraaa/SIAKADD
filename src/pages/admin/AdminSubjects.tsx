@@ -102,6 +102,7 @@ export default function AdminSubjects() {
       } else {
         await addMataPelajaran(formData);
       }
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       setIsDialogOpen(false);
       await loadData();
     } catch (e: any) {
@@ -120,6 +121,7 @@ export default function AdminSubjects() {
       if (existing.has(m.kode)) { skipped++; continue; }
       try { await addMataPelajaran(m); added++; } catch { skipped++; }
     }
+    await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
     setSeedingCategory(null);
     await loadData();
       alert(`Daftar bawaan ${category}: ${added} ditambahkan, ${skipped} dilewati.`);
@@ -144,6 +146,7 @@ export default function AdminSubjects() {
       if (existing.has(m.kode)) { skipped++; continue; }
       try { await addMataPelajaran(m); added++; } catch { skipped++; }
     }
+    await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
     setSeedingCategory(null);
     setIsPresetOpen(false);
     await loadData();
@@ -154,6 +157,7 @@ export default function AdminSubjects() {
     if (!confirm(`Hapus mata pelajaran "${nama}"? Jadwal yang menggunakan mata pelajaran ini akan bermasalah.`)) return;
     try {
       await removeMataPelajaran(id);
+      await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit
       await loadData();
     } catch (e: any) {
       alert('Gagal menghapus: ' + (e.message || 'Masih dipakai di jadwal/nilai.'));

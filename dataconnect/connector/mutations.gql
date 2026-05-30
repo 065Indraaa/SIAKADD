@@ -401,6 +401,14 @@ mutation DeleteAlumni($id: UUID!) @auth(level: PUBLIC) {
 }
 
 # -------------------------------------------------------
+# NILAI DELETE
+# -------------------------------------------------------
+
+mutation DeleteNilai($id: UUID!) @auth(level: PUBLIC) {
+  nilai_delete(id: $id)
+}
+
+# -------------------------------------------------------
 # DANGEROUS RESET MUTATIONS
 # -------------------------------------------------------
 

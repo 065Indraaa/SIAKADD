@@ -187,7 +187,15 @@ export async function fetchNilaiSiswa(siswaId: string, semester: string, tahunAj
 // ============================================================
 export async function fetchPrestasiSiswa(siswaId?: string) {
   const res = await executeQuery(listPrestasiRef(dataConnect, { siswaId }), NO_CACHE);
-  return res.data.prestasis;
+  return (res.data.prestasis || []).map((p: any) => ({
+    id: p.id,
+    name: p.nama,
+    type: p.tipe,
+    level: p.tingkat,
+    rank: p.peringkat,
+    date: p.tanggal,
+    desc: p.deskripsi,
+  }));
 }
 
 export async function addPrestasi(data: any) {

@@ -44,11 +44,74 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const enrichRoleData = async (baseUser: UserData): Promise<UserData> => {
+    if (!baseUser.penggunaId && !baseUser.uid) return baseUser;
+    const penggunaId = baseUser.penggunaId || baseUser.uid;
+
+    try {
+      if (baseUser.role === 'guru') {
+        const guruLookup = await getGuruByPengguna(dataConnect, { penggunaId });
+        const guruId = guruLookup.data.gurus[0]?.id;
+        if (!guruId) return baseUser;
+
+        const guruRes = await getGuru(dataConnect, { id: guruId });
+        const g = guruRes.data.guru;
+        if (!g) return baseUser;
+
+        return {
+          ...baseUser,
+          guruId: g.id,
+          nip: g.nip,
+          jabatan: g.jabatan,
+          specialization: g.spesialisasi || undefined,
+          gender: g.jenisKelamin,
+          birthPlace: g.tempatLahir || undefined,
+          birthDate: g.tanggalLahir ? String(g.tanggalLahir) : undefined,
+        };
+      }
+
+      if (baseUser.role === 'siswa') {
+        const siswaLookup = await getSiswaByPengguna(dataConnect, { penggunaId });
+        const siswaId = siswaLookup.data.siswas[0]?.id;
+        if (!siswaId) return baseUser;
+
+        const siswaRes = await getSiswa(dataConnect, { id: siswaId });
+        const s = siswaRes.data.siswa;
+        if (!s) return baseUser;
+
+        return {
+          ...baseUser,
+          siswaId: s.id,
+          nis: s.nis,
+          gender: s.jenisKelamin,
+          birthPlace: s.tempatLahir || undefined,
+          birthDate: s.tanggalLahir ? String(s.tanggalLahir) : undefined,
+          address: s.alamat || baseUser.address,
+          className: s.kelas?.nama || undefined,
+          kelasId: s.kelas?.id || undefined,
+          jurusanId: (s as any).jurusan?.id || undefined,
+          jurusanName: (s as any).jurusan?.nama || undefined,
+          peminatanId: (s as any).peminatan?.id || undefined,
+          peminatanName: (s as any).peminatan?.nama || undefined,
+        };
+      }
+    } catch (e) {
+      console.error('Gagal menyegarkan data peran:', e);
+    }
+
+    return baseUser;
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem('siakad_user');
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser) as UserData;
+        setUser(parsed);
+        enrichRoleData(parsed).then((freshUser) => {
+          localStorage.setItem('siakad_user', JSON.stringify(freshUser));
+          setUser(freshUser);
+        });
       } catch {
         localStorage.removeItem('siakad_user');
       }
@@ -106,55 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     // 4. Fetch role-specific data
-    try {
-      if (role === 'guru') {
-        const guruLookup = await getGuruByPengguna(dataConnect, { penggunaId });
-        const guruId = guruLookup.data.gurus[0]?.id;
-        if (guruId) {
-          const guruRes = await getGuru(dataConnect, { id: guruId });
-          const g = guruRes.data.guru;
-          if (g) {
-            userData = {
-              ...userData,
-              guruId: g.id,
-              nip: g.nip,
-              jabatan: g.jabatan,
-              specialization: g.spesialisasi || undefined,
-              gender: g.jenisKelamin,
-              birthPlace: g.tempatLahir || undefined,
-              birthDate: g.tanggalLahir ? String(g.tanggalLahir) : undefined,
-            };
-          }
-        }
-      } else if (role === 'siswa') {
-        const siswaLookup = await getSiswaByPengguna(dataConnect, { penggunaId });
-        const siswaId = siswaLookup.data.siswas[0]?.id;
-        if (siswaId) {
-          const siswaRes = await getSiswa(dataConnect, { id: siswaId });
-          const s = siswaRes.data.siswa;
-          if (s) {
-            userData = {
-              ...userData,
-              siswaId: s.id,
-              nis: s.nis,
-              gender: s.jenisKelamin,
-              birthPlace: s.tempatLahir || undefined,
-              birthDate: s.tanggalLahir ? String(s.tanggalLahir) : undefined,
-              address: s.alamat || userData.address,
-              className: s.kelas?.nama || undefined,
-              kelasId: s.kelas?.id || undefined,
-              jurusanId: (s as any).jurusan?.id || undefined,
-              jurusanName: (s as any).jurusan?.nama || undefined,
-              peminatanId: (s as any).peminatan?.id || undefined,
-              peminatanName: (s as any).peminatan?.nama || undefined,
-            };
-          }
-        }
-      }
-    } catch (e: any) {
-      console.error('Error fetching role-specific data:', e);
-      // Continue with base data
-    }
+    userData = await enrichRoleData(userData);
 
     // 5. Persist
     localStorage.setItem('siakad_user', JSON.stringify(userData));

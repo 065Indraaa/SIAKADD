@@ -1,4 +1,4 @@
-const { queryRef, executeQuery, mutationRef, executeMutation, validateArgs } = require('firebase/data-connect');
+const { queryRef, executeQuery, validateArgsWithOptions, mutationRef, executeMutation, validateArgs } = require('firebase/data-connect');
 
 const JabatanGuru = {
   Guru: "Guru",
@@ -59,8 +59,10 @@ createPenggunaRef.operationName = 'CreatePengguna';
 exports.createPenggunaRef = createPenggunaRef;
 
 exports.createPengguna = function createPengguna(dcOrVars, vars) {
-  return executeMutation(createPenggunaRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createPenggunaRef(dcInstance, inputVars));
+}
+;
 
 const updatePenggunaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -71,8 +73,10 @@ updatePenggunaRef.operationName = 'UpdatePengguna';
 exports.updatePenggunaRef = updatePenggunaRef;
 
 exports.updatePengguna = function updatePengguna(dcOrVars, vars) {
-  return executeMutation(updatePenggunaRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updatePenggunaRef(dcInstance, inputVars));
+}
+;
 
 const deletePenggunaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -83,8 +87,10 @@ deletePenggunaRef.operationName = 'DeletePengguna';
 exports.deletePenggunaRef = deletePenggunaRef;
 
 exports.deletePengguna = function deletePengguna(dcOrVars, vars) {
-  return executeMutation(deletePenggunaRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deletePenggunaRef(dcInstance, inputVars));
+}
+;
 
 const createGuruRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -95,8 +101,10 @@ createGuruRef.operationName = 'CreateGuru';
 exports.createGuruRef = createGuruRef;
 
 exports.createGuru = function createGuru(dcOrVars, vars) {
-  return executeMutation(createGuruRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createGuruRef(dcInstance, inputVars));
+}
+;
 
 const updateGuruRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -107,8 +115,10 @@ updateGuruRef.operationName = 'UpdateGuru';
 exports.updateGuruRef = updateGuruRef;
 
 exports.updateGuru = function updateGuru(dcOrVars, vars) {
-  return executeMutation(updateGuruRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateGuruRef(dcInstance, inputVars));
+}
+;
 
 const deleteGuruRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -119,8 +129,10 @@ deleteGuruRef.operationName = 'DeleteGuru';
 exports.deleteGuruRef = deleteGuruRef;
 
 exports.deleteGuru = function deleteGuru(dcOrVars, vars) {
-  return executeMutation(deleteGuruRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteGuruRef(dcInstance, inputVars));
+}
+;
 
 const createSiswaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -131,8 +143,10 @@ createSiswaRef.operationName = 'CreateSiswa';
 exports.createSiswaRef = createSiswaRef;
 
 exports.createSiswa = function createSiswa(dcOrVars, vars) {
-  return executeMutation(createSiswaRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createSiswaRef(dcInstance, inputVars));
+}
+;
 
 const updateSiswaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -143,8 +157,10 @@ updateSiswaRef.operationName = 'UpdateSiswa';
 exports.updateSiswaRef = updateSiswaRef;
 
 exports.updateSiswa = function updateSiswa(dcOrVars, vars) {
-  return executeMutation(updateSiswaRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateSiswaRef(dcInstance, inputVars));
+}
+;
 
 const updateSiswaPeminatanRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -155,8 +171,10 @@ updateSiswaPeminatanRef.operationName = 'UpdateSiswaPeminatan';
 exports.updateSiswaPeminatanRef = updateSiswaPeminatanRef;
 
 exports.updateSiswaPeminatan = function updateSiswaPeminatan(dcOrVars, vars) {
-  return executeMutation(updateSiswaPeminatanRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateSiswaPeminatanRef(dcInstance, inputVars));
+}
+;
 
 const deleteSiswaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -167,8 +185,10 @@ deleteSiswaRef.operationName = 'DeleteSiswa';
 exports.deleteSiswaRef = deleteSiswaRef;
 
 exports.deleteSiswa = function deleteSiswa(dcOrVars, vars) {
-  return executeMutation(deleteSiswaRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteSiswaRef(dcInstance, inputVars));
+}
+;
 
 const createKelasRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -179,8 +199,10 @@ createKelasRef.operationName = 'CreateKelas';
 exports.createKelasRef = createKelasRef;
 
 exports.createKelas = function createKelas(dcOrVars, vars) {
-  return executeMutation(createKelasRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createKelasRef(dcInstance, inputVars));
+}
+;
 
 const updateKelasRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -191,8 +213,10 @@ updateKelasRef.operationName = 'UpdateKelas';
 exports.updateKelasRef = updateKelasRef;
 
 exports.updateKelas = function updateKelas(dcOrVars, vars) {
-  return executeMutation(updateKelasRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateKelasRef(dcInstance, inputVars));
+}
+;
 
 const deleteKelasRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -203,8 +227,10 @@ deleteKelasRef.operationName = 'DeleteKelas';
 exports.deleteKelasRef = deleteKelasRef;
 
 exports.deleteKelas = function deleteKelas(dcOrVars, vars) {
-  return executeMutation(deleteKelasRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteKelasRef(dcInstance, inputVars));
+}
+;
 
 const createJurusanRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -215,8 +241,10 @@ createJurusanRef.operationName = 'CreateJurusan';
 exports.createJurusanRef = createJurusanRef;
 
 exports.createJurusan = function createJurusan(dcOrVars, vars) {
-  return executeMutation(createJurusanRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createJurusanRef(dcInstance, inputVars));
+}
+;
 
 const updateJurusanRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -227,8 +255,10 @@ updateJurusanRef.operationName = 'UpdateJurusan';
 exports.updateJurusanRef = updateJurusanRef;
 
 exports.updateJurusan = function updateJurusan(dcOrVars, vars) {
-  return executeMutation(updateJurusanRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateJurusanRef(dcInstance, inputVars));
+}
+;
 
 const deleteJurusanRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -239,8 +269,10 @@ deleteJurusanRef.operationName = 'DeleteJurusan';
 exports.deleteJurusanRef = deleteJurusanRef;
 
 exports.deleteJurusan = function deleteJurusan(dcOrVars, vars) {
-  return executeMutation(deleteJurusanRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteJurusanRef(dcInstance, inputVars));
+}
+;
 
 const createMataPelajaranRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -251,8 +283,10 @@ createMataPelajaranRef.operationName = 'CreateMataPelajaran';
 exports.createMataPelajaranRef = createMataPelajaranRef;
 
 exports.createMataPelajaran = function createMataPelajaran(dcOrVars, vars) {
-  return executeMutation(createMataPelajaranRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createMataPelajaranRef(dcInstance, inputVars));
+}
+;
 
 const updateMataPelajaranRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -263,8 +297,10 @@ updateMataPelajaranRef.operationName = 'UpdateMataPelajaran';
 exports.updateMataPelajaranRef = updateMataPelajaranRef;
 
 exports.updateMataPelajaran = function updateMataPelajaran(dcOrVars, vars) {
-  return executeMutation(updateMataPelajaranRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateMataPelajaranRef(dcInstance, inputVars));
+}
+;
 
 const deleteMataPelajaranRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -275,8 +311,10 @@ deleteMataPelajaranRef.operationName = 'DeleteMataPelajaran';
 exports.deleteMataPelajaranRef = deleteMataPelajaranRef;
 
 exports.deleteMataPelajaran = function deleteMataPelajaran(dcOrVars, vars) {
-  return executeMutation(deleteMataPelajaranRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteMataPelajaranRef(dcInstance, inputVars));
+}
+;
 
 const createJadwalRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -287,8 +325,10 @@ createJadwalRef.operationName = 'CreateJadwal';
 exports.createJadwalRef = createJadwalRef;
 
 exports.createJadwal = function createJadwal(dcOrVars, vars) {
-  return executeMutation(createJadwalRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createJadwalRef(dcInstance, inputVars));
+}
+;
 
 const deleteJadwalRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -299,8 +339,10 @@ deleteJadwalRef.operationName = 'DeleteJadwal';
 exports.deleteJadwalRef = deleteJadwalRef;
 
 exports.deleteJadwal = function deleteJadwal(dcOrVars, vars) {
-  return executeMutation(deleteJadwalRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteJadwalRef(dcInstance, inputVars));
+}
+;
 
 const upsertNilaiRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -311,8 +353,10 @@ upsertNilaiRef.operationName = 'UpsertNilai';
 exports.upsertNilaiRef = upsertNilaiRef;
 
 exports.upsertNilai = function upsertNilai(dcOrVars, vars) {
-  return executeMutation(upsertNilaiRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(upsertNilaiRef(dcInstance, inputVars));
+}
+;
 
 const recordKehadiranRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -323,8 +367,10 @@ recordKehadiranRef.operationName = 'RecordKehadiran';
 exports.recordKehadiranRef = recordKehadiranRef;
 
 exports.recordKehadiran = function recordKehadiran(dcOrVars, vars) {
-  return executeMutation(recordKehadiranRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(recordKehadiranRef(dcInstance, inputVars));
+}
+;
 
 const createPengumumanRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -335,8 +381,10 @@ createPengumumanRef.operationName = 'CreatePengumuman';
 exports.createPengumumanRef = createPengumumanRef;
 
 exports.createPengumuman = function createPengumuman(dcOrVars, vars) {
-  return executeMutation(createPengumumanRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createPengumumanRef(dcInstance, inputVars));
+}
+;
 
 const deletePengumumanRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -347,8 +395,10 @@ deletePengumumanRef.operationName = 'DeletePengumuman';
 exports.deletePengumumanRef = deletePengumumanRef;
 
 exports.deletePengumuman = function deletePengumuman(dcOrVars, vars) {
-  return executeMutation(deletePengumumanRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deletePengumumanRef(dcInstance, inputVars));
+}
+;
 
 const createPrestasiRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -359,8 +409,10 @@ createPrestasiRef.operationName = 'CreatePrestasi';
 exports.createPrestasiRef = createPrestasiRef;
 
 exports.createPrestasi = function createPrestasi(dcOrVars, vars) {
-  return executeMutation(createPrestasiRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createPrestasiRef(dcInstance, inputVars));
+}
+;
 
 const deletePrestasiRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -371,8 +423,10 @@ deletePrestasiRef.operationName = 'DeletePrestasi';
 exports.deletePrestasiRef = deletePrestasiRef;
 
 exports.deletePrestasi = function deletePrestasi(dcOrVars, vars) {
-  return executeMutation(deletePrestasiRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deletePrestasiRef(dcInstance, inputVars));
+}
+;
 
 const createAlumniRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -383,8 +437,10 @@ createAlumniRef.operationName = 'CreateAlumni';
 exports.createAlumniRef = createAlumniRef;
 
 exports.createAlumni = function createAlumni(dcOrVars, vars) {
-  return executeMutation(createAlumniRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createAlumniRef(dcInstance, inputVars));
+}
+;
 
 const updateAlumniRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -395,8 +451,10 @@ updateAlumniRef.operationName = 'UpdateAlumni';
 exports.updateAlumniRef = updateAlumniRef;
 
 exports.updateAlumni = function updateAlumni(dcOrVars, vars) {
-  return executeMutation(updateAlumniRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateAlumniRef(dcInstance, inputVars));
+}
+;
 
 const deleteAlumniRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -407,8 +465,24 @@ deleteAlumniRef.operationName = 'DeleteAlumni';
 exports.deleteAlumniRef = deleteAlumniRef;
 
 exports.deleteAlumni = function deleteAlumni(dcOrVars, vars) {
-  return executeMutation(deleteAlumniRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteAlumniRef(dcInstance, inputVars));
+}
+;
+
+const deleteNilaiRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteNilai', inputVars);
+}
+deleteNilaiRef.operationName = 'DeleteNilai';
+exports.deleteNilaiRef = deleteNilaiRef;
+
+exports.deleteNilai = function deleteNilai(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteNilaiRef(dcInstance, inputVars));
+}
+;
 
 const resetDatabaseRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
@@ -419,8 +493,10 @@ resetDatabaseRef.operationName = 'ResetDatabase';
 exports.resetDatabaseRef = resetDatabaseRef;
 
 exports.resetDatabase = function resetDatabase(dc) {
-  return executeMutation(resetDatabaseRef(dc));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dc, undefined);
+  return executeMutation(resetDatabaseRef(dcInstance, inputVars));
+}
+;
 
 const listPenggunaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars);
@@ -430,9 +506,12 @@ const listPenggunaRef = (dcOrVars, vars) => {
 listPenggunaRef.operationName = 'ListPengguna';
 exports.listPenggunaRef = listPenggunaRef;
 
-exports.listPengguna = function listPengguna(dcOrVars, vars) {
-  return executeQuery(listPenggunaRef(dcOrVars, vars));
-};
+exports.listPengguna = function listPengguna(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, false);
+  return executeQuery(listPenggunaRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getPenggunaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -442,9 +521,12 @@ const getPenggunaRef = (dcOrVars, vars) => {
 getPenggunaRef.operationName = 'GetPengguna';
 exports.getPenggunaRef = getPenggunaRef;
 
-exports.getPengguna = function getPengguna(dcOrVars, vars) {
-  return executeQuery(getPenggunaRef(dcOrVars, vars));
-};
+exports.getPengguna = function getPengguna(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getPenggunaRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getPenggunaByEmailRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -454,9 +536,12 @@ const getPenggunaByEmailRef = (dcOrVars, vars) => {
 getPenggunaByEmailRef.operationName = 'GetPenggunaByEmail';
 exports.getPenggunaByEmailRef = getPenggunaByEmailRef;
 
-exports.getPenggunaByEmail = function getPenggunaByEmail(dcOrVars, vars) {
-  return executeQuery(getPenggunaByEmailRef(dcOrVars, vars));
-};
+exports.getPenggunaByEmail = function getPenggunaByEmail(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getPenggunaByEmailRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const listGuruRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
@@ -466,9 +551,12 @@ const listGuruRef = (dc) => {
 listGuruRef.operationName = 'ListGuru';
 exports.listGuruRef = listGuruRef;
 
-exports.listGuru = function listGuru(dc) {
-  return executeQuery(listGuruRef(dc));
-};
+exports.listGuru = function listGuru(dcOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(listGuruRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getGuruRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -478,9 +566,12 @@ const getGuruRef = (dcOrVars, vars) => {
 getGuruRef.operationName = 'GetGuru';
 exports.getGuruRef = getGuruRef;
 
-exports.getGuru = function getGuru(dcOrVars, vars) {
-  return executeQuery(getGuruRef(dcOrVars, vars));
-};
+exports.getGuru = function getGuru(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getGuruRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getLastNipRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
@@ -490,9 +581,12 @@ const getLastNipRef = (dc) => {
 getLastNipRef.operationName = 'GetLastNIP';
 exports.getLastNipRef = getLastNipRef;
 
-exports.getLastNip = function getLastNip(dc) {
-  return executeQuery(getLastNipRef(dc));
-};
+exports.getLastNip = function getLastNip(dcOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(getLastNipRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getGuruByPenggunaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -502,9 +596,12 @@ const getGuruByPenggunaRef = (dcOrVars, vars) => {
 getGuruByPenggunaRef.operationName = 'GetGuruByPengguna';
 exports.getGuruByPenggunaRef = getGuruByPenggunaRef;
 
-exports.getGuruByPengguna = function getGuruByPengguna(dcOrVars, vars) {
-  return executeQuery(getGuruByPenggunaRef(dcOrVars, vars));
-};
+exports.getGuruByPengguna = function getGuruByPengguna(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getGuruByPenggunaRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const listSemuaSiswaRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
@@ -514,9 +611,12 @@ const listSemuaSiswaRef = (dc) => {
 listSemuaSiswaRef.operationName = 'ListSemuaSiswa';
 exports.listSemuaSiswaRef = listSemuaSiswaRef;
 
-exports.listSemuaSiswa = function listSemuaSiswa(dc) {
-  return executeQuery(listSemuaSiswaRef(dc));
-};
+exports.listSemuaSiswa = function listSemuaSiswa(dcOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(listSemuaSiswaRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const listSiswaByKelasRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -526,9 +626,12 @@ const listSiswaByKelasRef = (dcOrVars, vars) => {
 listSiswaByKelasRef.operationName = 'ListSiswaByKelas';
 exports.listSiswaByKelasRef = listSiswaByKelasRef;
 
-exports.listSiswaByKelas = function listSiswaByKelas(dcOrVars, vars) {
-  return executeQuery(listSiswaByKelasRef(dcOrVars, vars));
-};
+exports.listSiswaByKelas = function listSiswaByKelas(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(listSiswaByKelasRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getSiswaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -538,9 +641,12 @@ const getSiswaRef = (dcOrVars, vars) => {
 getSiswaRef.operationName = 'GetSiswa';
 exports.getSiswaRef = getSiswaRef;
 
-exports.getSiswa = function getSiswa(dcOrVars, vars) {
-  return executeQuery(getSiswaRef(dcOrVars, vars));
-};
+exports.getSiswa = function getSiswa(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getSiswaRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getLastNisRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
@@ -550,9 +656,12 @@ const getLastNisRef = (dc) => {
 getLastNisRef.operationName = 'GetLastNIS';
 exports.getLastNisRef = getLastNisRef;
 
-exports.getLastNis = function getLastNis(dc) {
-  return executeQuery(getLastNisRef(dc));
-};
+exports.getLastNis = function getLastNis(dcOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(getLastNisRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getSiswaByPenggunaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -562,9 +671,12 @@ const getSiswaByPenggunaRef = (dcOrVars, vars) => {
 getSiswaByPenggunaRef.operationName = 'GetSiswaByPengguna';
 exports.getSiswaByPenggunaRef = getSiswaByPenggunaRef;
 
-exports.getSiswaByPengguna = function getSiswaByPengguna(dcOrVars, vars) {
-  return executeQuery(getSiswaByPenggunaRef(dcOrVars, vars));
-};
+exports.getSiswaByPengguna = function getSiswaByPengguna(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getSiswaByPenggunaRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const listSemuaKelasRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
@@ -574,9 +686,12 @@ const listSemuaKelasRef = (dc) => {
 listSemuaKelasRef.operationName = 'ListSemuaKelas';
 exports.listSemuaKelasRef = listSemuaKelasRef;
 
-exports.listSemuaKelas = function listSemuaKelas(dc) {
-  return executeQuery(listSemuaKelasRef(dc));
-};
+exports.listSemuaKelas = function listSemuaKelas(dcOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(listSemuaKelasRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const listKelasByTingkatRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -586,9 +701,12 @@ const listKelasByTingkatRef = (dcOrVars, vars) => {
 listKelasByTingkatRef.operationName = 'ListKelasByTingkat';
 exports.listKelasByTingkatRef = listKelasByTingkatRef;
 
-exports.listKelasByTingkat = function listKelasByTingkat(dcOrVars, vars) {
-  return executeQuery(listKelasByTingkatRef(dcOrVars, vars));
-};
+exports.listKelasByTingkat = function listKelasByTingkat(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(listKelasByTingkatRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const listJurusanRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
@@ -598,9 +716,12 @@ const listJurusanRef = (dc) => {
 listJurusanRef.operationName = 'ListJurusan';
 exports.listJurusanRef = listJurusanRef;
 
-exports.listJurusan = function listJurusan(dc) {
-  return executeQuery(listJurusanRef(dc));
-};
+exports.listJurusan = function listJurusan(dcOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(listJurusanRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const listMataPelajaranRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
@@ -610,9 +731,12 @@ const listMataPelajaranRef = (dc) => {
 listMataPelajaranRef.operationName = 'ListMataPelajaran';
 exports.listMataPelajaranRef = listMataPelajaranRef;
 
-exports.listMataPelajaran = function listMataPelajaran(dc) {
-  return executeQuery(listMataPelajaranRef(dc));
-};
+exports.listMataPelajaran = function listMataPelajaran(dcOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(listMataPelajaranRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getJadwalByKelasRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -622,9 +746,12 @@ const getJadwalByKelasRef = (dcOrVars, vars) => {
 getJadwalByKelasRef.operationName = 'GetJadwalByKelas';
 exports.getJadwalByKelasRef = getJadwalByKelasRef;
 
-exports.getJadwalByKelas = function getJadwalByKelas(dcOrVars, vars) {
-  return executeQuery(getJadwalByKelasRef(dcOrVars, vars));
-};
+exports.getJadwalByKelas = function getJadwalByKelas(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getJadwalByKelasRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getJadwalByGuruRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -634,9 +761,12 @@ const getJadwalByGuruRef = (dcOrVars, vars) => {
 getJadwalByGuruRef.operationName = 'GetJadwalByGuru';
 exports.getJadwalByGuruRef = getJadwalByGuruRef;
 
-exports.getJadwalByGuru = function getJadwalByGuru(dcOrVars, vars) {
-  return executeQuery(getJadwalByGuruRef(dcOrVars, vars));
-};
+exports.getJadwalByGuru = function getJadwalByGuru(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getJadwalByGuruRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getNilaiBySiswaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -646,9 +776,12 @@ const getNilaiBySiswaRef = (dcOrVars, vars) => {
 getNilaiBySiswaRef.operationName = 'GetNilaiBySiswa';
 exports.getNilaiBySiswaRef = getNilaiBySiswaRef;
 
-exports.getNilaiBySiswa = function getNilaiBySiswa(dcOrVars, vars) {
-  return executeQuery(getNilaiBySiswaRef(dcOrVars, vars));
-};
+exports.getNilaiBySiswa = function getNilaiBySiswa(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getNilaiBySiswaRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getNilaiByKelasRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -658,9 +791,12 @@ const getNilaiByKelasRef = (dcOrVars, vars) => {
 getNilaiByKelasRef.operationName = 'GetNilaiByKelas';
 exports.getNilaiByKelasRef = getNilaiByKelasRef;
 
-exports.getNilaiByKelas = function getNilaiByKelas(dcOrVars, vars) {
-  return executeQuery(getNilaiByKelasRef(dcOrVars, vars));
-};
+exports.getNilaiByKelas = function getNilaiByKelas(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getNilaiByKelasRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getKehadiranByKelasRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -670,9 +806,12 @@ const getKehadiranByKelasRef = (dcOrVars, vars) => {
 getKehadiranByKelasRef.operationName = 'GetKehadiranByKelas';
 exports.getKehadiranByKelasRef = getKehadiranByKelasRef;
 
-exports.getKehadiranByKelas = function getKehadiranByKelas(dcOrVars, vars) {
-  return executeQuery(getKehadiranByKelasRef(dcOrVars, vars));
-};
+exports.getKehadiranByKelas = function getKehadiranByKelas(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getKehadiranByKelasRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const getKehadiranBySiswaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -682,9 +821,12 @@ const getKehadiranBySiswaRef = (dcOrVars, vars) => {
 getKehadiranBySiswaRef.operationName = 'GetKehadiranBySiswa';
 exports.getKehadiranBySiswaRef = getKehadiranBySiswaRef;
 
-exports.getKehadiranBySiswa = function getKehadiranBySiswa(dcOrVars, vars) {
-  return executeQuery(getKehadiranBySiswaRef(dcOrVars, vars));
-};
+exports.getKehadiranBySiswa = function getKehadiranBySiswa(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getKehadiranBySiswaRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const listPengumumanRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
@@ -694,9 +836,12 @@ const listPengumumanRef = (dc) => {
 listPengumumanRef.operationName = 'ListPengumuman';
 exports.listPengumumanRef = listPengumumanRef;
 
-exports.listPengumuman = function listPengumuman(dc) {
-  return executeQuery(listPengumumanRef(dc));
-};
+exports.listPengumuman = function listPengumuman(dcOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(listPengumumanRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const listPrestasiRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars);
@@ -706,9 +851,12 @@ const listPrestasiRef = (dcOrVars, vars) => {
 listPrestasiRef.operationName = 'ListPrestasi';
 exports.listPrestasiRef = listPrestasiRef;
 
-exports.listPrestasi = function listPrestasi(dcOrVars, vars) {
-  return executeQuery(listPrestasiRef(dcOrVars, vars));
-};
+exports.listPrestasi = function listPrestasi(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, false);
+  return executeQuery(listPrestasiRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
 
 const listAlumniRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars);
@@ -718,6 +866,9 @@ const listAlumniRef = (dcOrVars, vars) => {
 listAlumniRef.operationName = 'ListAlumni';
 exports.listAlumniRef = listAlumniRef;
 
-exports.listAlumni = function listAlumni(dcOrVars, vars) {
-  return executeQuery(listAlumniRef(dcOrVars, vars));
-};
+exports.listAlumni = function listAlumni(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, false);
+  return executeQuery(listAlumniRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+;
