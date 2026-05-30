@@ -306,6 +306,66 @@ export function upsertNilai(dcOrVars, vars) {
   return executeMutation(upsertNilaiRef(dcInstance, inputVars));
 }
 
+export const updateNilaiRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateNilai', inputVars);
+}
+updateNilaiRef.operationName = 'UpdateNilai';
+
+export function updateNilai(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateNilaiRef(dcInstance, inputVars));
+}
+
+export const upsertTugasHarianRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpsertTugasHarian', inputVars);
+}
+upsertTugasHarianRef.operationName = 'UpsertTugasHarian';
+
+export function upsertTugasHarian(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(upsertTugasHarianRef(dcInstance, inputVars));
+}
+
+export const deleteTugasHarianRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteTugasHarian', inputVars);
+}
+deleteTugasHarianRef.operationName = 'DeleteTugasHarian';
+
+export function deleteTugasHarian(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteTugasHarianRef(dcInstance, inputVars));
+}
+
+export const upsertBobotNilaiRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpsertBobotNilai', inputVars);
+}
+upsertBobotNilaiRef.operationName = 'UpsertBobotNilai';
+
+export function upsertBobotNilai(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(upsertBobotNilaiRef(dcInstance, inputVars));
+}
+
+export const updateBobotNilaiRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateBobotNilai', inputVars);
+}
+updateBobotNilaiRef.operationName = 'UpdateBobotNilai';
+
+export function updateBobotNilai(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateBobotNilaiRef(dcInstance, inputVars));
+}
+
 export const recordKehadiranRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -316,6 +376,18 @@ recordKehadiranRef.operationName = 'RecordKehadiran';
 export function recordKehadiran(dcOrVars, vars) {
   const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
   return executeMutation(recordKehadiranRef(dcInstance, inputVars));
+}
+
+export const deleteKehadiranRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'DeleteKehadiran', inputVars);
+}
+deleteKehadiranRef.operationName = 'DeleteKehadiran';
+
+export function deleteKehadiran(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteKehadiranRef(dcInstance, inputVars));
 }
 
 export const createPengumumanRef = (dcOrVars, vars) => {
@@ -684,6 +756,58 @@ export function getNilaiByKelas(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
   return executeQuery(getNilaiByKelasRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+
+export const listTugasHarianRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'ListTugasHarian', inputVars);
+}
+listTugasHarianRef.operationName = 'ListTugasHarian';
+
+export function listTugasHarian(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(listTugasHarianRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+
+export const listTugasHarianByKelasRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'ListTugasHarianByKelas', inputVars);
+}
+listTugasHarianByKelasRef.operationName = 'ListTugasHarianByKelas';
+
+export function listTugasHarianByKelas(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(listTugasHarianByKelasRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+
+export const getBobotNilaiRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetBobotNilai', inputVars);
+}
+getBobotNilaiRef.operationName = 'GetBobotNilai';
+
+export function getBobotNilai(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getBobotNilaiRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
+}
+
+export const listBobotNilaiByKelasRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'ListBobotNilaiByKelas', inputVars);
+}
+listBobotNilaiByKelasRef.operationName = 'ListBobotNilaiByKelas';
+
+export function listBobotNilaiByKelas(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(listBobotNilaiByKelasRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 
 export const getKehadiranByKelasRef = (dcOrVars, vars) => {

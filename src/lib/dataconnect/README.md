@@ -28,6 +28,10 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetJadwalByGuru*](#getjadwalbyguru)
   - [*GetNilaiBySiswa*](#getnilaibysiswa)
   - [*GetNilaiByKelas*](#getnilaibykelas)
+  - [*ListTugasHarian*](#listtugasharian)
+  - [*ListTugasHarianByKelas*](#listtugasharianbykelas)
+  - [*GetBobotNilai*](#getbobotnilai)
+  - [*ListBobotNilaiByKelas*](#listbobotnilaibykelas)
   - [*GetKehadiranByKelas*](#getkehadiranbykelas)
   - [*GetKehadiranBySiswa*](#getkehadiranbysiswa)
   - [*ListPengumuman*](#listpengumuman)
@@ -56,7 +60,13 @@ This README will guide you through the process of using the generated JavaScript
   - [*CreateJadwal*](#createjadwal)
   - [*DeleteJadwal*](#deletejadwal)
   - [*UpsertNilai*](#upsertnilai)
+  - [*UpdateNilai*](#updatenilai)
+  - [*UpsertTugasHarian*](#upserttugasharian)
+  - [*DeleteTugasHarian*](#deletetugasharian)
+  - [*UpsertBobotNilai*](#upsertbobotnilai)
+  - [*UpdateBobotNilai*](#updatebobotnilai)
   - [*RecordKehadiran*](#recordkehadiran)
+  - [*DeleteKehadiran*](#deletekehadiran)
   - [*CreatePengumuman*](#createpengumuman)
   - [*DeletePengumuman*](#deletepengumuman)
   - [*CreatePrestasi*](#createprestasi)
@@ -2238,6 +2248,9 @@ export interface GetNilaiBySiswaData {
     nilaiHarian?: number | null;
     nilaiUts?: number | null;
     nilaiUas?: number | null;
+    nilaiRemedialUts?: number | null;
+    nilaiRemedialUas?: number | null;
+    jumlahTugasHarian?: number | null;
     semester: string;
     tahunAjaran: string;
     mataPelajaran: {
@@ -2350,6 +2363,8 @@ The `GetNilaiByKelas` query requires an argument of type `GetNilaiByKelasVariabl
 export interface GetNilaiByKelasVariables {
   kelasId: UUIDString;
   mataPelajaranId: UUIDString;
+  semester?: string | null;
+  tahunAjaran?: string | null;
 }
 ```
 ### Return Type
@@ -2363,6 +2378,9 @@ export interface GetNilaiByKelasData {
     nilaiHarian?: number | null;
     nilaiUts?: number | null;
     nilaiUas?: number | null;
+    nilaiRemedialUts?: number | null;
+    nilaiRemedialUas?: number | null;
+    jumlahTugasHarian?: number | null;
     semester: string;
     tahunAjaran: string;
     siswa: {
@@ -2385,13 +2403,15 @@ import { connectorConfig, getNilaiByKelas, GetNilaiByKelasVariables } from '@uas
 const getNilaiByKelasVars: GetNilaiByKelasVariables = {
   kelasId: ..., 
   mataPelajaranId: ..., 
+  semester: ..., // optional
+  tahunAjaran: ..., // optional
 };
 
 // Call the `getNilaiByKelas()` function to execute the query.
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await getNilaiByKelas(getNilaiByKelasVars);
 // Variables can be defined inline as well.
-const { data } = await getNilaiByKelas({ kelasId: ..., mataPelajaranId: ..., });
+const { data } = await getNilaiByKelas({ kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -2416,12 +2436,14 @@ import { connectorConfig, getNilaiByKelasRef, GetNilaiByKelasVariables } from '@
 const getNilaiByKelasVars: GetNilaiByKelasVariables = {
   kelasId: ..., 
   mataPelajaranId: ..., 
+  semester: ..., // optional
+  tahunAjaran: ..., // optional
 };
 
 // Call the `getNilaiByKelasRef()` function to get a reference to the query.
 const ref = getNilaiByKelasRef(getNilaiByKelasVars);
 // Variables can be defined inline as well.
-const ref = getNilaiByKelasRef({ kelasId: ..., mataPelajaranId: ..., });
+const ref = getNilaiByKelasRef({ kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., });
 
 // You can also pass in a `DataConnect` instance to the `QueryRef` function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -2437,6 +2459,512 @@ console.log(data.nilais);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.nilais);
+});
+```
+
+## ListTugasHarian
+You can execute the `ListTugasHarian` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+listTugasHarian(vars: ListTugasHarianVariables, options?: ExecuteQueryOptions): QueryPromise<ListTugasHarianData, ListTugasHarianVariables>;
+
+interface ListTugasHarianRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ListTugasHarianVariables): QueryRef<ListTugasHarianData, ListTugasHarianVariables>;
+}
+export const listTugasHarianRef: ListTugasHarianRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+listTugasHarian(dc: DataConnect, vars: ListTugasHarianVariables, options?: ExecuteQueryOptions): QueryPromise<ListTugasHarianData, ListTugasHarianVariables>;
+
+interface ListTugasHarianRef {
+  ...
+  (dc: DataConnect, vars: ListTugasHarianVariables): QueryRef<ListTugasHarianData, ListTugasHarianVariables>;
+}
+export const listTugasHarianRef: ListTugasHarianRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listTugasHarianRef:
+```typescript
+const name = listTugasHarianRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `ListTugasHarian` query requires an argument of type `ListTugasHarianVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface ListTugasHarianVariables {
+  siswaId: UUIDString;
+  kelasId: UUIDString;
+  mataPelajaranId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
+}
+```
+### Return Type
+Recall that executing the `ListTugasHarian` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `ListTugasHarianData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface ListTugasHarianData {
+  tugasHarians: ({
+    id: UUIDString;
+    pertemuanKe: number;
+    nilai?: number | null;
+  } & TugasHarian_Key)[];
+}
+```
+### Using `ListTugasHarian`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, listTugasHarian, ListTugasHarianVariables } from '@uassiakad/connector';
+
+// The `ListTugasHarian` query requires an argument of type `ListTugasHarianVariables`:
+const listTugasHarianVars: ListTugasHarianVariables = {
+  siswaId: ..., 
+  kelasId: ..., 
+  mataPelajaranId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+};
+
+// Call the `listTugasHarian()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await listTugasHarian(listTugasHarianVars);
+// Variables can be defined inline as well.
+const { data } = await listTugasHarian({ siswaId: ..., kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await listTugasHarian(dataConnect, listTugasHarianVars);
+
+console.log(data.tugasHarians);
+
+// Or, you can use the `Promise` API.
+listTugasHarian(listTugasHarianVars).then((response) => {
+  const data = response.data;
+  console.log(data.tugasHarians);
+});
+```
+
+### Using `ListTugasHarian`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, listTugasHarianRef, ListTugasHarianVariables } from '@uassiakad/connector';
+
+// The `ListTugasHarian` query requires an argument of type `ListTugasHarianVariables`:
+const listTugasHarianVars: ListTugasHarianVariables = {
+  siswaId: ..., 
+  kelasId: ..., 
+  mataPelajaranId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+};
+
+// Call the `listTugasHarianRef()` function to get a reference to the query.
+const ref = listTugasHarianRef(listTugasHarianVars);
+// Variables can be defined inline as well.
+const ref = listTugasHarianRef({ siswaId: ..., kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = listTugasHarianRef(dataConnect, listTugasHarianVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.tugasHarians);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tugasHarians);
+});
+```
+
+## ListTugasHarianByKelas
+You can execute the `ListTugasHarianByKelas` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+listTugasHarianByKelas(vars: ListTugasHarianByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListTugasHarianByKelasData, ListTugasHarianByKelasVariables>;
+
+interface ListTugasHarianByKelasRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ListTugasHarianByKelasVariables): QueryRef<ListTugasHarianByKelasData, ListTugasHarianByKelasVariables>;
+}
+export const listTugasHarianByKelasRef: ListTugasHarianByKelasRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+listTugasHarianByKelas(dc: DataConnect, vars: ListTugasHarianByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListTugasHarianByKelasData, ListTugasHarianByKelasVariables>;
+
+interface ListTugasHarianByKelasRef {
+  ...
+  (dc: DataConnect, vars: ListTugasHarianByKelasVariables): QueryRef<ListTugasHarianByKelasData, ListTugasHarianByKelasVariables>;
+}
+export const listTugasHarianByKelasRef: ListTugasHarianByKelasRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listTugasHarianByKelasRef:
+```typescript
+const name = listTugasHarianByKelasRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `ListTugasHarianByKelas` query requires an argument of type `ListTugasHarianByKelasVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface ListTugasHarianByKelasVariables {
+  kelasId: UUIDString;
+  mataPelajaranId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
+}
+```
+### Return Type
+Recall that executing the `ListTugasHarianByKelas` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `ListTugasHarianByKelasData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface ListTugasHarianByKelasData {
+  tugasHarians: ({
+    id: UUIDString;
+    pertemuanKe: number;
+    nilai?: number | null;
+    siswa: {
+      id: UUIDString;
+      nis: string;
+      pengguna: {
+        nama: string;
+      };
+    } & Siswa_Key;
+  } & TugasHarian_Key)[];
+}
+```
+### Using `ListTugasHarianByKelas`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, listTugasHarianByKelas, ListTugasHarianByKelasVariables } from '@uassiakad/connector';
+
+// The `ListTugasHarianByKelas` query requires an argument of type `ListTugasHarianByKelasVariables`:
+const listTugasHarianByKelasVars: ListTugasHarianByKelasVariables = {
+  kelasId: ..., 
+  mataPelajaranId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+};
+
+// Call the `listTugasHarianByKelas()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await listTugasHarianByKelas(listTugasHarianByKelasVars);
+// Variables can be defined inline as well.
+const { data } = await listTugasHarianByKelas({ kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await listTugasHarianByKelas(dataConnect, listTugasHarianByKelasVars);
+
+console.log(data.tugasHarians);
+
+// Or, you can use the `Promise` API.
+listTugasHarianByKelas(listTugasHarianByKelasVars).then((response) => {
+  const data = response.data;
+  console.log(data.tugasHarians);
+});
+```
+
+### Using `ListTugasHarianByKelas`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, listTugasHarianByKelasRef, ListTugasHarianByKelasVariables } from '@uassiakad/connector';
+
+// The `ListTugasHarianByKelas` query requires an argument of type `ListTugasHarianByKelasVariables`:
+const listTugasHarianByKelasVars: ListTugasHarianByKelasVariables = {
+  kelasId: ..., 
+  mataPelajaranId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+};
+
+// Call the `listTugasHarianByKelasRef()` function to get a reference to the query.
+const ref = listTugasHarianByKelasRef(listTugasHarianByKelasVars);
+// Variables can be defined inline as well.
+const ref = listTugasHarianByKelasRef({ kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = listTugasHarianByKelasRef(dataConnect, listTugasHarianByKelasVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.tugasHarians);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tugasHarians);
+});
+```
+
+## GetBobotNilai
+You can execute the `GetBobotNilai` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+getBobotNilai(vars: GetBobotNilaiVariables, options?: ExecuteQueryOptions): QueryPromise<GetBobotNilaiData, GetBobotNilaiVariables>;
+
+interface GetBobotNilaiRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetBobotNilaiVariables): QueryRef<GetBobotNilaiData, GetBobotNilaiVariables>;
+}
+export const getBobotNilaiRef: GetBobotNilaiRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getBobotNilai(dc: DataConnect, vars: GetBobotNilaiVariables, options?: ExecuteQueryOptions): QueryPromise<GetBobotNilaiData, GetBobotNilaiVariables>;
+
+interface GetBobotNilaiRef {
+  ...
+  (dc: DataConnect, vars: GetBobotNilaiVariables): QueryRef<GetBobotNilaiData, GetBobotNilaiVariables>;
+}
+export const getBobotNilaiRef: GetBobotNilaiRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getBobotNilaiRef:
+```typescript
+const name = getBobotNilaiRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetBobotNilai` query requires an argument of type `GetBobotNilaiVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetBobotNilaiVariables {
+  kelasId: UUIDString;
+  mataPelajaranId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
+}
+```
+### Return Type
+Recall that executing the `GetBobotNilai` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetBobotNilaiData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetBobotNilaiData {
+  bobotNilais: ({
+    id: UUIDString;
+    bobotKehadiran: number;
+    bobotHarian: number;
+    bobotUts: number;
+    bobotUas: number;
+    kkm: number;
+  } & BobotNilai_Key)[];
+}
+```
+### Using `GetBobotNilai`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getBobotNilai, GetBobotNilaiVariables } from '@uassiakad/connector';
+
+// The `GetBobotNilai` query requires an argument of type `GetBobotNilaiVariables`:
+const getBobotNilaiVars: GetBobotNilaiVariables = {
+  kelasId: ..., 
+  mataPelajaranId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+};
+
+// Call the `getBobotNilai()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getBobotNilai(getBobotNilaiVars);
+// Variables can be defined inline as well.
+const { data } = await getBobotNilai({ kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getBobotNilai(dataConnect, getBobotNilaiVars);
+
+console.log(data.bobotNilais);
+
+// Or, you can use the `Promise` API.
+getBobotNilai(getBobotNilaiVars).then((response) => {
+  const data = response.data;
+  console.log(data.bobotNilais);
+});
+```
+
+### Using `GetBobotNilai`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getBobotNilaiRef, GetBobotNilaiVariables } from '@uassiakad/connector';
+
+// The `GetBobotNilai` query requires an argument of type `GetBobotNilaiVariables`:
+const getBobotNilaiVars: GetBobotNilaiVariables = {
+  kelasId: ..., 
+  mataPelajaranId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+};
+
+// Call the `getBobotNilaiRef()` function to get a reference to the query.
+const ref = getBobotNilaiRef(getBobotNilaiVars);
+// Variables can be defined inline as well.
+const ref = getBobotNilaiRef({ kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getBobotNilaiRef(dataConnect, getBobotNilaiVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.bobotNilais);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.bobotNilais);
+});
+```
+
+## ListBobotNilaiByKelas
+You can execute the `ListBobotNilaiByKelas` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+listBobotNilaiByKelas(vars: ListBobotNilaiByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListBobotNilaiByKelasData, ListBobotNilaiByKelasVariables>;
+
+interface ListBobotNilaiByKelasRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ListBobotNilaiByKelasVariables): QueryRef<ListBobotNilaiByKelasData, ListBobotNilaiByKelasVariables>;
+}
+export const listBobotNilaiByKelasRef: ListBobotNilaiByKelasRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+listBobotNilaiByKelas(dc: DataConnect, vars: ListBobotNilaiByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListBobotNilaiByKelasData, ListBobotNilaiByKelasVariables>;
+
+interface ListBobotNilaiByKelasRef {
+  ...
+  (dc: DataConnect, vars: ListBobotNilaiByKelasVariables): QueryRef<ListBobotNilaiByKelasData, ListBobotNilaiByKelasVariables>;
+}
+export const listBobotNilaiByKelasRef: ListBobotNilaiByKelasRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listBobotNilaiByKelasRef:
+```typescript
+const name = listBobotNilaiByKelasRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `ListBobotNilaiByKelas` query requires an argument of type `ListBobotNilaiByKelasVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface ListBobotNilaiByKelasVariables {
+  kelasId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
+}
+```
+### Return Type
+Recall that executing the `ListBobotNilaiByKelas` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `ListBobotNilaiByKelasData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface ListBobotNilaiByKelasData {
+  bobotNilais: ({
+    id: UUIDString;
+    bobotKehadiran: number;
+    bobotHarian: number;
+    bobotUts: number;
+    bobotUas: number;
+    kkm: number;
+    mataPelajaran: {
+      id: UUIDString;
+      nama: string;
+      kode: string;
+    } & MataPelajaran_Key;
+  } & BobotNilai_Key)[];
+}
+```
+### Using `ListBobotNilaiByKelas`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, listBobotNilaiByKelas, ListBobotNilaiByKelasVariables } from '@uassiakad/connector';
+
+// The `ListBobotNilaiByKelas` query requires an argument of type `ListBobotNilaiByKelasVariables`:
+const listBobotNilaiByKelasVars: ListBobotNilaiByKelasVariables = {
+  kelasId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+};
+
+// Call the `listBobotNilaiByKelas()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await listBobotNilaiByKelas(listBobotNilaiByKelasVars);
+// Variables can be defined inline as well.
+const { data } = await listBobotNilaiByKelas({ kelasId: ..., semester: ..., tahunAjaran: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await listBobotNilaiByKelas(dataConnect, listBobotNilaiByKelasVars);
+
+console.log(data.bobotNilais);
+
+// Or, you can use the `Promise` API.
+listBobotNilaiByKelas(listBobotNilaiByKelasVars).then((response) => {
+  const data = response.data;
+  console.log(data.bobotNilais);
+});
+```
+
+### Using `ListBobotNilaiByKelas`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, listBobotNilaiByKelasRef, ListBobotNilaiByKelasVariables } from '@uassiakad/connector';
+
+// The `ListBobotNilaiByKelas` query requires an argument of type `ListBobotNilaiByKelasVariables`:
+const listBobotNilaiByKelasVars: ListBobotNilaiByKelasVariables = {
+  kelasId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+};
+
+// Call the `listBobotNilaiByKelasRef()` function to get a reference to the query.
+const ref = listBobotNilaiByKelasRef(listBobotNilaiByKelasVars);
+// Variables can be defined inline as well.
+const ref = listBobotNilaiByKelasRef({ kelasId: ..., semester: ..., tahunAjaran: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = listBobotNilaiByKelasRef(dataConnect, listBobotNilaiByKelasVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.bobotNilais);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.bobotNilais);
 });
 ```
 
@@ -5546,6 +6074,9 @@ export interface UpsertNilaiVariables {
   nilaiHarian?: number | null;
   nilaiUts?: number | null;
   nilaiUas?: number | null;
+  nilaiRemedialUts?: number | null;
+  nilaiRemedialUas?: number | null;
+  jumlahTugasHarian?: number | null;
 }
 ```
 ### Return Type
@@ -5573,13 +6104,16 @@ const upsertNilaiVars: UpsertNilaiVariables = {
   nilaiHarian: ..., // optional
   nilaiUts: ..., // optional
   nilaiUas: ..., // optional
+  nilaiRemedialUts: ..., // optional
+  nilaiRemedialUas: ..., // optional
+  jumlahTugasHarian: ..., // optional
 };
 
 // Call the `upsertNilai()` function to execute the mutation.
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await upsertNilai(upsertNilaiVars);
 // Variables can be defined inline as well.
-const { data } = await upsertNilai({ siswaId: ..., kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., nilaiHarian: ..., nilaiUts: ..., nilaiUas: ..., });
+const { data } = await upsertNilai({ siswaId: ..., kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., nilaiHarian: ..., nilaiUts: ..., nilaiUas: ..., nilaiRemedialUts: ..., nilaiRemedialUas: ..., jumlahTugasHarian: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -5610,12 +6144,15 @@ const upsertNilaiVars: UpsertNilaiVariables = {
   nilaiHarian: ..., // optional
   nilaiUts: ..., // optional
   nilaiUas: ..., // optional
+  nilaiRemedialUts: ..., // optional
+  nilaiRemedialUas: ..., // optional
+  jumlahTugasHarian: ..., // optional
 };
 
 // Call the `upsertNilaiRef()` function to get a reference to the mutation.
 const ref = upsertNilaiRef(upsertNilaiVars);
 // Variables can be defined inline as well.
-const ref = upsertNilaiRef({ siswaId: ..., kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., nilaiHarian: ..., nilaiUts: ..., nilaiUas: ..., });
+const ref = upsertNilaiRef({ siswaId: ..., kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., nilaiHarian: ..., nilaiUts: ..., nilaiUas: ..., nilaiRemedialUts: ..., nilaiRemedialUas: ..., jumlahTugasHarian: ..., });
 
 // You can also pass in a `DataConnect` instance to the `MutationRef` function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -5631,6 +6168,626 @@ console.log(data.nilai_insert);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.nilai_insert);
+});
+```
+
+## UpdateNilai
+You can execute the `UpdateNilai` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+updateNilai(vars: UpdateNilaiVariables): MutationPromise<UpdateNilaiData, UpdateNilaiVariables>;
+
+interface UpdateNilaiRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateNilaiVariables): MutationRef<UpdateNilaiData, UpdateNilaiVariables>;
+}
+export const updateNilaiRef: UpdateNilaiRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+updateNilai(dc: DataConnect, vars: UpdateNilaiVariables): MutationPromise<UpdateNilaiData, UpdateNilaiVariables>;
+
+interface UpdateNilaiRef {
+  ...
+  (dc: DataConnect, vars: UpdateNilaiVariables): MutationRef<UpdateNilaiData, UpdateNilaiVariables>;
+}
+export const updateNilaiRef: UpdateNilaiRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the updateNilaiRef:
+```typescript
+const name = updateNilaiRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpdateNilai` mutation requires an argument of type `UpdateNilaiVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpdateNilaiVariables {
+  id: UUIDString;
+  nilaiHarian?: number | null;
+  nilaiUts?: number | null;
+  nilaiUas?: number | null;
+  nilaiRemedialUts?: number | null;
+  nilaiRemedialUas?: number | null;
+  jumlahTugasHarian?: number | null;
+}
+```
+### Return Type
+Recall that executing the `UpdateNilai` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpdateNilaiData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpdateNilaiData {
+  nilai_update?: Nilai_Key | null;
+}
+```
+### Using `UpdateNilai`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, updateNilai, UpdateNilaiVariables } from '@uassiakad/connector';
+
+// The `UpdateNilai` mutation requires an argument of type `UpdateNilaiVariables`:
+const updateNilaiVars: UpdateNilaiVariables = {
+  id: ..., 
+  nilaiHarian: ..., // optional
+  nilaiUts: ..., // optional
+  nilaiUas: ..., // optional
+  nilaiRemedialUts: ..., // optional
+  nilaiRemedialUas: ..., // optional
+  jumlahTugasHarian: ..., // optional
+};
+
+// Call the `updateNilai()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await updateNilai(updateNilaiVars);
+// Variables can be defined inline as well.
+const { data } = await updateNilai({ id: ..., nilaiHarian: ..., nilaiUts: ..., nilaiUas: ..., nilaiRemedialUts: ..., nilaiRemedialUas: ..., jumlahTugasHarian: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await updateNilai(dataConnect, updateNilaiVars);
+
+console.log(data.nilai_update);
+
+// Or, you can use the `Promise` API.
+updateNilai(updateNilaiVars).then((response) => {
+  const data = response.data;
+  console.log(data.nilai_update);
+});
+```
+
+### Using `UpdateNilai`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, updateNilaiRef, UpdateNilaiVariables } from '@uassiakad/connector';
+
+// The `UpdateNilai` mutation requires an argument of type `UpdateNilaiVariables`:
+const updateNilaiVars: UpdateNilaiVariables = {
+  id: ..., 
+  nilaiHarian: ..., // optional
+  nilaiUts: ..., // optional
+  nilaiUas: ..., // optional
+  nilaiRemedialUts: ..., // optional
+  nilaiRemedialUas: ..., // optional
+  jumlahTugasHarian: ..., // optional
+};
+
+// Call the `updateNilaiRef()` function to get a reference to the mutation.
+const ref = updateNilaiRef(updateNilaiVars);
+// Variables can be defined inline as well.
+const ref = updateNilaiRef({ id: ..., nilaiHarian: ..., nilaiUts: ..., nilaiUas: ..., nilaiRemedialUts: ..., nilaiRemedialUas: ..., jumlahTugasHarian: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = updateNilaiRef(dataConnect, updateNilaiVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.nilai_update);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.nilai_update);
+});
+```
+
+## UpsertTugasHarian
+You can execute the `UpsertTugasHarian` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+upsertTugasHarian(vars: UpsertTugasHarianVariables): MutationPromise<UpsertTugasHarianData, UpsertTugasHarianVariables>;
+
+interface UpsertTugasHarianRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertTugasHarianVariables): MutationRef<UpsertTugasHarianData, UpsertTugasHarianVariables>;
+}
+export const upsertTugasHarianRef: UpsertTugasHarianRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+upsertTugasHarian(dc: DataConnect, vars: UpsertTugasHarianVariables): MutationPromise<UpsertTugasHarianData, UpsertTugasHarianVariables>;
+
+interface UpsertTugasHarianRef {
+  ...
+  (dc: DataConnect, vars: UpsertTugasHarianVariables): MutationRef<UpsertTugasHarianData, UpsertTugasHarianVariables>;
+}
+export const upsertTugasHarianRef: UpsertTugasHarianRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the upsertTugasHarianRef:
+```typescript
+const name = upsertTugasHarianRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpsertTugasHarian` mutation requires an argument of type `UpsertTugasHarianVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpsertTugasHarianVariables {
+  siswaId: UUIDString;
+  kelasId: UUIDString;
+  mataPelajaranId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
+  pertemuanKe: number;
+  nilai?: number | null;
+}
+```
+### Return Type
+Recall that executing the `UpsertTugasHarian` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpsertTugasHarianData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpsertTugasHarianData {
+  tugasHarian_insert: TugasHarian_Key;
+}
+```
+### Using `UpsertTugasHarian`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, upsertTugasHarian, UpsertTugasHarianVariables } from '@uassiakad/connector';
+
+// The `UpsertTugasHarian` mutation requires an argument of type `UpsertTugasHarianVariables`:
+const upsertTugasHarianVars: UpsertTugasHarianVariables = {
+  siswaId: ..., 
+  kelasId: ..., 
+  mataPelajaranId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+  pertemuanKe: ..., 
+  nilai: ..., // optional
+};
+
+// Call the `upsertTugasHarian()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await upsertTugasHarian(upsertTugasHarianVars);
+// Variables can be defined inline as well.
+const { data } = await upsertTugasHarian({ siswaId: ..., kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., pertemuanKe: ..., nilai: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await upsertTugasHarian(dataConnect, upsertTugasHarianVars);
+
+console.log(data.tugasHarian_insert);
+
+// Or, you can use the `Promise` API.
+upsertTugasHarian(upsertTugasHarianVars).then((response) => {
+  const data = response.data;
+  console.log(data.tugasHarian_insert);
+});
+```
+
+### Using `UpsertTugasHarian`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, upsertTugasHarianRef, UpsertTugasHarianVariables } from '@uassiakad/connector';
+
+// The `UpsertTugasHarian` mutation requires an argument of type `UpsertTugasHarianVariables`:
+const upsertTugasHarianVars: UpsertTugasHarianVariables = {
+  siswaId: ..., 
+  kelasId: ..., 
+  mataPelajaranId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+  pertemuanKe: ..., 
+  nilai: ..., // optional
+};
+
+// Call the `upsertTugasHarianRef()` function to get a reference to the mutation.
+const ref = upsertTugasHarianRef(upsertTugasHarianVars);
+// Variables can be defined inline as well.
+const ref = upsertTugasHarianRef({ siswaId: ..., kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., pertemuanKe: ..., nilai: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = upsertTugasHarianRef(dataConnect, upsertTugasHarianVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.tugasHarian_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tugasHarian_insert);
+});
+```
+
+## DeleteTugasHarian
+You can execute the `DeleteTugasHarian` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+deleteTugasHarian(vars: DeleteTugasHarianVariables): MutationPromise<DeleteTugasHarianData, DeleteTugasHarianVariables>;
+
+interface DeleteTugasHarianRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteTugasHarianVariables): MutationRef<DeleteTugasHarianData, DeleteTugasHarianVariables>;
+}
+export const deleteTugasHarianRef: DeleteTugasHarianRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+deleteTugasHarian(dc: DataConnect, vars: DeleteTugasHarianVariables): MutationPromise<DeleteTugasHarianData, DeleteTugasHarianVariables>;
+
+interface DeleteTugasHarianRef {
+  ...
+  (dc: DataConnect, vars: DeleteTugasHarianVariables): MutationRef<DeleteTugasHarianData, DeleteTugasHarianVariables>;
+}
+export const deleteTugasHarianRef: DeleteTugasHarianRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteTugasHarianRef:
+```typescript
+const name = deleteTugasHarianRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `DeleteTugasHarian` mutation requires an argument of type `DeleteTugasHarianVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface DeleteTugasHarianVariables {
+  id: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `DeleteTugasHarian` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `DeleteTugasHarianData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface DeleteTugasHarianData {
+  tugasHarian_delete?: TugasHarian_Key | null;
+}
+```
+### Using `DeleteTugasHarian`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, deleteTugasHarian, DeleteTugasHarianVariables } from '@uassiakad/connector';
+
+// The `DeleteTugasHarian` mutation requires an argument of type `DeleteTugasHarianVariables`:
+const deleteTugasHarianVars: DeleteTugasHarianVariables = {
+  id: ..., 
+};
+
+// Call the `deleteTugasHarian()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await deleteTugasHarian(deleteTugasHarianVars);
+// Variables can be defined inline as well.
+const { data } = await deleteTugasHarian({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await deleteTugasHarian(dataConnect, deleteTugasHarianVars);
+
+console.log(data.tugasHarian_delete);
+
+// Or, you can use the `Promise` API.
+deleteTugasHarian(deleteTugasHarianVars).then((response) => {
+  const data = response.data;
+  console.log(data.tugasHarian_delete);
+});
+```
+
+### Using `DeleteTugasHarian`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, deleteTugasHarianRef, DeleteTugasHarianVariables } from '@uassiakad/connector';
+
+// The `DeleteTugasHarian` mutation requires an argument of type `DeleteTugasHarianVariables`:
+const deleteTugasHarianVars: DeleteTugasHarianVariables = {
+  id: ..., 
+};
+
+// Call the `deleteTugasHarianRef()` function to get a reference to the mutation.
+const ref = deleteTugasHarianRef(deleteTugasHarianVars);
+// Variables can be defined inline as well.
+const ref = deleteTugasHarianRef({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = deleteTugasHarianRef(dataConnect, deleteTugasHarianVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.tugasHarian_delete);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.tugasHarian_delete);
+});
+```
+
+## UpsertBobotNilai
+You can execute the `UpsertBobotNilai` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+upsertBobotNilai(vars: UpsertBobotNilaiVariables): MutationPromise<UpsertBobotNilaiData, UpsertBobotNilaiVariables>;
+
+interface UpsertBobotNilaiRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertBobotNilaiVariables): MutationRef<UpsertBobotNilaiData, UpsertBobotNilaiVariables>;
+}
+export const upsertBobotNilaiRef: UpsertBobotNilaiRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+upsertBobotNilai(dc: DataConnect, vars: UpsertBobotNilaiVariables): MutationPromise<UpsertBobotNilaiData, UpsertBobotNilaiVariables>;
+
+interface UpsertBobotNilaiRef {
+  ...
+  (dc: DataConnect, vars: UpsertBobotNilaiVariables): MutationRef<UpsertBobotNilaiData, UpsertBobotNilaiVariables>;
+}
+export const upsertBobotNilaiRef: UpsertBobotNilaiRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the upsertBobotNilaiRef:
+```typescript
+const name = upsertBobotNilaiRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpsertBobotNilai` mutation requires an argument of type `UpsertBobotNilaiVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpsertBobotNilaiVariables {
+  kelasId: UUIDString;
+  mataPelajaranId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
+  bobotKehadiran?: number | null;
+  bobotHarian?: number | null;
+  bobotUts?: number | null;
+  bobotUas?: number | null;
+  kkm?: number | null;
+}
+```
+### Return Type
+Recall that executing the `UpsertBobotNilai` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpsertBobotNilaiData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpsertBobotNilaiData {
+  bobotNilai_insert: BobotNilai_Key;
+}
+```
+### Using `UpsertBobotNilai`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, upsertBobotNilai, UpsertBobotNilaiVariables } from '@uassiakad/connector';
+
+// The `UpsertBobotNilai` mutation requires an argument of type `UpsertBobotNilaiVariables`:
+const upsertBobotNilaiVars: UpsertBobotNilaiVariables = {
+  kelasId: ..., 
+  mataPelajaranId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+  bobotKehadiran: ..., // optional
+  bobotHarian: ..., // optional
+  bobotUts: ..., // optional
+  bobotUas: ..., // optional
+  kkm: ..., // optional
+};
+
+// Call the `upsertBobotNilai()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await upsertBobotNilai(upsertBobotNilaiVars);
+// Variables can be defined inline as well.
+const { data } = await upsertBobotNilai({ kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., bobotKehadiran: ..., bobotHarian: ..., bobotUts: ..., bobotUas: ..., kkm: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await upsertBobotNilai(dataConnect, upsertBobotNilaiVars);
+
+console.log(data.bobotNilai_insert);
+
+// Or, you can use the `Promise` API.
+upsertBobotNilai(upsertBobotNilaiVars).then((response) => {
+  const data = response.data;
+  console.log(data.bobotNilai_insert);
+});
+```
+
+### Using `UpsertBobotNilai`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, upsertBobotNilaiRef, UpsertBobotNilaiVariables } from '@uassiakad/connector';
+
+// The `UpsertBobotNilai` mutation requires an argument of type `UpsertBobotNilaiVariables`:
+const upsertBobotNilaiVars: UpsertBobotNilaiVariables = {
+  kelasId: ..., 
+  mataPelajaranId: ..., 
+  semester: ..., 
+  tahunAjaran: ..., 
+  bobotKehadiran: ..., // optional
+  bobotHarian: ..., // optional
+  bobotUts: ..., // optional
+  bobotUas: ..., // optional
+  kkm: ..., // optional
+};
+
+// Call the `upsertBobotNilaiRef()` function to get a reference to the mutation.
+const ref = upsertBobotNilaiRef(upsertBobotNilaiVars);
+// Variables can be defined inline as well.
+const ref = upsertBobotNilaiRef({ kelasId: ..., mataPelajaranId: ..., semester: ..., tahunAjaran: ..., bobotKehadiran: ..., bobotHarian: ..., bobotUts: ..., bobotUas: ..., kkm: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = upsertBobotNilaiRef(dataConnect, upsertBobotNilaiVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.bobotNilai_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.bobotNilai_insert);
+});
+```
+
+## UpdateBobotNilai
+You can execute the `UpdateBobotNilai` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+updateBobotNilai(vars: UpdateBobotNilaiVariables): MutationPromise<UpdateBobotNilaiData, UpdateBobotNilaiVariables>;
+
+interface UpdateBobotNilaiRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateBobotNilaiVariables): MutationRef<UpdateBobotNilaiData, UpdateBobotNilaiVariables>;
+}
+export const updateBobotNilaiRef: UpdateBobotNilaiRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+updateBobotNilai(dc: DataConnect, vars: UpdateBobotNilaiVariables): MutationPromise<UpdateBobotNilaiData, UpdateBobotNilaiVariables>;
+
+interface UpdateBobotNilaiRef {
+  ...
+  (dc: DataConnect, vars: UpdateBobotNilaiVariables): MutationRef<UpdateBobotNilaiData, UpdateBobotNilaiVariables>;
+}
+export const updateBobotNilaiRef: UpdateBobotNilaiRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the updateBobotNilaiRef:
+```typescript
+const name = updateBobotNilaiRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpdateBobotNilai` mutation requires an argument of type `UpdateBobotNilaiVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpdateBobotNilaiVariables {
+  id: UUIDString;
+  bobotKehadiran?: number | null;
+  bobotHarian?: number | null;
+  bobotUts?: number | null;
+  bobotUas?: number | null;
+  kkm?: number | null;
+}
+```
+### Return Type
+Recall that executing the `UpdateBobotNilai` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpdateBobotNilaiData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpdateBobotNilaiData {
+  bobotNilai_update?: BobotNilai_Key | null;
+}
+```
+### Using `UpdateBobotNilai`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, updateBobotNilai, UpdateBobotNilaiVariables } from '@uassiakad/connector';
+
+// The `UpdateBobotNilai` mutation requires an argument of type `UpdateBobotNilaiVariables`:
+const updateBobotNilaiVars: UpdateBobotNilaiVariables = {
+  id: ..., 
+  bobotKehadiran: ..., // optional
+  bobotHarian: ..., // optional
+  bobotUts: ..., // optional
+  bobotUas: ..., // optional
+  kkm: ..., // optional
+};
+
+// Call the `updateBobotNilai()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await updateBobotNilai(updateBobotNilaiVars);
+// Variables can be defined inline as well.
+const { data } = await updateBobotNilai({ id: ..., bobotKehadiran: ..., bobotHarian: ..., bobotUts: ..., bobotUas: ..., kkm: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await updateBobotNilai(dataConnect, updateBobotNilaiVars);
+
+console.log(data.bobotNilai_update);
+
+// Or, you can use the `Promise` API.
+updateBobotNilai(updateBobotNilaiVars).then((response) => {
+  const data = response.data;
+  console.log(data.bobotNilai_update);
+});
+```
+
+### Using `UpdateBobotNilai`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, updateBobotNilaiRef, UpdateBobotNilaiVariables } from '@uassiakad/connector';
+
+// The `UpdateBobotNilai` mutation requires an argument of type `UpdateBobotNilaiVariables`:
+const updateBobotNilaiVars: UpdateBobotNilaiVariables = {
+  id: ..., 
+  bobotKehadiran: ..., // optional
+  bobotHarian: ..., // optional
+  bobotUts: ..., // optional
+  bobotUas: ..., // optional
+  kkm: ..., // optional
+};
+
+// Call the `updateBobotNilaiRef()` function to get a reference to the mutation.
+const ref = updateBobotNilaiRef(updateBobotNilaiVars);
+// Variables can be defined inline as well.
+const ref = updateBobotNilaiRef({ id: ..., bobotKehadiran: ..., bobotHarian: ..., bobotUts: ..., bobotUas: ..., kkm: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = updateBobotNilaiRef(dataConnect, updateBobotNilaiVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.bobotNilai_update);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.bobotNilai_update);
 });
 ```
 
@@ -5752,6 +6909,115 @@ console.log(data.kehadiran_insert);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.kehadiran_insert);
+});
+```
+
+## DeleteKehadiran
+You can execute the `DeleteKehadiran` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+deleteKehadiran(vars: DeleteKehadiranVariables): MutationPromise<DeleteKehadiranData, DeleteKehadiranVariables>;
+
+interface DeleteKehadiranRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteKehadiranVariables): MutationRef<DeleteKehadiranData, DeleteKehadiranVariables>;
+}
+export const deleteKehadiranRef: DeleteKehadiranRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+deleteKehadiran(dc: DataConnect, vars: DeleteKehadiranVariables): MutationPromise<DeleteKehadiranData, DeleteKehadiranVariables>;
+
+interface DeleteKehadiranRef {
+  ...
+  (dc: DataConnect, vars: DeleteKehadiranVariables): MutationRef<DeleteKehadiranData, DeleteKehadiranVariables>;
+}
+export const deleteKehadiranRef: DeleteKehadiranRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteKehadiranRef:
+```typescript
+const name = deleteKehadiranRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `DeleteKehadiran` mutation requires an argument of type `DeleteKehadiranVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface DeleteKehadiranVariables {
+  id: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `DeleteKehadiran` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `DeleteKehadiranData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface DeleteKehadiranData {
+  kehadiran_delete?: Kehadiran_Key | null;
+}
+```
+### Using `DeleteKehadiran`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, deleteKehadiran, DeleteKehadiranVariables } from '@uassiakad/connector';
+
+// The `DeleteKehadiran` mutation requires an argument of type `DeleteKehadiranVariables`:
+const deleteKehadiranVars: DeleteKehadiranVariables = {
+  id: ..., 
+};
+
+// Call the `deleteKehadiran()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await deleteKehadiran(deleteKehadiranVars);
+// Variables can be defined inline as well.
+const { data } = await deleteKehadiran({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await deleteKehadiran(dataConnect, deleteKehadiranVars);
+
+console.log(data.kehadiran_delete);
+
+// Or, you can use the `Promise` API.
+deleteKehadiran(deleteKehadiranVars).then((response) => {
+  const data = response.data;
+  console.log(data.kehadiran_delete);
+});
+```
+
+### Using `DeleteKehadiran`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, deleteKehadiranRef, DeleteKehadiranVariables } from '@uassiakad/connector';
+
+// The `DeleteKehadiran` mutation requires an argument of type `DeleteKehadiranVariables`:
+const deleteKehadiranVars: DeleteKehadiranVariables = {
+  id: ..., 
+};
+
+// Call the `deleteKehadiranRef()` function to get a reference to the mutation.
+const ref = deleteKehadiranRef(deleteKehadiranVars);
+// Variables can be defined inline as well.
+const ref = deleteKehadiranRef({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = deleteKehadiranRef(dataConnect, deleteKehadiranVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.kehadiran_delete);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.kehadiran_delete);
 });
 ```
 

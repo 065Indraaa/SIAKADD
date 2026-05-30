@@ -94,7 +94,7 @@ const RUMPUNS = [
     code: 'Rumpun A',
     title: 'Kelompok Kesehatan',
     desc: 'Mendalami Matematika, Fisika, Kimia, dan Biologi untuk jalur kedokteran, farmasi, keperawatan, dan bidang kesehatan lain.',
-    tags: ['2 kelas', 'Matematika', 'Fisika', 'Kimia', 'Biologi'],
+    tags: ['Matematika', 'Fisika', 'Kimia', 'Biologi'],
   },
   {
     icon: Globe,
@@ -102,7 +102,7 @@ const RUMPUNS = [
     code: 'Rumpun B',
     title: 'Kelompok Teknik',
     desc: 'Fokus pada Matematika Tingkat Lanjut, Fisika, Kimia, dan Biologi untuk arah teknik, informatika, sipil, dan rekayasa.',
-    tags: ['1 kelas', 'Matematika Lanjut', 'Fisika', 'Kimia', 'Biologi'],
+    tags: ['Matematika Lanjut', 'Fisika', 'Kimia', 'Biologi'],
   },
   {
     icon: BookOpen,
@@ -110,7 +110,7 @@ const RUMPUNS = [
     code: 'Rumpun C',
     title: 'Kelompok Sosial dan Humaniora',
     desc: 'Mendalami Ekonomi, Sosiologi, Geografi, dan Sejarah untuk jalur hukum, bisnis, komunikasi, dan dakwah.',
-    tags: ['2 kelas', 'Ekonomi', 'Sosiologi', 'Geografi', 'Sejarah'],
+    tags: ['Ekonomi', 'Sosiologi', 'Geografi', 'Sejarah'],
   },
 ] as const;
 
@@ -281,29 +281,29 @@ export default function LandingPage() {
       </header>
 
       <section className="relative isolate overflow-hidden pt-24">
-        <div className="absolute inset-0 bg-slate-950">
+        <div className={`absolute inset-0 ${isDark ? 'bg-slate-950' : 'bg-slate-100'}`}>
           <img
               src={HERO_IMAGE}
               alt="SMAIT Nur Hidayah Sukoharjo"
               className="h-full w-full object-cover"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/82 to-slate-950/45" />
-          <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-slate-950 to-transparent" />
+          <div className={`absolute inset-0 bg-gradient-to-r ${isDark ? 'from-slate-950 via-slate-950/82 to-slate-950/45' : 'from-slate-100/95 via-slate-100/80 to-slate-100/50'}`} />
+          <div className={`absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t ${isDark ? 'from-slate-950 to-transparent' : 'from-slate-100 to-transparent'}`} />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl py-16 sm:py-20 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
-              <Info className="h-3 w-3 text-blue-300" />
+            <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold ${isDark ? 'border-white/15 bg-white/5 text-slate-200' : 'border-slate-300 bg-white/70 text-slate-700'}`}>
+              <Info className={`h-3 w-3 ${isDark ? 'text-blue-300' : 'text-blue-600'}`} />
               Akreditasi A · Berdiri sejak 2008 · Terhubung dalam satu portal akademik
             </div>
 
-            <h1 className="mt-6 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className={`mt-6 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Layanan akademik sekolah yang tertata, jelas, dan mudah diakses
             </h1>
 
-            <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
+            <p className={`mt-5 max-w-2xl text-base leading-8 sm:text-lg ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
               SCOLA menyatukan data nilai, jadwal, penjurusan, prestasi, dan alumni dalam satu portal resmi
               untuk mendukung layanan akademik SMAIT Nur Hidayah Sukoharjo.
             </p>
@@ -317,7 +317,7 @@ export default function LandingPage() {
               <a href="#ppdb">
                 <Button
                   variant="outline"
-                  className={`h-11 rounded-xl px-6 font-semibold ${isDark ? 'border-white/15 bg-transparent text-white hover:bg-white/5' : 'border-slate-200 bg-white text-slate-900 hover:bg-slate-50'}`}
+                  className={`h-11 rounded-xl px-6 font-semibold ${isDark ? 'border-white/15 bg-transparent text-white hover:bg-white/5' : 'border-slate-300 bg-white text-slate-900 hover:bg-slate-50'}`}
                 >
                   Lihat PPDB
                 </Button>
@@ -325,7 +325,7 @@ export default function LandingPage() {
               <a href={SCHOOL.website} target="_blank" rel="noreferrer">
                 <Button
                   variant="outline"
-                  className={`h-11 rounded-xl px-6 font-semibold ${isDark ? 'border-white/15 bg-transparent text-white hover:bg-white/5' : 'border-slate-200 bg-white text-slate-900 hover:bg-slate-50'}`}
+                  className={`h-11 rounded-xl px-6 font-semibold ${isDark ? 'border-white/15 bg-transparent text-white hover:bg-white/5' : 'border-slate-300 bg-white text-slate-900 hover:bg-slate-50'}`}
                 >
                   Situs Sekolah
                 </Button>
@@ -337,12 +337,12 @@ export default function LandingPage() {
                 const Icon = item.icon;
                 return (
                   <div key={item.label}>
-                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    <div className={`flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                       <Icon className="h-3.5 w-3.5" />
                       {item.label}
                     </div>
-                    <div className="mt-2 text-lg font-semibold text-white">{item.value}</div>
-                    {'note' in item && item.note ? <p className="mt-1 text-[11px] text-slate-400">{item.note}</p> : null}
+                    <div className={`mt-2 text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{item.value}</div>
+                    {'note' in item && item.note ? <p className={`mt-1 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{item.note}</p> : null}
                   </div>
                 );
               })}

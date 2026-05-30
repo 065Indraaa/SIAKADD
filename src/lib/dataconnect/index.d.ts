@@ -52,6 +52,11 @@ export interface Alumni_Key {
   __typename?: 'Alumni_Key';
 }
 
+export interface BobotNilai_Key {
+  id: UUIDString;
+  __typename?: 'BobotNilai_Key';
+}
+
 export interface CreateAlumniData {
   alumni_insert: Alumni_Key;
 }
@@ -216,6 +221,14 @@ export interface DeleteJurusanVariables {
   id: UUIDString;
 }
 
+export interface DeleteKehadiranData {
+  kehadiran_delete?: Kehadiran_Key | null;
+}
+
+export interface DeleteKehadiranVariables {
+  id: UUIDString;
+}
+
 export interface DeleteKelasData {
   kelas_delete?: Kelas_Key | null;
 }
@@ -270,6 +283,32 @@ export interface DeleteSiswaData {
 
 export interface DeleteSiswaVariables {
   id: UUIDString;
+}
+
+export interface DeleteTugasHarianData {
+  tugasHarian_delete?: TugasHarian_Key | null;
+}
+
+export interface DeleteTugasHarianVariables {
+  id: UUIDString;
+}
+
+export interface GetBobotNilaiData {
+  bobotNilais: ({
+    id: UUIDString;
+    bobotKehadiran: number;
+    bobotHarian: number;
+    bobotUts: number;
+    bobotUas: number;
+    kkm: number;
+  } & BobotNilai_Key)[];
+}
+
+export interface GetBobotNilaiVariables {
+  kelasId: UUIDString;
+  mataPelajaranId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
 }
 
 export interface GetGuruByPenggunaData {
@@ -410,6 +449,9 @@ export interface GetNilaiByKelasData {
     nilaiHarian?: number | null;
     nilaiUts?: number | null;
     nilaiUas?: number | null;
+    nilaiRemedialUts?: number | null;
+    nilaiRemedialUas?: number | null;
+    jumlahTugasHarian?: number | null;
     semester: string;
     tahunAjaran: string;
     siswa: {
@@ -425,6 +467,8 @@ export interface GetNilaiByKelasData {
 export interface GetNilaiByKelasVariables {
   kelasId: UUIDString;
   mataPelajaranId: UUIDString;
+  semester?: string | null;
+  tahunAjaran?: string | null;
 }
 
 export interface GetNilaiBySiswaData {
@@ -433,6 +477,9 @@ export interface GetNilaiBySiswaData {
     nilaiHarian?: number | null;
     nilaiUts?: number | null;
     nilaiUas?: number | null;
+    nilaiRemedialUts?: number | null;
+    nilaiRemedialUas?: number | null;
+    jumlahTugasHarian?: number | null;
     semester: string;
     tahunAjaran: string;
     mataPelajaran: {
@@ -571,6 +618,28 @@ export interface ListAlumniData {
 
 export interface ListAlumniVariables {
   tahunLulus?: number | null;
+}
+
+export interface ListBobotNilaiByKelasData {
+  bobotNilais: ({
+    id: UUIDString;
+    bobotKehadiran: number;
+    bobotHarian: number;
+    bobotUts: number;
+    bobotUas: number;
+    kkm: number;
+    mataPelajaran: {
+      id: UUIDString;
+      nama: string;
+      kode: string;
+    } & MataPelajaran_Key;
+  } & BobotNilai_Key)[];
+}
+
+export interface ListBobotNilaiByKelasVariables {
+  kelasId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
 }
 
 export interface ListGuruData {
@@ -777,6 +846,44 @@ export interface ListSiswaByKelasVariables {
   kelasId: UUIDString;
 }
 
+export interface ListTugasHarianByKelasData {
+  tugasHarians: ({
+    id: UUIDString;
+    pertemuanKe: number;
+    nilai?: number | null;
+    siswa: {
+      id: UUIDString;
+      nis: string;
+      pengguna: {
+        nama: string;
+      };
+    } & Siswa_Key;
+  } & TugasHarian_Key)[];
+}
+
+export interface ListTugasHarianByKelasVariables {
+  kelasId: UUIDString;
+  mataPelajaranId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
+}
+
+export interface ListTugasHarianData {
+  tugasHarians: ({
+    id: UUIDString;
+    pertemuanKe: number;
+    nilai?: number | null;
+  } & TugasHarian_Key)[];
+}
+
+export interface ListTugasHarianVariables {
+  siswaId: UUIDString;
+  kelasId: UUIDString;
+  mataPelajaranId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
+}
+
 export interface MataPelajaran_Key {
   id: UUIDString;
   __typename?: 'MataPelajaran_Key';
@@ -834,6 +941,11 @@ export interface Siswa_Key {
   __typename?: 'Siswa_Key';
 }
 
+export interface TugasHarian_Key {
+  id: UUIDString;
+  __typename?: 'TugasHarian_Key';
+}
+
 export interface UpdateAlumniData {
   alumni_update?: Alumni_Key | null;
 }
@@ -847,6 +959,19 @@ export interface UpdateAlumniVariables {
   telepon?: string | null;
   alamat?: string | null;
   prestasi?: string | null;
+}
+
+export interface UpdateBobotNilaiData {
+  bobotNilai_update?: BobotNilai_Key | null;
+}
+
+export interface UpdateBobotNilaiVariables {
+  id: UUIDString;
+  bobotKehadiran?: number | null;
+  bobotHarian?: number | null;
+  bobotUts?: number | null;
+  bobotUas?: number | null;
+  kkm?: number | null;
 }
 
 export interface UpdateGuruData {
@@ -893,6 +1018,20 @@ export interface UpdateMataPelajaranVariables {
   nama?: string | null;
 }
 
+export interface UpdateNilaiData {
+  nilai_update?: Nilai_Key | null;
+}
+
+export interface UpdateNilaiVariables {
+  id: UUIDString;
+  nilaiHarian?: number | null;
+  nilaiUts?: number | null;
+  nilaiUas?: number | null;
+  nilaiRemedialUts?: number | null;
+  nilaiRemedialUas?: number | null;
+  jumlahTugasHarian?: number | null;
+}
+
 export interface UpdatePenggunaData {
   pengguna_update?: Pengguna_Key | null;
 }
@@ -928,6 +1067,22 @@ export interface UpdateSiswaVariables {
   alamat?: string | null;
 }
 
+export interface UpsertBobotNilaiData {
+  bobotNilai_insert: BobotNilai_Key;
+}
+
+export interface UpsertBobotNilaiVariables {
+  kelasId: UUIDString;
+  mataPelajaranId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
+  bobotKehadiran?: number | null;
+  bobotHarian?: number | null;
+  bobotUts?: number | null;
+  bobotUas?: number | null;
+  kkm?: number | null;
+}
+
 export interface UpsertNilaiData {
   nilai_insert: Nilai_Key;
 }
@@ -941,6 +1096,23 @@ export interface UpsertNilaiVariables {
   nilaiHarian?: number | null;
   nilaiUts?: number | null;
   nilaiUas?: number | null;
+  nilaiRemedialUts?: number | null;
+  nilaiRemedialUas?: number | null;
+  jumlahTugasHarian?: number | null;
+}
+
+export interface UpsertTugasHarianData {
+  tugasHarian_insert: TugasHarian_Key;
+}
+
+export interface UpsertTugasHarianVariables {
+  siswaId: UUIDString;
+  kelasId: UUIDString;
+  mataPelajaranId: UUIDString;
+  semester: string;
+  tahunAjaran: string;
+  pertemuanKe: number;
+  nilai?: number | null;
 }
 
 interface CreatePenggunaRef {
@@ -1207,6 +1379,66 @@ export const upsertNilaiRef: UpsertNilaiRef;
 export function upsertNilai(vars: UpsertNilaiVariables): MutationPromise<UpsertNilaiData, UpsertNilaiVariables>;
 export function upsertNilai(dc: DataConnect, vars: UpsertNilaiVariables): MutationPromise<UpsertNilaiData, UpsertNilaiVariables>;
 
+interface UpdateNilaiRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateNilaiVariables): MutationRef<UpdateNilaiData, UpdateNilaiVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateNilaiVariables): MutationRef<UpdateNilaiData, UpdateNilaiVariables>;
+  operationName: string;
+}
+export const updateNilaiRef: UpdateNilaiRef;
+
+export function updateNilai(vars: UpdateNilaiVariables): MutationPromise<UpdateNilaiData, UpdateNilaiVariables>;
+export function updateNilai(dc: DataConnect, vars: UpdateNilaiVariables): MutationPromise<UpdateNilaiData, UpdateNilaiVariables>;
+
+interface UpsertTugasHarianRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertTugasHarianVariables): MutationRef<UpsertTugasHarianData, UpsertTugasHarianVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpsertTugasHarianVariables): MutationRef<UpsertTugasHarianData, UpsertTugasHarianVariables>;
+  operationName: string;
+}
+export const upsertTugasHarianRef: UpsertTugasHarianRef;
+
+export function upsertTugasHarian(vars: UpsertTugasHarianVariables): MutationPromise<UpsertTugasHarianData, UpsertTugasHarianVariables>;
+export function upsertTugasHarian(dc: DataConnect, vars: UpsertTugasHarianVariables): MutationPromise<UpsertTugasHarianData, UpsertTugasHarianVariables>;
+
+interface DeleteTugasHarianRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteTugasHarianVariables): MutationRef<DeleteTugasHarianData, DeleteTugasHarianVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeleteTugasHarianVariables): MutationRef<DeleteTugasHarianData, DeleteTugasHarianVariables>;
+  operationName: string;
+}
+export const deleteTugasHarianRef: DeleteTugasHarianRef;
+
+export function deleteTugasHarian(vars: DeleteTugasHarianVariables): MutationPromise<DeleteTugasHarianData, DeleteTugasHarianVariables>;
+export function deleteTugasHarian(dc: DataConnect, vars: DeleteTugasHarianVariables): MutationPromise<DeleteTugasHarianData, DeleteTugasHarianVariables>;
+
+interface UpsertBobotNilaiRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpsertBobotNilaiVariables): MutationRef<UpsertBobotNilaiData, UpsertBobotNilaiVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpsertBobotNilaiVariables): MutationRef<UpsertBobotNilaiData, UpsertBobotNilaiVariables>;
+  operationName: string;
+}
+export const upsertBobotNilaiRef: UpsertBobotNilaiRef;
+
+export function upsertBobotNilai(vars: UpsertBobotNilaiVariables): MutationPromise<UpsertBobotNilaiData, UpsertBobotNilaiVariables>;
+export function upsertBobotNilai(dc: DataConnect, vars: UpsertBobotNilaiVariables): MutationPromise<UpsertBobotNilaiData, UpsertBobotNilaiVariables>;
+
+interface UpdateBobotNilaiRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateBobotNilaiVariables): MutationRef<UpdateBobotNilaiData, UpdateBobotNilaiVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateBobotNilaiVariables): MutationRef<UpdateBobotNilaiData, UpdateBobotNilaiVariables>;
+  operationName: string;
+}
+export const updateBobotNilaiRef: UpdateBobotNilaiRef;
+
+export function updateBobotNilai(vars: UpdateBobotNilaiVariables): MutationPromise<UpdateBobotNilaiData, UpdateBobotNilaiVariables>;
+export function updateBobotNilai(dc: DataConnect, vars: UpdateBobotNilaiVariables): MutationPromise<UpdateBobotNilaiData, UpdateBobotNilaiVariables>;
+
 interface RecordKehadiranRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: RecordKehadiranVariables): MutationRef<RecordKehadiranData, RecordKehadiranVariables>;
@@ -1218,6 +1450,18 @@ export const recordKehadiranRef: RecordKehadiranRef;
 
 export function recordKehadiran(vars: RecordKehadiranVariables): MutationPromise<RecordKehadiranData, RecordKehadiranVariables>;
 export function recordKehadiran(dc: DataConnect, vars: RecordKehadiranVariables): MutationPromise<RecordKehadiranData, RecordKehadiranVariables>;
+
+interface DeleteKehadiranRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteKehadiranVariables): MutationRef<DeleteKehadiranData, DeleteKehadiranVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeleteKehadiranVariables): MutationRef<DeleteKehadiranData, DeleteKehadiranVariables>;
+  operationName: string;
+}
+export const deleteKehadiranRef: DeleteKehadiranRef;
+
+export function deleteKehadiran(vars: DeleteKehadiranVariables): MutationPromise<DeleteKehadiranData, DeleteKehadiranVariables>;
+export function deleteKehadiran(dc: DataConnect, vars: DeleteKehadiranVariables): MutationPromise<DeleteKehadiranData, DeleteKehadiranVariables>;
 
 interface CreatePengumumanRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1566,6 +1810,54 @@ export const getNilaiByKelasRef: GetNilaiByKelasRef;
 
 export function getNilaiByKelas(vars: GetNilaiByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetNilaiByKelasData, GetNilaiByKelasVariables>;
 export function getNilaiByKelas(dc: DataConnect, vars: GetNilaiByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<GetNilaiByKelasData, GetNilaiByKelasVariables>;
+
+interface ListTugasHarianRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ListTugasHarianVariables): QueryRef<ListTugasHarianData, ListTugasHarianVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: ListTugasHarianVariables): QueryRef<ListTugasHarianData, ListTugasHarianVariables>;
+  operationName: string;
+}
+export const listTugasHarianRef: ListTugasHarianRef;
+
+export function listTugasHarian(vars: ListTugasHarianVariables, options?: ExecuteQueryOptions): QueryPromise<ListTugasHarianData, ListTugasHarianVariables>;
+export function listTugasHarian(dc: DataConnect, vars: ListTugasHarianVariables, options?: ExecuteQueryOptions): QueryPromise<ListTugasHarianData, ListTugasHarianVariables>;
+
+interface ListTugasHarianByKelasRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ListTugasHarianByKelasVariables): QueryRef<ListTugasHarianByKelasData, ListTugasHarianByKelasVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: ListTugasHarianByKelasVariables): QueryRef<ListTugasHarianByKelasData, ListTugasHarianByKelasVariables>;
+  operationName: string;
+}
+export const listTugasHarianByKelasRef: ListTugasHarianByKelasRef;
+
+export function listTugasHarianByKelas(vars: ListTugasHarianByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListTugasHarianByKelasData, ListTugasHarianByKelasVariables>;
+export function listTugasHarianByKelas(dc: DataConnect, vars: ListTugasHarianByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListTugasHarianByKelasData, ListTugasHarianByKelasVariables>;
+
+interface GetBobotNilaiRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetBobotNilaiVariables): QueryRef<GetBobotNilaiData, GetBobotNilaiVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetBobotNilaiVariables): QueryRef<GetBobotNilaiData, GetBobotNilaiVariables>;
+  operationName: string;
+}
+export const getBobotNilaiRef: GetBobotNilaiRef;
+
+export function getBobotNilai(vars: GetBobotNilaiVariables, options?: ExecuteQueryOptions): QueryPromise<GetBobotNilaiData, GetBobotNilaiVariables>;
+export function getBobotNilai(dc: DataConnect, vars: GetBobotNilaiVariables, options?: ExecuteQueryOptions): QueryPromise<GetBobotNilaiData, GetBobotNilaiVariables>;
+
+interface ListBobotNilaiByKelasRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ListBobotNilaiByKelasVariables): QueryRef<ListBobotNilaiByKelasData, ListBobotNilaiByKelasVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: ListBobotNilaiByKelasVariables): QueryRef<ListBobotNilaiByKelasData, ListBobotNilaiByKelasVariables>;
+  operationName: string;
+}
+export const listBobotNilaiByKelasRef: ListBobotNilaiByKelasRef;
+
+export function listBobotNilaiByKelas(vars: ListBobotNilaiByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListBobotNilaiByKelasData, ListBobotNilaiByKelasVariables>;
+export function listBobotNilaiByKelas(dc: DataConnect, vars: ListBobotNilaiByKelasVariables, options?: ExecuteQueryOptions): QueryPromise<ListBobotNilaiByKelasData, ListBobotNilaiByKelasVariables>;
 
 interface GetKehadiranByKelasRef {
   /* Allow users to create refs without passing in DataConnect */

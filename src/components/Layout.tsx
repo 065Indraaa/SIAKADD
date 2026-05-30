@@ -57,6 +57,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (user?.role === 'guru') return [
       { label: 'Beranda', href: '/guru', icon: LayoutDashboard },
       { label: 'Pengisian Nilai', href: '/guru/grades', icon: BookOpen },
+      { label: 'Absensi', href: '/guru/attendance', icon: Calendar },
       { label: 'Prestasi', href: '/guru/achievements', icon: Award },
       { label: 'Data Murid', href: '/guru/students', icon: Users },
     ];

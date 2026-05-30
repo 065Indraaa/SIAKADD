@@ -264,6 +264,9 @@ mutation UpsertNilai(
   $nilaiHarian: Float
   $nilaiUts: Float
   $nilaiUas: Float
+  $nilaiRemedialUts: Float
+  $nilaiRemedialUas: Float
+  $jumlahTugasHarian: Int
 ) @auth(level: PUBLIC) {
   nilai_insert(data: {
     siswaId: $siswaId
@@ -274,6 +277,101 @@ mutation UpsertNilai(
     nilaiHarian: $nilaiHarian
     nilaiUts: $nilaiUts
     nilaiUas: $nilaiUas
+    nilaiRemedialUts: $nilaiRemedialUts
+    nilaiRemedialUas: $nilaiRemedialUas
+    jumlahTugasHarian: $jumlahTugasHarian
+  })
+}
+
+mutation UpdateNilai(
+  $id: UUID!
+  $nilaiHarian: Float
+  $nilaiUts: Float
+  $nilaiUas: Float
+  $nilaiRemedialUts: Float
+  $nilaiRemedialUas: Float
+  $jumlahTugasHarian: Int
+) @auth(level: PUBLIC) {
+  nilai_update(id: $id, data: {
+    nilaiHarian: $nilaiHarian
+    nilaiUts: $nilaiUts
+    nilaiUas: $nilaiUas
+    nilaiRemedialUts: $nilaiRemedialUts
+    nilaiRemedialUas: $nilaiRemedialUas
+    jumlahTugasHarian: $jumlahTugasHarian
+  })
+}
+
+# -------------------------------------------------------
+# TUGAS HARIAN MUTATIONS
+# -------------------------------------------------------
+
+mutation UpsertTugasHarian(
+  $siswaId: UUID!
+  $kelasId: UUID!
+  $mataPelajaranId: UUID!
+  $semester: String!
+  $tahunAjaran: String!
+  $pertemuanKe: Int!
+  $nilai: Float
+) @auth(level: PUBLIC) {
+  tugasHarian_insert(data: {
+    siswaId: $siswaId
+    kelasId: $kelasId
+    mataPelajaranId: $mataPelajaranId
+    semester: $semester
+    tahunAjaran: $tahunAjaran
+    pertemuanKe: $pertemuanKe
+    nilai: $nilai
+  })
+}
+
+mutation DeleteTugasHarian($id: UUID!) @auth(level: PUBLIC) {
+  tugasHarian_delete(id: $id)
+}
+
+# -------------------------------------------------------
+# BOBOT NILAI MUTATIONS
+# -------------------------------------------------------
+
+mutation UpsertBobotNilai(
+  $kelasId: UUID!
+  $mataPelajaranId: UUID!
+  $semester: String!
+  $tahunAjaran: String!
+  $bobotKehadiran: Float
+  $bobotHarian: Float
+  $bobotUts: Float
+  $bobotUas: Float
+  $kkm: Float
+) @auth(level: PUBLIC) {
+  bobotNilai_insert(data: {
+    kelasId: $kelasId
+    mataPelajaranId: $mataPelajaranId
+    semester: $semester
+    tahunAjaran: $tahunAjaran
+    bobotKehadiran: $bobotKehadiran
+    bobotHarian: $bobotHarian
+    bobotUts: $bobotUts
+    bobotUas: $bobotUas
+    kkm: $kkm
+  })
+}
+
+mutation UpdateBobotNilai(
+  $id: UUID!
+  $bobotKehadiran: Float
+  $bobotHarian: Float
+  $bobotUts: Float
+  $bobotUas: Float
+  $kkm: Float
+) @auth(level: PUBLIC) {
+  bobotNilai_update(id: $id, data: {
+    bobotKehadiran: $bobotKehadiran
+    bobotHarian: $bobotHarian
+    bobotUts: $bobotUts
+    bobotUas: $bobotUas
+    kkm: $kkm
   })
 }
 
@@ -295,6 +393,10 @@ mutation RecordKehadiran(
     status: $status
     catatan: $catatan
   })
+}
+
+mutation DeleteKehadiran($id: UUID!) @auth(level: PUBLIC) {
+  kehadiran_delete(id: $id)
 }
 
 # -------------------------------------------------------

@@ -148,6 +148,39 @@ type Nilai @table(name: "nilai") {
   nilaiHarian: Float
   nilaiUts: Float
   nilaiUas: Float
+  nilaiRemedialUts: Float
+  nilaiRemedialUas: Float
+  jumlahTugasHarian: Int
+}
+
+# -------------------------------------------------------
+# TUGAS HARIAN — per siswa, per pertemuan
+# -------------------------------------------------------
+type TugasHarian @table(name: "tugas_harian") {
+  id: UUID! @default(expr: "uuidV4()")
+  siswa: Siswa!
+  kelas: Kelas!
+  mataPelajaran: MataPelajaran!
+  semester: String!
+  tahunAjaran: String!
+  pertemuanKe: Int!
+  nilai: Float
+}
+
+# -------------------------------------------------------
+# BOBOT NILAI — ditentukan guru per kelas per mapel per semester
+# -------------------------------------------------------
+type BobotNilai @table(name: "bobot_nilai") {
+  id: UUID! @default(expr: "uuidV4()")
+  kelas: Kelas!
+  mataPelajaran: MataPelajaran!
+  semester: String!
+  tahunAjaran: String!
+  bobotKehadiran: Float! @default(expr: "0")
+  bobotHarian: Float! @default(expr: "30")
+  bobotUts: Float! @default(expr: "30")
+  bobotUas: Float! @default(expr: "40")
+  kkm: Float! @default(expr: "75")
 }
 
 # -------------------------------------------------------

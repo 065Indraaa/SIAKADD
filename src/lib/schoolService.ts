@@ -17,6 +17,7 @@ import {
   getNilaiBySiswa,
   getNilaiByKelas,
   upsertNilai,
+  updateNilai,
   listPrestasi,
   createPrestasi,
   listAlumni,
@@ -37,6 +38,18 @@ import {
   getNilaiByKelasRef,
   listPrestasiRef,
   listAlumniRef,
+  listTugasHarianRef,
+  listTugasHarianByKelasRef,
+  upsertTugasHarianRef,
+  deleteTugasHarianRef,
+  getBobotNilaiRef,
+  listBobotNilaiByKelasRef,
+  upsertBobotNilaiRef,
+  updateBobotNilaiRef,
+  getKehadiranByKelasRef,
+  getKehadiranBySiswaRef,
+  recordKehadiranRef,
+  deleteKehadiranRef,
 } from '@uassiakad/connector';
 import { executeQuery } from 'firebase/data-connect';
 
@@ -314,4 +327,110 @@ export async function savePeminatan(siswaId: string, jurusanId: string | null) {
     id: siswaId,
     peminatanId: jurusanId || null
   });
+}
+
+export async function updateNilaiData(id: string, data: any) {
+  return await updateNilai(dataConnect, {
+    id,
+    nilaiHarian: data.nilaiHarian ?? null,
+    nilaiUts: data.nilaiUts ?? null,
+    nilaiUas: data.nilaiUas ?? null,
+    nilaiRemedialUts: data.nilaiRemedialUts ?? null,
+    nilaiRemedialUas: data.nilaiRemedialUas ?? null,
+    jumlahTugasHarian: data.jumlahTugasHarian ?? null,
+  });
+}
+
+// ============================================================
+// TUGAS HARIAN
+// ============================================================
+export async function fetchTugasHarian(siswaId: string, kelasId: string, mataPelajaranId: string, semester: string, tahunAjaran: string) {
+  const res = await executeQuery(listTugasHarianRef(dataConnect, { siswaId, kelasId, mataPelajaranId, semester, tahunAjaran }), NO_CACHE);
+  return res.data.tugasHarians || [];
+}
+
+export async function fetchTugasHarianByKelas(kelasId: string, mataPelajaranId: string, semester: string, tahunAjaran: string) {
+  const res = await executeQuery(listTugasHarianByKelasRef(dataConnect, { kelasId, mataPelajaranId, semester, tahunAjaran }), NO_CACHE);
+  return res.data.tugasHarians || [];
+}
+
+export async function addTugasHarian(data: any) {
+  return await upsertTugasHarianRef(dataConnect, {
+    siswaId: data.siswaId,
+    kelasId: data.kelasId,
+    mataPelajaranId: data.mataPelajaranId,
+    semester: data.semester,
+    tahunAjaran: data.tahunAjaran,
+    pertemuanKe: data.pertemuanKe,
+    nilai: data.nilai ?? null,
+  });
+}
+
+export async function removeTugasHarian(id: string) {
+  return await deleteTugasHarianRef(dataConnect, { id });
+}
+
+// ============================================================
+// BOBOT NILAI
+// ============================================================
+export async function fetchBobotNilai(kelasId: string, mataPelajaranId: string, semester: string, tahunAjaran: string) {
+  const res = await executeQuery(getBobotNilaiRef(dataConnect, { kelasId, mataPelajaranId, semester, tahunAjaran }), NO_CACHE);
+  return res.data.bobotNilais?.[0] || null;
+}
+
+export async function fetchBobotNilaiByKelas(kelasId: string, semester: string, tahunAjaran: string) {
+  const res = await executeQuery(listBobotNilaiByKelasRef(dataConnect, { kelasId, semester, tahunAjaran }), NO_CACHE);
+  return res.data.bobotNilais || [];
+}
+
+export async function setBobotNilai(data: any) {
+  return await upsertBobotNilaiRef(dataConnect, {
+    kelasId: data.kelasId,
+    mataPelajaranId: data.mataPelajaranId,
+    semester: data.semester,
+    tahunAjaran: data.tahunAjaran,
+    bobotKehadiran: data.bobotKehadiran ?? 0,
+    bobotHarian: data.bobotHarian ?? 30,
+    bobotUts: data.bobotUts ?? 30,
+    bobotUas: data.bobotUas ?? 40,
+    kkm: data.kkm ?? 75,
+  });
+}
+
+export async function editBobotNilai(id: string, data: any) {
+  return await updateBobotNilaiRef(dataConnect, {
+    id,
+    bobotKehadiran: data.bobotKehadiran,
+    bobotHarian: data.bobotHarian,
+    bobotUts: data.bobotUts,
+    bobotUas: data.bobotUas,
+    kkm: data.kkm,
+  });
+}
+
+// ============================================================
+// KEHADIRAN
+// ============================================================
+export async function fetchKehadiranByKelas(kelasId: string, tanggal: string) {
+  const res = await executeQuery(getKehadiranByKelasRef(dataConnect, { kelasId, tanggal }), NO_CACHE);
+  return res.data.kehadirans || [];
+}
+
+export async function fetchKehadiranBySiswa(siswaId: string) {
+  const res = await executeQuery(getKehadiranBySiswaRef(dataConnect, { siswaId }), NO_CACHE);
+  return res.data.kehadirans || [];
+}
+
+export async function recordKehadiran(data: any) {
+  return await recordKehadiranRef(dataConnect, {
+    siswaId: data.siswaId,
+    kelasId: data.kelasId,
+    tanggal: data.tanggal,
+    status: data.status,
+    catatan: data.catatan || null,
+  });
+}
+
+export async function removeKehadiran(id: string) {
+  return await deleteKehadiranRef(dataConnect, { id });
 }

@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Download, BookOpen, TrendingUp, Loader2 } from 'lucide-react';
+import { Download, BookOpen, TrendingUp, Loader2, Calculator } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { fetchNilaiSiswa } from '@/lib/schoolService';
+import { fetchNilaiSiswa, fetchBobotNilaiByKelas } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { currentTahunAjaran, currentSemester, buildTahunAjaranOptions } from '@/lib/tahunAjaran';
 
 const SEMESTER_OPTIONS = ['Ganjil', 'Genap'];
+const DEFAULT_BOBOT = { bobotKehadiran: 0, bobotHarian: 30, bobotUts: 30, bobotUas: 40, kkm: 75 };
 
 export default function SiswaGrades() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ export default function SiswaGrades() {
   const [loading, setLoading] = useState(false);
   const [semester, setSemester] = useState(currentSemester());
   const [tahunAjaran, setTahunAjaran] = useState(currentTahunAjaran());
+  const [bobotMap, setBobotMap] = useState<Record<string, any>>({});
 
   const tahunAjaranOptions = useMemo(() => buildTahunAjaranOptions(), []);
 
@@ -27,24 +29,37 @@ export default function SiswaGrades() {
     }
     setLoading(true);
     try {
-      const data = await fetchNilaiSiswa(user.siswaId, semester, tahunAjaran);
+      const [data, bobotData] = await Promise.all([
+        fetchNilaiSiswa(user.siswaId, semester, tahunAjaran),
+        user?.kelasId ? fetchBobotNilaiByKelas(user.kelasId, semester, tahunAjaran) : Promise.resolve([]),
+      ]);
       setGrades(data || []);
+      const map: Record<string, any> = {};
+      (bobotData || []).forEach((b: any) => {
+        if (b.mataPelajaran?.id) {
+          map[b.mataPelajaran.id] = b;
+        }
+      });
+      setBobotMap(map);
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
-  }, [user?.siswaId, semester, tahunAjaran]);
+  }, [user?.siswaId, user?.kelasId, semester, tahunAjaran]);
 
   useEffect(() => { loadGrades(); }, [loadGrades]);
   useAutoRefresh(loadGrades, 20_000);
 
   const calculateNilaiAkhir = (g: any) => {
+    const bobot = bobotMap[g.mataPelajaran?.id] || DEFAULT_BOBOT;
     const nh = g.nilaiHarian || 0;
-    const uts = g.nilaiUts || 0;
-    const uas = g.nilaiUas || 0;
+    const uts = Math.max(g.nilaiUts || 0, g.nilaiRemedialUts || 0);
+    const uas = Math.max(g.nilaiUas || 0, g.nilaiRemedialUas || 0);
     if (!nh && !uts && !uas) return 0;
-    return nh * 0.3 + uts * 0.3 + uas * 0.4;
+    const totalBobot = (bobot.bobotHarian || 30) + (bobot.bobotUts || 30) + (bobot.bobotUas || 40);
+    if (totalBobot === 0) return 0;
+    return (nh * (bobot.bobotHarian || 30) + uts * (bobot.bobotUts || 30) + uas * (bobot.bobotUas || 40)) / totalBobot;
   };
 
   const avgIpk = grades.length > 0
@@ -126,7 +141,13 @@ export default function SiswaGrades() {
                     UTS
                   </TableHead>
                   <TableHead className="text-center text-muted-foreground font-semibold uppercase tracking-wider text-[11px]">
+                    Rem UTS
+                  </TableHead>
+                  <TableHead className="text-center text-muted-foreground font-semibold uppercase tracking-wider text-[11px]">
                     UAS
+                  </TableHead>
+                  <TableHead className="text-center text-muted-foreground font-semibold uppercase tracking-wider text-[11px]">
+                    Rem UAS
                   </TableHead>
                   <TableHead className="text-right pr-6 text-muted-foreground font-semibold uppercase tracking-wider text-[11px]">
                     Akhir
@@ -136,18 +157,19 @@ export default function SiswaGrades() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-10">
+                    <TableCell colSpan={7} className="text-center py-10">
                       <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-500" />
                     </TableCell>
                   </TableRow>
                 ) : grades.length > 0 ? (
                   grades.map((grade) => {
+                    const bobot = bobotMap[grade.mataPelajaran?.id] || DEFAULT_BOBOT;
                     const akhir = calculateNilaiAkhir(grade);
-                    const color = akhir >= 85
+                    const color = akhir >= (bobot.kkm || 75) + 10
                       ? 'text-emerald-600 dark:text-emerald-400'
-                      : akhir >= 75
+                      : akhir >= (bobot.kkm || 75)
                       ? 'text-blue-600 dark:text-blue-400'
-                      : akhir >= 60
+                      : akhir >= (bobot.kkm || 75) - 15
                       ? 'text-amber-600 dark:text-amber-400'
                       : 'text-red-600 dark:text-red-400';
                     return (
@@ -169,7 +191,13 @@ export default function SiswaGrades() {
                           {grade.nilaiUts ?? '—'}
                         </TableCell>
                         <TableCell className="text-center text-foreground font-medium tabular-nums">
+                          {grade.nilaiRemedialUts ?? '—'}
+                        </TableCell>
+                        <TableCell className="text-center text-foreground font-medium tabular-nums">
                           {grade.nilaiUas ?? '—'}
+                        </TableCell>
+                        <TableCell className="text-center text-foreground font-medium tabular-nums">
+                          {grade.nilaiRemedialUas ?? '—'}
                         </TableCell>
                         <TableCell className="text-right pr-6">
                           <span className={`text-lg font-bold tabular-nums ${color}`}>
@@ -181,7 +209,7 @@ export default function SiswaGrades() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-10 text-muted-foreground text-sm">
+                    <TableCell colSpan={7} className="text-center py-10 text-muted-foreground text-sm">
                       Belum ada nilai untuk Semester {semester} tahun ajaran {tahunAjaran}.
                     </TableCell>
                   </TableRow>
@@ -216,7 +244,7 @@ export default function SiswaGrades() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-md">
-              Nilai akhir dihitung 30% harian + 30% UTS + 40% UAS. KKM sekolah 75.
+              Nilai akhir dihitung berdasarkan bobot yang ditentukan guru masing-masing mata pelajaran. KKM: 75. Remedial mengambil nilai tertinggi.
             </p>
           </div>
         </CardContent>

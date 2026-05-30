@@ -58,8 +58,9 @@ function SiswaOverview() {
           if (nilai && nilai.length > 0) {
             const sum = nilai.reduce((acc: number, cur: any) => {
               const nh = cur.nilaiHarian || 0;
-              const uts = cur.nilaiUts || 0;
-              const uas = cur.nilaiUas || 0;
+              const uts = Math.max(cur.nilaiUts || 0, cur.nilaiRemedialUts || 0);
+              const uas = Math.max(cur.nilaiUas || 0, cur.nilaiRemedialUas || 0);
+              if (!nh && !uts && !uas) return acc;
               return acc + (nh * 0.3 + uts * 0.3 + uas * 0.4);
             }, 0);
             avg = sum / nilai.length;

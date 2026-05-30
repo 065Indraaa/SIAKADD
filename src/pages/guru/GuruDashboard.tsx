@@ -3,6 +3,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, BookOpen, Award, CheckCircle, Loader2, Calendar, ArrowRight } from 'lucide-react';
 import GuruGrades from './GuruGrades';
+import GuruAttendance from './GuruAttendance';
 import GuruAchievements from './GuruAchievements';
 import GuruStudents from './GuruStudents';
 import { useAuth } from '../../contexts/AuthContext';
@@ -159,7 +160,8 @@ function GuruOverview() {
           </div>
           <div className="p-4 space-y-2">
             {[
-              { label: 'Pengisian Nilai', sub: 'Harian · UTS · UAS', href: 'grades', icon: CheckCircle, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+              { label: 'Pengisian Nilai', sub: 'Harian · UTS · UAS · Remedial', href: 'grades', icon: CheckCircle, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+              { label: 'Absensi', sub: 'Hadir · Izin · Sakit · Alpa', href: 'attendance', icon: Calendar, color: 'text-orange-500', bg: 'bg-orange-500/10' },
               { label: 'Catat Prestasi', sub: 'Sertifikasi · Lomba', href: 'achievements', icon: Award, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
               { label: 'Data Murid', sub: 'Profil · Kehadiran', href: 'students', icon: Users, color: 'text-purple-500', bg: 'bg-purple-500/10' },
             ].map((item, i) => (
@@ -188,6 +190,7 @@ export default function GuruDashboard() {
         <Route path="/" element={<GuruOverview />} />
         <Route path="/students" element={<GuruStudents />} />
         <Route path="/grades" element={<GuruGrades />} />
+        <Route path="/attendance" element={<GuruAttendance />} />
         <Route path="/achievements" element={<GuruAchievements />} />
       </Routes>
     </div>

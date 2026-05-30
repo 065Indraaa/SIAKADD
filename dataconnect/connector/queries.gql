@@ -352,6 +352,9 @@ query GetNilaiBySiswa($siswaId: UUID!, $semester: String, $tahunAjaran: String) 
     nilaiHarian
     nilaiUts
     nilaiUas
+    nilaiRemedialUts
+    nilaiRemedialUas
+    jumlahTugasHarian
     semester
     tahunAjaran
     mataPelajaran {
@@ -361,17 +364,22 @@ query GetNilaiBySiswa($siswaId: UUID!, $semester: String, $tahunAjaran: String) 
   }
 }
 
-query GetNilaiByKelas($kelasId: UUID!, $mataPelajaranId: UUID!) @auth(level: PUBLIC) {
+query GetNilaiByKelas($kelasId: UUID!, $mataPelajaranId: UUID!, $semester: String, $tahunAjaran: String) @auth(level: PUBLIC) {
   nilais(
     where: {
       kelasId: { eq: $kelasId }
       mataPelajaranId: { eq: $mataPelajaranId }
+      semester: { eq: $semester }
+      tahunAjaran: { eq: $tahunAjaran }
     }
   ) {
     id
     nilaiHarian
     nilaiUts
     nilaiUas
+    nilaiRemedialUts
+    nilaiRemedialUas
+    jumlahTugasHarian
     semester
     tahunAjaran
     siswa {
@@ -380,6 +388,94 @@ query GetNilaiByKelas($kelasId: UUID!, $mataPelajaranId: UUID!) @auth(level: PUB
       pengguna {
         nama
       }
+    }
+  }
+}
+
+# -------------------------------------------------------
+# TUGAS HARIAN QUERIES
+# -------------------------------------------------------
+
+query ListTugasHarian($siswaId: UUID!, $kelasId: UUID!, $mataPelajaranId: UUID!, $semester: String!, $tahunAjaran: String!) @auth(level: PUBLIC) {
+  tugasHarians(
+    where: {
+      siswaId: { eq: $siswaId }
+      kelasId: { eq: $kelasId }
+      mataPelajaranId: { eq: $mataPelajaranId }
+      semester: { eq: $semester }
+      tahunAjaran: { eq: $tahunAjaran }
+    }
+    orderBy: { pertemuanKe: ASC }
+  ) {
+    id
+    pertemuanKe
+    nilai
+  }
+}
+
+query ListTugasHarianByKelas($kelasId: UUID!, $mataPelajaranId: UUID!, $semester: String!, $tahunAjaran: String!) @auth(level: PUBLIC) {
+  tugasHarians(
+    where: {
+      kelasId: { eq: $kelasId }
+      mataPelajaranId: { eq: $mataPelajaranId }
+      semester: { eq: $semester }
+      tahunAjaran: { eq: $tahunAjaran }
+    }
+    orderBy: { pertemuanKe: ASC }
+  ) {
+    id
+    pertemuanKe
+    nilai
+    siswa {
+      id
+      nis
+      pengguna {
+        nama
+      }
+    }
+  }
+}
+
+# -------------------------------------------------------
+# BOBOT NILAI QUERIES
+# -------------------------------------------------------
+
+query GetBobotNilai($kelasId: UUID!, $mataPelajaranId: UUID!, $semester: String!, $tahunAjaran: String!) @auth(level: PUBLIC) {
+  bobotNilais(
+    where: {
+      kelasId: { eq: $kelasId }
+      mataPelajaranId: { eq: $mataPelajaranId }
+      semester: { eq: $semester }
+      tahunAjaran: { eq: $tahunAjaran }
+    }
+  ) {
+    id
+    bobotKehadiran
+    bobotHarian
+    bobotUts
+    bobotUas
+    kkm
+  }
+}
+
+query ListBobotNilaiByKelas($kelasId: UUID!, $semester: String!, $tahunAjaran: String!) @auth(level: PUBLIC) {
+  bobotNilais(
+    where: {
+      kelasId: { eq: $kelasId }
+      semester: { eq: $semester }
+      tahunAjaran: { eq: $tahunAjaran }
+    }
+  ) {
+    id
+    bobotKehadiran
+    bobotHarian
+    bobotUts
+    bobotUas
+    kkm
+    mataPelajaran {
+      id
+      nama
+      kode
     }
   }
 }
