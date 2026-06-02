@@ -209,9 +209,7 @@ export default function LandingPage() {
       <header className={`fixed top-0 z-50 w-full border-b backdrop-blur-xl ${isDark ? 'bg-slate-950/85 border-white/10' : 'bg-white/90 border-slate-200/80 shadow-sm'}`}>
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/30">
-              <GraduationCap className="h-5 w-5 text-white" />
-            </div>
+            <img src="/images/scola.jpg" alt="SCOLA" className="h-10 w-10 rounded-xl object-cover shadow-lg shadow-blue-600/30" />
             <div>
               <div className={`text-sm font-bold leading-none ${isDark ? 'text-white' : 'text-slate-950'}`}>SCOLA</div>
               <div className={`mt-0.5 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>SMAIT Nur Hidayah Sukoharjo</div>
@@ -724,9 +722,7 @@ export default function LandingPage() {
           <div className="mb-10 grid gap-8 md:grid-cols-4">
             <div className="md:col-span-2">
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600">
-                  <GraduationCap className="h-5 w-5 text-white" />
-                </div>
+                <img src="/images/scola.jpg" alt="SCOLA" className="h-10 w-10 rounded-xl object-cover" />
                 <div>
                   <div className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>SCOLA</div>
                   <div className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>

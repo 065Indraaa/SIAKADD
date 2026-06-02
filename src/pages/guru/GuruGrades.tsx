@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,6 +77,8 @@ export default function GuruGrades() {
   const [jumlahTugas, setJumlahTugas] = useState(10);
   const [tugasMap, setTugasMap] = useState<Record<string, Record<number, { id?: string; nilai?: number }>>>({});
   const [hasChanges, setHasChanges] = useState(false);
+  const hasChangesRef = useRef(hasChanges);
+  useEffect(() => { hasChangesRef.current = hasChanges; }, [hasChanges]);
 
   const loadAssignments = useCallback(async () => {
     setLoadingAssignments(true);
@@ -221,7 +223,10 @@ export default function GuruGrades() {
         }
       });
       if (maxTugas > jumlahTugasHarian) jumlahTugasHarian = maxTugas;
-      setJumlahTugas(jumlahTugasHarian);
+      // Jangan override jumlahTugas jika user sedang mengedit (belum disimpan)
+      if (!hasChangesRef.current) {
+        setJumlahTugas(jumlahTugasHarian);
+      }
       setTugasMap(tugasBySiswa);
 
       setStudents(siswaData.map(s => {
@@ -254,6 +259,11 @@ export default function GuruGrades() {
 
   useEffect(() => { loadStudentsWithGrades(); }, [loadStudentsWithGrades]);
   useAutoRefresh(loadStudentsWithGrades, 20_000, !hasChanges);
+
+  // Reset dirty flag saat ganti assignment agar jumlah tugas dari DB di-load
+  useEffect(() => {
+    setHasChanges(false);
+  }, [selectedAssignment?.key]);
 
   const [refreshing, refresh] = useManualRefresh(loadAssignments, loadStudentsWithGrades);
 
