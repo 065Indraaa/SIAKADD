@@ -358,7 +358,6 @@ query GetNilaiBySiswa($siswaId: UUID!, $semester: String, $tahunAjaran: String) 
     semester
     tahunAjaran
     mataPelajaran {
-      id
       nama
       kode
     }
@@ -482,7 +481,7 @@ query ListBobotNilaiByKelas($kelasId: UUID!, $semester: String!, $tahunAjaran: S
 }
 
 # -------------------------------------------------------
-# KEHADIRAN QUERIES
+# KEHADIRAN QUERIESaaaaaaaa
 # -------------------------------------------------------
 
 query GetKehadiranByKelas($kelasId: UUID!, $tanggal: Date!) @auth(level: PUBLIC) {
