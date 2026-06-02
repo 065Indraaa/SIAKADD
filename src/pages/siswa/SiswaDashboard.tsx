@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { BookOpen, Award, Calendar, TrendingUp, CheckCircle, Users, ArrowUpRight, Clock, GraduationCap } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { fetchJadwalKelas, fetchNilaiSiswa, fetchPrestasiSiswa } from '@/lib/schoolService';
+import { fetchJadwalKelas, fetchNilaiSiswa, fetchPrestasiSiswa, fetchKehadiranBySiswa } from '@/lib/schoolService';
 import { currentTahunAjaran, currentSemester } from '@/lib/tahunAjaran';
 import SiswaProfile from './SiswaProfile';
 import SiswaGrades from './SiswaGrades';
@@ -42,10 +42,11 @@ function SiswaOverview() {
             kelasId = siswaRes.data.siswa?.kelas?.id;
           }
 
-          const [jadwal, nilai, prestasi] = await Promise.all([
+          const [jadwal, nilai, prestasi, kehadiran] = await Promise.all([
             kelasId ? fetchJadwalKelas(kelasId) : Promise.resolve([]),
             fetchNilaiSiswa(user.siswaId, currentSemester(), currentTahunAjaran()),
             fetchPrestasiSiswa(user.siswaId),
+            fetchKehadiranBySiswa(user.siswaId),
           ]);
 
           const hariIni = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
@@ -66,9 +67,26 @@ function SiswaOverview() {
             avg = sum / nilai.length;
           }
 
+          // Hitung persentase kehadiran semester aktif (dari tanggal)
+          let hadirPersen = 100;
+          const cs = currentSemester();
+          const cta = currentTahunAjaran();
+          const kehadiranSemester = (kehadiran || []).filter((k: any) => {
+            const d = new Date(k.tanggal);
+            const month = d.getMonth(); // 0-11
+            const year = d.getFullYear();
+            const semester = month >= 6 ? 'Ganjil' : 'Genap';
+            const tahunAjaran = month >= 6 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+            return semester === cs && tahunAjaran === cta;
+          });
+          if (kehadiranSemester.length > 0) {
+            const hadirCount = kehadiranSemester.filter((k: any) => k.status === 'Hadir').length;
+            hadirPersen = Math.round((hadirCount / kehadiranSemester.length) * 100);
+          }
+
           setStats({
             rataNilai: avg > 0 ? avg.toFixed(1) : '0',
-            kehadiran: '100%',
+            kehadiran: `${hadirPersen}%`,
             prestasi: prestasi ? prestasi.length : 0,
           });
         }

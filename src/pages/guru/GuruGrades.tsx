@@ -76,9 +76,6 @@ export default function GuruGrades() {
 
   const [jumlahTugas, setJumlahTugas] = useState(10);
   const [tugasMap, setTugasMap] = useState<Record<string, Record<number, { id?: string; nilai?: number }>>>({});
-  const [hasChanges, setHasChanges] = useState(false);
-  const hasChangesRef = useRef(hasChanges);
-  useEffect(() => { hasChangesRef.current = hasChanges; }, [hasChanges]);
 
   const loadAssignments = useCallback(async () => {
     setLoadingAssignments(true);
@@ -151,6 +148,17 @@ export default function GuruGrades() {
     [assignments, selectedKey],
   );
 
+  // Persist jumlah tugas per assignment via localStorage
+  const jtStorageKey = useMemo(() => selectedAssignment ? `scola_jt_${selectedAssignment.key}` : '', [selectedAssignment]);
+  useEffect(() => {
+    if (!jtStorageKey) return;
+    const stored = localStorage.getItem(jtStorageKey);
+    if (stored) {
+      const val = parseInt(stored, 10);
+      if (!isNaN(val) && val >= 1) setJumlahTugas(val);
+    }
+  }, [jtStorageKey]);
+
   const loadBobot = useCallback(async () => {
     if (!selectedAssignment) return;
     setBobotLoading(true);
@@ -215,26 +223,28 @@ export default function GuruGrades() {
         if (t.pertemuanKe > maxTugas) maxTugas = t.pertemuanKe;
       });
 
-      // Ambil jumlahTugasHarian dari salah satu record nilai jika ada
-      let jumlahTugasHarian = 10;
+      // Fallback jumlah tugas dari DB kalau localStorage belum pernah di-set
+      let dbJumlahTugas = 10;
       gradesRes.data.nilais.forEach((n: any) => {
-        if (n.jumlahTugasHarian && n.jumlahTugasHarian > jumlahTugasHarian) {
-          jumlahTugasHarian = n.jumlahTugasHarian;
+        if (n.jumlahTugasHarian && n.jumlahTugasHarian > dbJumlahTugas) {
+          dbJumlahTugas = n.jumlahTugasHarian;
         }
       });
-      if (maxTugas > jumlahTugasHarian) jumlahTugasHarian = maxTugas;
-      // Jangan override jumlahTugas jika user sedang mengedit (belum disimpan)
-      if (!hasChangesRef.current) {
-        setJumlahTugas(jumlahTugasHarian);
+      if (maxTugas > dbJumlahTugas) dbJumlahTugas = maxTugas;
+      // Jika localStorage belum ada untuk assignment ini, pakai nilai DB
+      if (jtStorageKey && !localStorage.getItem(jtStorageKey)) {
+        setJumlahTugas(dbJumlahTugas);
       }
       setTugasMap(tugasBySiswa);
 
+      // Gunakan jumlahTugas state (bisa dari localStorage atau DB) untuk render kolom
+      const colCount = jumlahTugas;
       setStudents(siswaData.map(s => {
         const sid = s.siswaId || s.id;
         const existing = (s.siswaId ? gradesMap.get(s.siswaId) : null) || (s.nis ? gradesMap.get(s.nis) : null);
         const tugasSiswa = tugasBySiswa[sid] || {};
         const tugasObj: Record<number, number | string> = {};
-        for (let i = 1; i <= jumlahTugasHarian; i++) {
+        for (let i = 1; i <= colCount; i++) {
           tugasObj[i] = tugasSiswa[i]?.nilai ?? '';
         }
         return {
@@ -258,19 +268,13 @@ export default function GuruGrades() {
   }, [selectedAssignment, semester, tahunAjaran]);
 
   useEffect(() => { loadStudentsWithGrades(); }, [loadStudentsWithGrades]);
-  useAutoRefresh(loadStudentsWithGrades, 20_000, !hasChanges);
-
-  // Reset dirty flag saat ganti assignment agar jumlah tugas dari DB di-load
-  useEffect(() => {
-    setHasChanges(false);
-  }, [selectedAssignment?.key]);
+  useAutoRefresh(loadStudentsWithGrades, 20_000);
 
   const [refreshing, refresh] = useManualRefresh(loadAssignments, loadStudentsWithGrades);
 
   const handleNilaiChange = (siswaId: string, field: keyof Omit<SiswaGrade, 'tugas'>, val: string) => {
     setStudents(prev => prev.map(s => s.siswaId === siswaId ? { ...s, [field]: val } : s));
     setSaved(false);
-    setHasChanges(true);
   };
 
   const handleTugasChange = (siswaId: string, pertemuan: number, val: string) => {
@@ -279,7 +283,6 @@ export default function GuruGrades() {
       return { ...s, tugas: { ...s.tugas, [pertemuan]: val } };
     }));
     setSaved(false);
-    setHasChanges(true);
   };
 
   const effectiveUts = (s: SiswaGrade) => {
@@ -381,7 +384,6 @@ export default function GuruGrades() {
         setError(`${successCount} berhasil disimpan, ${errors.length} gagal. Detail: ${errors.slice(0, 3).join('; ')}`);
       } else {
         setSaved(true);
-        setHasChanges(false);
         setTimeout(() => setSaved(false), 3000);
         if (successCount > 0) {
           addNotif({
@@ -392,8 +394,11 @@ export default function GuruGrades() {
           });
         }
       }
+      // Persist jumlah tugas ke localStorage agar tidak reset saat reload
+      if (jtStorageKey) {
+        localStorage.setItem(jtStorageKey, String(jumlahTugas));
+      }
       await new Promise(r => setTimeout(r, 400));
-      hasChangesRef.current = false;
       await loadStudentsWithGrades();
     } catch (e: any) {
       setError(e.message || 'Gagal menyimpan nilai.');
@@ -615,7 +620,7 @@ export default function GuruGrades() {
                 onChange={(e) => {
                   const val = Math.max(1, parseInt(e.target.value) || 1);
                   setJumlahTugas(val);
-                  setHasChanges(true);
+                  if (jtStorageKey) localStorage.setItem(jtStorageKey, String(val));
                 }}
                 className="h-11 w-32 rounded-xl text-center" />
             </div>
