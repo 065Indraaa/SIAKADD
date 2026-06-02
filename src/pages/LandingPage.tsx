@@ -51,7 +51,7 @@ import { useTheme } from '@/contexts/ThemeContext';
  *    atau foto suasana upacara/kegiatan besar di lapangan.
  *    Ukuran ideal: 1920×1080 px, landscape.
  *
- * 2. /public/images/profil.jpg
+ * 2. /public/image/profill.jpeg
  *    Foto untuk kartu profil sekolah (section Profil).
  *    Rekomendasi: foto koridor, ruang kelas, atau area masjid sekolah.
  *    Ukuran ideal: 800×600 px, landscape.
@@ -60,7 +60,7 @@ import { useTheme } from '@/contexts/ThemeContext';
  * ─────────────────────────────────────────────────────────────
  */
 const HERO_IMAGE = '/images/hero.jpeg';
-const PROFIL_IMAGE = '/images/profil.jpg';
+const PROFIL_IMAGE = '/image/profill.jpeg';
 
 const SCHOOL = {
   name: 'SMAIT Nur Hidayah',
@@ -403,7 +403,7 @@ export default function LandingPage() {
                   if (parent) {
                     const placeholder = document.createElement('div');
                     placeholder.className = 'h-72 sm:h-96 w-full flex items-center justify-center bg-slate-800 text-slate-500 text-sm';
-                        placeholder.textContent = 'Foto sekolah belum tersedia di /public/images/profil.jpg';
+                        placeholder.textContent = 'Foto sekolah belum tersedia di /public/image/profill.jpeg';
                     parent.insertBefore(placeholder, el);
                   }
                 }}
