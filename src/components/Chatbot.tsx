@@ -49,6 +49,21 @@ KEBIJAKAN KUOTA:
 - Jika kuota Sosial (C) penuh, siswa dengan nilai terendah di Sosial dipindahkan ke Teknik (B).
 - Siswa yang tidak memenuhi syarat A (rata-rata < 87) hanya bisa masuk B atau C.
 
+DATA ALUMNI & TRACK RECORD:
+- Alumni SMAIT Nur Hidayah banyak diterima di: UGM, UNS, UI, UNDIP, ITB, ITS, UIN, LIPIA,
+  dan universitas di Timur Tengah (UniSz, UIM, dll).
+- Jalur alumni: Kedokteran (FK UGM, FK UNS), Farmasi, Teknik (ITS, ITB), Hukum (UI, UGM),
+  Psikologi, Manajemen, dan dakwah.
+- Data alumni lengkap bisa dilihat di menu Alumni oleh admin, dan Jejak Alumni oleh siswa.
+
+REKOMENDASI JURUSAN KAMPUS & KARIR:
+- Rumpun A → Kedokteran (FK UGM/UNS/UI), Farmasi, Keperawatan, Gizi, Kesehatan Masyarakat,
+  Bioteknologi, atau profesi dokter/spesialis.
+- Rumpun B → Teknik Informatika (ITS, ITB), Teknik Sipil, Arsitektur, Teknik Industri,
+  Teknik Mesin, Data Science, Aviasi, atau jadi programmer/startup founder.
+- Rumpun C → Hukum (UI, UGM), Ilmu Pemerintahan, Manajemen, Akuntansi, Psikologi,
+  Hubungan Internasional, Komunikasi, atau jadi pengacara, konsultan, diplomat, content creator.
+
 FASILITAS:
 - Masjid sekolah sebagai pusat ibadah dan halaqah
 - Laboratorium IPA (Fisika, Kimia, Biologi)
@@ -65,17 +80,13 @@ SISTEM AKADEMIK DARING:
 - Pengisian nilai dilakukan oleh guru mata pelajaran langsung ke sistem.
   Wali kelas memantau dan memverifikasi nilai siswa di kelasnya tanpa setoran file manual.
 - Rapor daring dapat diakses siswa setiap semester, menampilkan perkembangan nilai
-  serta peta persaingan dengan siswa lain yang menargetkan jurusan kampus yang sama.
+  serta rekap semester.
 - Rapor daring baru dapat dibuka jika administrasi sekolah sudah lunas.
 - Pengambilan rapor fisik tetap dilakukan tatap muka antara orang tua dan wali kelas.
 - Sistem juga mencatat prestasi siswa (akademik, olahraga, keagamaan),
   pelanggaran, frekuensi kunjungan ke BK, serta keanggotaan ekstrakurikuler.
 - Penjadwalan pelajaran menggunakan sistem penjadwalan otomatis agar tidak bentrok
   antar guru maupun antar kelas.
-
-DATA ALUMNI:
-Riwayat alumni mulai dirapikan sejak tahun 2023. Data lulusan lama masih dalam
-proses digitalisasi dari arsip Excel ke sistem.
 
 AKSES PENGGUNA:
 Akun portal akademik hanya tersedia untuk siswa, guru, dan administrator.
@@ -115,13 +126,21 @@ export default function Chatbot({ context }: { context: string }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Sapaan awal berbasis nama pengguna (bukan Akhi/Ukhti).
     const displayName = user?.name?.trim() || '';
+    const firstName = displayName.split(' ')[0];
     const greetings: Record<string, string> = {
-      admin: `Halo${displayName ? `, ${displayName}` : ''}. Saya Asisten SCOLA, asisten SMAIT Nur Hidayah. Saya dapat membantu pengelolaan data siswa, guru, jadwal, dan informasi sekolah.`,
-      guru: `Halo${displayName ? `, ${displayName}` : ''}. Saya Asisten SCOLA. Saya dapat membantu pengisian nilai, penjadwalan, atau informasi kelas.`,
-      siswa: `Halo${displayName ? `, ${displayName}` : ''}. Saya Asisten SCOLA. Silakan tanyakan jadwal, nilai, rumpun peminatan, atau informasi SMAIT Nur Hidayah.`,
-      public: `Halo${displayName ? `, ${displayName}` : ''}. Saya Asisten SCOLA dan dapat menjelaskan SMAIT Nur Hidayah Sukoharjo, pembagian kelas, rumpun peminatan, dan portal akademik.`,
+      admin: displayName
+        ? `Halo, ${firstName}. Saya Asisten SCOLA. Mau ngecek data, butuh panduan fitur, atau ada yang perlu diurus? Langsung aja tanya.`
+        : `Halo. Saya Asisten SCOLA. Mau ngecek data, butuh panduan fitur, atau ada yang perlu diurus? Langsung aja tanya.`,
+      guru: displayName
+        ? `Halo, ${firstName}. Saya Asisten SCOLA. Mau tanya soal input nilai, jadwal, atau butuh bantuan administrasi kelas? Saya siap bantu.`
+        : `Halo. Saya Asisten SCOLA. Mau tanya soal input nilai, jadwal, atau butuh bantuan administrasi kelas? Saya siap bantu.`,
+      siswa: displayName
+        ? `Halo, ${firstName}! Saya Asisten SCOLA, teman ngobrol virtualmu di sini. Mau tanya jadwal, nilai, rekomendasi kampus, butuh semangat, atau curhat soal sekolah? Gaskeun tanya aja.`
+        : `Halo! Saya Asisten SCOLA, teman ngobrol virtualmu di sini. Mau tanya jadwal, nilai, rekomendasi kampus, butuh semangat, atau curhat soal sekolah? Gaskeun tanya aja.`,
+      public: displayName
+        ? `Halo, ${firstName}. Saya Asisten SCOLA. Bisa jelasin soal SMAIT Nur Hidayah, rumpun kelas, fasilitas, atau cara pakai portal akademik. Tanya aja.`
+        : `Halo. Saya Asisten SCOLA. Bisa jelasin soal SMAIT Nur Hidayah, rumpun kelas, fasilitas, atau cara pakai portal akademik. Tanya aja.`,
     };
     setMessages([{ role: 'assistant', content: greetings[context] || greetings.public }]);
   }, [context, user?.name]);
@@ -134,31 +153,43 @@ export default function Chatbot({ context }: { context: string }) {
 
   const getSystemPrompt = (): string => {
     const roleContext: Record<string, string> = {
-      admin: 'Pengguna saat ini adalah ADMINISTRATOR sekolah. Bantu menjawab tentang manajemen data akademik, penggunaan fitur SCOLA, dan kebijakan sekolah.',
-      guru: `Pengguna adalah GURU${user?.specialization ? ` mata pelajaran ${user.specialization}` : ''}${user?.jabatan && user.jabatan !== 'Guru' ? ` dengan jabatan ${user.jabatan}` : ''}. Bantu dengan pertanyaan pengisian nilai, kehadiran, dan administrasi kelas.`,
-      siswa: `Pengguna adalah SISWA${user?.className ? ` kelas ${user.className}` : ''}. Bantu dengan info pelajaran, jadwal, nilai, dan info sekolah.`,
-      public: 'Pengguna adalah PENGUNJUNG/CALON SISWA. Bantu dengan info sistem pembagian kelas, rumpun peminatan A/B/C, fasilitas, dan cara kerja portal akademik SMAIT Nur Hidayah Sukoharjo.',
+      admin: `Pengguna saat ini adalah ADMINISTRATOR sekolah.
+TUGAS: bantu kelola data akademik, troubleshooting fitur SCOLA, dan kebijakan sekolah.
+GAYA: to the point, efisien, solusi-oriented. Berikan langkah-langkah konkret jika diminta panduan teknis.`,
+      guru: `Pengguna adalah GURU${user?.specialization ? ` mata pelajaran ${user.specialization}` : ''}${user?.jabatan && user.jabatan !== 'Guru' ? ` dengan jabatan ${user.jabatan}` : ''}.
+TUGAS: bantu soal pengisian nilai, jadwal mengajar, kehadiran, prestasi siswa, dan tips mengajar.
+GAYA: profesional tapi santai, menghargai waktu guru, berikan tips praktis.`,
+      siswa: `Pengguna adalah SISWA${user?.className ? ` kelas ${user.className}` : ''}.
+TUGAS: jadi teman ngobrol yang asik — bisa bantu jadwal, nilai, rumpun peminatan, rekomendasi universitas/jurusan, tips belajar, motivasi, hingga curhat ringan soal sekolah.
+GAYA: hangat seperti teman, santai, bisa bercanda ringan (tetap sopan), gunakan bahasa anak muda Indonesia yang natural. Jangan kaku seperti robot. Boleh pakai emoji di jawaban.
+KETIKA ditanya soal kampus/jurusan: berikan rekomendasi realistis berdasarkan rumpun peminatan A/B/C dan prestasi sekolah.
+KETIKA diminta semangat/motivasi: berikan semangat yang genuine, boleh kutipan islami ringan atau quotes motivasi pelajar.
+KETIKA ditanya alumni: arahkan ke menu Jejak Alumni (siswa) atau Data Alumni (admin).`,
+      public: `Pengguna adalah PENGUNJUNG/CALON SISWA.
+TUGAS: jelaskan info sekolah, rumpun peminatan, fasilitas, PPDB, dan cara kerja portal akademik.
+GAYA: ramah, informatif, dan meyakinkan.`,
     };
 
-    return `Kamu adalah Asisten SCOLA, asisten virtual SMAIT Nur Hidayah Sukoharjo. Jawab dalam Bahasa Indonesia yang hangat, profesional, dan ringkas.
+    return `Kamu adalah Asisten SCOLA, asisten virtual SMAIT Nur Hidayah Sukoharjo. Jawab dalam Bahasa Indonesia.
 
 GAYA BAHASA:
-- Sapa pengguna dengan nama yang sudah diberikan di bawah. Jangan gunakan panggilan "Akhi", "Ukhti", "Ustadz", atau "Ustadzah".
-- Jika nama pengguna tidak diketahui, sapa secara netral tanpa kata ganti spesifik.
-${user?.name ? `- Nama pengguna saat ini: ${user.name}.` : '- Nama pengguna belum diketahui.'}
+- Sapa pengguna dengan nama jika tersedia. Jangan pakai panggilan formal seperti "Akhi", "Ukhti", "Ustadz", atau "Ustadzah".
+- Untuk SISWA: bicara seperti teman sebaya yang pinter dan supportif. Boleh pakai slang ringan (gaskeun, mantap, wkwk, dll) asal tetap sopan dan tidak berlebihan.
+- Untuk ADMIN & GURU: tetap profesional tapi tidak kaku.
+- Nama pengguna: ${user?.name || 'belum diketahui'}.
 
 ${roleContext[context] || roleContext.public}
 
 ${SCHOOL_KNOWLEDGE}
 
 PANDUAN JAWABAN:
-- Gunakan bahasa Indonesia yang mudah dipahami.
 - Jika pertanyaan tentang sekolah, gunakan data di atas sebagai sumber utama.
-- Untuk pertanyaan yang tidak ada datanya, katakan dengan jujur bahwa kamu tidak punya info tersebut dan sarankan hubungi TU sekolah.
-- Jangan mengarang data siswa/guru/nilai spesifik — arahkan ke menu yang tepat di aplikasi.
-- Format jawaban rapi dengan bullet points jika berisi daftar.
-- Jangan terlalu panjang, maksimal 4-5 kalimat kecuali diminta detail.
-- Boleh menyisipkan kutipan Al-Qur'an/Hadits singkat hanya jika pengguna secara eksplisit meminta motivasi atau bertanya hal keislaman.`;
+- Jika tidak ada datanya, jujur bilang tidak tahu dan sarankan hubungi TU sekolah.
+- Jangan mengarang data siswa/guru/nilai spesifik — arahkan ke menu aplikasi yang tepat.
+- Format rapi dengan bullet points jika berisi daftar.
+- Maksimal 5-7 kalimat kecuali diminta detail panjang.
+- Boleh kasih emoji sesekali untuk siswa agar terasa hidup.
+- Boleh berikan tips belajar, time management, atau persiapan SNBT/UM jika diminta.`;
   };
 
   const handleSend = async (e: React.FormEvent) => {
@@ -185,8 +216,8 @@ PANDUAN JAWABAN:
             { role: 'system', content: getSystemPrompt() },
             ...newMessages.filter(m => m.role !== 'system').slice(-10),
           ],
-          temperature: 0.7,
-          max_tokens: 800,
+          temperature: 0.75,
+          max_tokens: 900,
           top_p: 1,
           stream: false,
         }),
@@ -215,13 +246,15 @@ PANDUAN JAWABAN:
     'Apakah boleh bawa HP ke sekolah?',
     'Bagaimana cara melihat nilai?',
   ] : context === 'siswa' ? [
-    'Cara melihat rapor daring?',
-    'Bagaimana memilih rumpun A/B/C?',
-    'Cara cek persaingan jurusan kampus',
+    'Rekomendasi kampus buat rumpun A?',
+    'Tips belajar efektif dong',
+    'Alumni SMAITNH biasa lanjut ke mana?',
+    'Semangat buat ujian besok',
+    'Gimana sih pilih rumpun yang bener?',
   ] : context === 'guru' ? [
     'Cara mengisi nilai harian?',
     'Bagaimana catat prestasi siswa?',
-    'Cara catat poin BK siswa?',
+    'Tips mengajar biar siswa paham',
   ] : [
     'Impor siswa melalui Excel?',
     'Ekspor akun ke PDF?',
