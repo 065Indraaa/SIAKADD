@@ -405,6 +405,7 @@ export interface GetKehadiranByKelasData {
     status: StatusKehadiran;
     catatan?: string | null;
     siswa: {
+      id: UUIDString;
       nis: string;
       pengguna: {
         nama: string;

@@ -191,9 +191,10 @@ export default function GuruAttendance() {
                   <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
                 </TableCell></TableRow>
               ) : students.length > 0 ? students.map((s) => {
-                const currentStatus = getStatusForSiswa(s.siswaId || s.id);
+                const siswaId = s.siswaId;
+                const currentStatus = getStatusForSiswa(siswaId);
                 return (
-                  <TableRow key={s.siswaId || s.id}>
+                  <TableRow key={siswaId}>
                     <TableCell className="py-4 pl-6">
                       <div className="font-semibold text-foreground">{s.name}</div>
                       <div className="text-xs text-muted-foreground font-mono mt-0.5">NIS {s.nis || '-'}</div>
@@ -215,7 +216,7 @@ export default function GuruAttendance() {
                             variant="outline"
                             size="sm"
                             disabled={saving}
-                            onClick={() => handleStatusChange(s.siswaId || s.id, opt.value)}
+                            onClick={() => handleStatusChange(siswaId, opt.value)}
                             className={`h-8 px-2 text-xs rounded-lg ${currentStatus === opt.value ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`}
                           >
                             {opt.value === 'Hadir' ? <Check className="h-3 w-3 mr-1" /> : opt.value === 'Alpa' ? <X className="h-3 w-3 mr-1" /> : null}
