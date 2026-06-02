@@ -15,11 +15,11 @@ import { useNotifications } from '@/contexts/NotificationContext';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useManualRefresh } from '@/lib/useManualRefresh';
 
-/** Kuota per rumpun (jumlah kelas × 30 siswa). */
+/** Kuota per rumpun (jumlah siswa). */
 const KUOTA: Record<string, number> = {
-  A: 60, // 2 kelas
-  B: 30, // 1 kelas
-  C: 60, // 2 kelas
+  A: 60,
+  B: 30,
+  C: 60,
 };
 
 interface StudentRow {
@@ -324,8 +324,8 @@ export default function AdminPenjuruan() {
               <strong>Rumpun B (Teknik)</strong> & <strong>Rumpun C (Sosial)</strong>: siswa bebas memilih.
             </li>
             <li>
-              Kuota kelas: <strong>A = 2 kelas (±60 siswa)</strong>, <strong>B = 1 kelas (±30 siswa)</strong>,{' '}
-              <strong>C = 2 kelas (±60 siswa)</strong>. Jika kuota penuh, siswa dengan nilai terendah di rumpun
+              Kuota: <strong>A = 60 siswa</strong>, <strong>B = 30 siswa</strong>,{' '}
+              <strong>C = 60 siswa</strong>. Jika kuota penuh, siswa dengan nilai terendah di rumpun
               tersebut dipindahkan ke rumpun alternatif yang masih tersedia.
             </li>
           </ul>

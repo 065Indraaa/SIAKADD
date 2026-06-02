@@ -170,7 +170,7 @@ export default function AdminClasses() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold text-white">Manajemen Kelas</h2>
-          <p className="text-slate-300 mt-1">Kelola kelas 10 (umum) dan kelas 11. Kelas 11: Rumpun A (2 kls), B (1 kls), C (2 kls).</p>
+          <p className="text-slate-300 mt-1">Kelola kelas 10 (umum) dan kelas 11 berdasarkan rumpun peminatan A, B, C.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={refresh} disabled={refreshing}
@@ -308,7 +308,7 @@ export default function AdminClasses() {
             </DialogTitle>
             <p className="text-slate-300 text-xs mt-1">
               Kelas 10: Fase E — dibagi 10 kelas (X-1 s/d X-10), ~30 siswa/kelas.<br />
-              Kelas 11: Rumpun A Kesehatan (2 kls), B Teknik (1 kls), C Sosial (2 kls).
+              Kelas 11: Rumpun A Kesehatan, B Teknik, C Sosial.
             </p>
           </div>
 

@@ -32,15 +32,15 @@ SISTEM KELAS:
 PROGRAM PEMINATAN (mulai kelas 11):
 KRITERIA PENJURUSAN:
 - Kriteria diambil dari RATA-RATA NILAI KELAS 10 (semester Ganjil & Genap), bukan per mata pelajaran.
-- Rumpun A — Kelompok Kesehatan (2 kelas, kuota ~60 siswa)
+- Rumpun A — Kelompok Kesehatan (kuota ~60 siswa)
   Syarat: rata-rata nilai kelas 10 minimal 87.
   Mata pelajaran: Matematika, Fisika, Kimia, Biologi.
   Diarahkan untuk jalur kedokteran, farmasi, keperawatan, dan ilmu kesehatan lainnya.
-- Rumpun B — Kelompok Teknik (1 kelas, kuota ~30 siswa)
+- Rumpun B — Kelompok Teknik (kuota ~30 siswa)
   Syarat: siswa bebas memilih tanpa batasan nilai minimal.
   Mata pelajaran: Fisika, Matematika Tingkat Lanjut, Biologi, Kimia.
   Diarahkan untuk jalur teknik (informatika, sipil, mesin, industri, arsitektur).
-- Rumpun C — Kelompok Sosial & Humaniora (2 kelas, kuota ~60 siswa)
+- Rumpun C — Kelompok Sosial & Humaniora (kuota ~60 siswa)
   Syarat: siswa bebas memilih tanpa batasan nilai minimal.
   Mata pelajaran: Ekonomi, Sosiologi, Geografi, Sejarah.
   Diarahkan untuk jalur hukum, bisnis, hubungan internasional, komunikasi, dan dakwah.

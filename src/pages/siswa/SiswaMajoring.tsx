@@ -179,7 +179,7 @@ export default function SiswaMajoring() {
           <li>Kriteria diambil dari <strong>rata-rata nilai kelas 10</strong> (semester Ganjil & Genap).</li>
           <li><strong>Rumpun A — Kesehatan</strong>: minimal rata-rata <strong>87</strong>.</li>
           <li><strong>Rumpun B — Teknik</strong> & <strong>C — Sosial</strong>: bebas memilih.</li>
-          <li>Kuota: A = 2 kelas, B = 1 kelas, C = 2 kelas. Jika kuota penuh, siswa nilai terendah dipindah ke rumpun alternatif.</li>
+          <li>Kuota: A = 60 siswa, B = 30 siswa, C = 60 siswa. Jika kuota penuh, siswa nilai terendah dipindah ke rumpun alternatif.</li>
         </ul>
       </div>
 
