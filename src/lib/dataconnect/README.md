@@ -2254,9 +2254,10 @@ export interface GetNilaiBySiswaData {
     semester: string;
     tahunAjaran: string;
     mataPelajaran: {
+      id: UUIDString;
       nama: string;
       kode: string;
-    };
+    } & MataPelajaran_Key;
   } & Nilai_Key)[];
 }
 ```
@@ -3017,11 +3018,12 @@ export interface GetKehadiranByKelasData {
     status: StatusKehadiran;
     catatan?: string | null;
     siswa: {
+      id: UUIDString;
       nis: string;
       pengguna: {
         nama: string;
       };
-    };
+    } & Siswa_Key;
   } & Kehadiran_Key)[];
 }
 ```

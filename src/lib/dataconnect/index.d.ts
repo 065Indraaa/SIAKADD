@@ -410,7 +410,7 @@ export interface GetKehadiranByKelasData {
       pengguna: {
         nama: string;
       };
-    };
+    } & Siswa_Key;
   } & Kehadiran_Key)[];
 }
 
@@ -487,7 +487,7 @@ export interface GetNilaiBySiswaData {
       id: UUIDString;
       nama: string;
       kode: string;
-    };
+    } & MataPelajaran_Key;
   } & Nilai_Key)[];
 }
 
