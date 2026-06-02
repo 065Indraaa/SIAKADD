@@ -197,7 +197,7 @@ function AdminOverview() {
               { label: 'Manajemen Kelas', href: '/admin/classes', icon: BookOpen },
               { label: 'Mata Pelajaran', href: '/admin/subjects', icon: Book },
               { label: 'Data Jurusan', href: '/admin/majors', icon: Award },
-              { label: 'Penjuruan Siswa', href: '/admin/penjuruan', icon: MoveRight },
+              { label: 'Penjurusan Siswa', href: '/admin/penjuruan', icon: MoveRight },
               { label: 'Data Alumni', href: '/admin/alumni', icon: GraduationCap },
             ].map((link, i) => (
               <Link key={i} to={link.href} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-accent text-muted-foreground hover:text-foreground transition-colors group">

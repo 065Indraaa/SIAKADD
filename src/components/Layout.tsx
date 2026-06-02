@@ -5,7 +5,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useNotifications } from '../contexts/NotificationContext';
 import {
   LogOut, LayoutDashboard, Users, GraduationCap, BookOpen,
-  Award, Settings, Menu, X, MessageSquare, Calendar,
+  Award, Menu, X, MessageSquare, Calendar,
   ChevronRight, Zap, Book, MoveRight, Sun, Moon
 } from 'lucide-react';
 import Chatbot from './Chatbot';
@@ -51,7 +51,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       { label: 'Mata Pelajaran', href: '/admin/subjects', icon: Book },
       { label: 'Jadwal', href: '/admin/schedules', icon: Calendar },
       { label: 'Jurusan', href: '/admin/majors', icon: Award },
-      { label: 'Penjuruan', href: '/admin/penjuruan', icon: MoveRight },
+      { label: 'Penjurusan', href: '/admin/penjuruan', icon: MoveRight },
       { label: 'Alumni', href: '/admin/alumni', icon: GraduationCap },
     ];
     if (user?.role === 'guru') return [

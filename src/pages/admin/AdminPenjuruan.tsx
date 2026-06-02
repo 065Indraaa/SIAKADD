@@ -164,6 +164,12 @@ export default function AdminPenjuruan() {
     const jurusanB = jurusans.find(j => j.kode === 'B');
     const jurusanC = jurusans.find(j => j.kode === 'C');
 
+    if (!jurusanA || !jurusanB || !jurusanC) {
+      alert('Data jurusan A, B, C belum lengkap. Tambahkan jurusan terlebih dahulu di menu Jurusan.');
+      setShowAutoModal(false);
+      return;
+    }
+
     // Urutkan nilai tertinggi ke terendah
     const sorted = [...k10].sort((a, b) => (b.rataRata ?? 0) - (a.rataRata ?? 0));
 
