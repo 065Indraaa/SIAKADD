@@ -134,11 +134,11 @@ export default function AdminPenjuruan() {
     if (k && officialCounts[k] !== undefined) officialCounts[k]++;
   });
 
-  // Kelas 11 yang tersedia untuk sebuah rumpun (untuk penempatan otomatis saat ACC).
-  const kelas11ByJurusan = (jurusanId: string) =>
-    kelasList.filter(k => String(k.level) === '11' && k.jurusanId === jurusanId);
+  // Kelas target yang tersedia untuk sebuah rumpun sesuai tingkat siswa.
+  const kelasTargetByJurusan = (jurusanId: string, level: number | null) =>
+    kelasList.filter(k => k.level === (level && level >= 11 ? level : 11) && k.jurusanId === jurusanId);
 
-  /** ACC satu siswa: tetapkan jurusan resmi + naikkan ke kelas 11 rumpun terkait. */
+  /** ACC satu siswa: tetapkan jurusan resmi + tempatkan ke kelas target rumpun terkait. */
   const handleAcc = async (student: StudentRow) => {
     const targetId = student.assigned || student.peminatanId;
     if (!targetId) {
@@ -156,26 +156,36 @@ export default function AdminPenjuruan() {
       return;
     }
     const jurusanNama = jurusans.find(j => j.id === targetId)?.nama || kode;
-    if (!confirm(`ACC ${student.name} ke Rumpun ${kode} — ${jurusanNama}?\nJurusan resmi & kelas siswa akan diperbarui (naik ke kelas 11).`)) return;
+    const targetLevel = student.gradeLevel && student.gradeLevel >= 11 ? student.gradeLevel : 11;
+    const isNaikKelas = student.gradeLevel === 10;
+    const aksiText = isNaikKelas
+      ? 'naik ke kelas 11'
+      : student.jurusanId
+      ? `pindah jurusan di kelas ${targetLevel}`
+      : `tetapkan jurusan di kelas ${targetLevel}`;
+    if (!confirm(`ACC ${student.name} ke Rumpun ${kode} — ${jurusanNama}?\nJurusan resmi & kelas siswa akan diperbarui (${aksiText}).`)) return;
 
     setAccId(student.siswaId);
     try {
-      // Pilih kelas 11 rumpun terkait dengan anggota paling sedikit (distribusi merata).
-      const kelas11 = kelas11ByJurusan(targetId).map(k => ({
+      // Pilih kelas target rumpun terkait dengan anggota paling sedikit (distribusi merata).
+      const kelasTarget = kelasTargetByJurusan(targetId, student.gradeLevel).map(k => ({
         id: k.id,
         name: k.name,
         n: students.filter(s => s.className === k.name).length,
       }));
-      kelas11.sort((a, b) => a.n - b.n);
-      const kelasId = kelas11[0]?.id;
+      kelasTarget.sort((a, b) => a.n - b.n);
+      const kelasId = kelasTarget[0]?.id;
 
       await approvePenjurusan({ siswaId: student.siswaId, jurusanId: targetId, kelasId });
       await new Promise(r => setTimeout(r, 400));
       await loadData();
+      const notifAksi = isNaikKelas
+        ? `${kelasId ? ` dan dinaikkan ke kelas ${kelasTarget[0].name}` : ` (kelas ${targetLevel} rumpun ini belum dibuat)`}`
+        : `${kelasId ? ` di kelas ${kelasTarget[0].name}` : ` (kelas ${targetLevel} rumpun ini belum dibuat)`}`;
       addNotif({
         type: 'success', kind: 'akademik',
         title: 'Penjurusan Disetujui',
-        body: `${student.name} ditetapkan ke Rumpun ${kode}${kelasId ? ` dan dinaikkan ke kelas ${kelas11[0].name}` : ' (kelas 11 rumpun ini belum dibuat)'}.`,
+        body: `${student.name} ditetapkan ke Rumpun ${kode}${notifAksi}.`,
       });
     } catch (e: any) {
       alert('Gagal ACC penjurusan: ' + (e.message || 'Error'));
@@ -503,7 +513,7 @@ export default function AdminPenjuruan() {
                 <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4">Rata-rata Kls 10</TableHead>
                 <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4">Peminatan Saat Ini</TableHead>
                 <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4">Tetapkan Peminatan</TableHead>
-                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4 text-center">ACC / Naik Kelas 11</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4 text-center">ACC / Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -591,18 +601,37 @@ export default function AdminPenjuruan() {
                           const accendingThis = accId === student.siswaId;
                           if (sudahResmi) {
                             return (
-                              <Badge className="bg-emerald-600/20 text-emerald-300 border-emerald-500/30 text-[11px]">
-                                <CheckCircle2 className="mr-1 h-3 w-3" /> {targetKode} · {student.className}
-                              </Badge>
+                              <div className="inline-flex items-center gap-1.5">
+                                <Badge className="bg-emerald-600/20 text-emerald-300 border-emerald-500/30 text-[11px]">
+                                  <CheckCircle2 className="mr-1 h-3 w-3" /> {targetKode} · {student.className}
+                                </Badge>
+                                {(student.gradeLevel === 11 || student.gradeLevel === 12) && (
+                                  <button
+                                    onClick={() => alert(`${student.name} (${student.nis})\nRumpun: ${targetKode} — ${student.jurusanName}\nKelas: ${student.className}\nStatus: Sudah ditetapkan`)}
+                                    className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition-colors"
+                                    title="Lihat detail penjurusan"
+                                  >
+                                    <Info className="h-3.5 w-3.5" />
+                                  </button>
+                                )}
+                              </div>
                             );
                           }
+                          const isNaikKelas = student.gradeLevel === 10;
+                          const accTitle = !targetId
+                            ? 'Tetapkan rumpun dulu'
+                            : isNaikKelas
+                            ? `Setujui & naikkan ke kelas 11 (Rumpun ${targetKode})`
+                            : student.jurusanId
+                            ? `Pindah ke Rumpun ${targetKode}`
+                            : `Tetapkan jurusan (Rumpun ${targetKode})`;
                           return (
                             <Button
                               size="sm"
                               disabled={!targetId || accendingThis || !!accId}
                               onClick={() => handleAcc(student)}
                               className="h-9 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-40"
-                              title={targetId ? `Setujui & naikkan ke kelas 11 (Rumpun ${targetKode})` : 'Tetapkan rumpun dulu'}
+                              title={accTitle}
                             >
                               {accendingThis
                                 ? <Loader2 className="h-4 w-4 animate-spin" />
