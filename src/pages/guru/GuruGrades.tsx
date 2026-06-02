@@ -326,9 +326,7 @@ export default function GuruGrades() {
         const uas = parseFloat(String(s.nilaiUas));
         const remUts = parseFloat(String(s.nilaiRemedialUts));
         const remUas = parseFloat(String(s.nilaiRemedialUas));
-        const hasNilai = !isNaN(nh) || !isNaN(uts) || !isNaN(uas) || !isNaN(remUts) || !isNaN(remUas);
-        if (!hasNilai && !s.existingId) continue;
-
+        // Selalu simpan/update record agar jumlahTugasHarian tersimpan untuk semua siswa
         try {
           if (s.existingId) {
             await updateNilaiData(s.existingId, {
@@ -395,6 +393,7 @@ export default function GuruGrades() {
         }
       }
       await new Promise(r => setTimeout(r, 400));
+      hasChangesRef.current = false;
       await loadStudentsWithGrades();
     } catch (e: any) {
       setError(e.message || 'Gagal menyimpan nilai.');
