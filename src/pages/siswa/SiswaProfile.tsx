@@ -73,8 +73,8 @@ export default function SiswaProfile() {
         year: 'numeric', month: 'long', day: 'numeric',
       })
     : '-';
-  const displayJurusan = profile?.jurusan?.nama || user?.jurusanName || '-';
-  const displayPeminatan = profile?.peminatan?.nama || user?.peminatanName || '-';
+  const displayJurusan = profile?.jurusan?.nama || user?.jurusanName || 'Belum ditetapkan';
+  const displayPeminatan = profile?.peminatan?.nama || user?.peminatanName || 'Belum dipilih';
   // Gunakan !== undefined/null agar angka 0 tidak jadi '-'
   const displayTahunMasuk = profile?.tahunMasuk != null
     ? String(profile.tahunMasuk)
@@ -86,8 +86,8 @@ export default function SiswaProfile() {
     { label: 'Jenis Kelamin', value: displayGender },
     { label: 'Tempat Lahir', value: displayBirthPlace },
     { label: 'Tanggal Lahir', value: displayBirthDate },
-    { label: 'Jurusan', value: displayJurusan },
-    { label: 'Rumpun Peminatan', value: displayPeminatan },
+    { label: 'Jurusan (Kelas)', value: displayJurusan, hint: 'Jurusan mengikuti kelas, ditetapkan saat naik kelas 11' },
+    { label: 'Rumpun Peminatan', value: displayPeminatan, hint: 'Pilihan siswa untuk kelas 11 (A/B/C)' },
     { label: 'Tahun Masuk', value: displayTahunMasuk },
   ];
 
@@ -142,6 +142,9 @@ export default function SiswaProfile() {
                     {item.label}
                   </dt>
                   <dd className="text-sm font-semibold text-foreground mt-0.5">{item.value}</dd>
+                  {item.hint && (
+                    <p className="text-[10px] text-muted-foreground/70 mt-0.5">{item.hint}</p>
+                  )}
                 </div>
               ))}
             </dl>

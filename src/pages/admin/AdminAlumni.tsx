@@ -118,6 +118,7 @@ export default function AdminAlumni() {
           status: formData.status,
           institution: formData.institution,
           position: formData.major,
+          achievements: formData.achievements,
         });
       }
       await new Promise(r => setTimeout(r, 400)); // Tunggu DB commit

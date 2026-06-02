@@ -195,13 +195,14 @@ export default function GuruAchievements() {
                 <TableHead className="p-8">Nama Prestasi</TableHead>
                 <TableHead>Penerima (Siswa)</TableHead>
                 <TableHead>Tingkat / Peringkat</TableHead>
+                <TableHead>Deskripsi</TableHead>
                 <TableHead>Waktu</TableHead>
                 <TableHead className="text-right pr-10">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-40"><Loader2 className="h-10 w-10 animate-spin text-emerald-500 mx-auto opacity-50" /></TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-40"><Loader2 className="h-10 w-10 animate-spin text-emerald-500 mx-auto opacity-50" /></TableCell></TableRow>
               ) : filtered.length > 0 ? filtered.map((a) => (
                 <TableRow key={a.id} className="border-white/5 hover:bg-white/5 group transition-all duration-300 h-24">
                   <TableCell className="p-8">
@@ -227,6 +228,11 @@ export default function GuruAchievements() {
                     </div>
                   </TableCell>
                   <TableCell>
+                     <div className="text-slate-400 text-sm max-w-[200px] truncate" title={a.deskripsi || ''}>
+                        {a.deskripsi || <span className="text-slate-600 italic text-xs">—</span>}
+                     </div>
+                  </TableCell>
+                  <TableCell>
                      <div className="text-slate-400 font-medium flex items-center gap-2">
                         <Calendar className="h-4 w-4 opacity-50" /> {new Date(a.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric'})}
                      </div>
@@ -239,7 +245,7 @@ export default function GuruAchievements() {
                   </TableCell>
                 </TableRow>
               )) : (
-                <TableRow><TableCell colSpan={5} className="text-center py-40">
+                <TableRow><TableCell colSpan={6} className="text-center py-40">
                    <Trophy className="h-20 w-20 text-slate-800 mx-auto mb-6 opacity-20" />
                    <p className="text-slate-500 font-black uppercase tracking-widest text-[10px]">Belum ada rekam prestasi</p>
                 </TableCell></TableRow>

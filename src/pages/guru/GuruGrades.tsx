@@ -76,6 +76,7 @@ export default function GuruGrades() {
 
   const [jumlahTugas, setJumlahTugas] = useState(10);
   const [tugasMap, setTugasMap] = useState<Record<string, Record<number, { id?: string; nilai?: number }>>>({});
+  const [hasChanges, setHasChanges] = useState(false);
 
   const loadAssignments = useCallback(async () => {
     setLoadingAssignments(true);
@@ -252,13 +253,14 @@ export default function GuruGrades() {
   }, [selectedAssignment, semester, tahunAjaran]);
 
   useEffect(() => { loadStudentsWithGrades(); }, [loadStudentsWithGrades]);
-  useAutoRefresh(loadStudentsWithGrades, 20_000);
+  useAutoRefresh(loadStudentsWithGrades, 20_000, !hasChanges);
 
   const [refreshing, refresh] = useManualRefresh(loadAssignments, loadStudentsWithGrades);
 
   const handleNilaiChange = (siswaId: string, field: keyof Omit<SiswaGrade, 'tugas'>, val: string) => {
     setStudents(prev => prev.map(s => s.siswaId === siswaId ? { ...s, [field]: val } : s));
     setSaved(false);
+    setHasChanges(true);
   };
 
   const handleTugasChange = (siswaId: string, pertemuan: number, val: string) => {
@@ -267,6 +269,7 @@ export default function GuruGrades() {
       return { ...s, tugas: { ...s.tugas, [pertemuan]: val } };
     }));
     setSaved(false);
+    setHasChanges(true);
   };
 
   const effectiveUts = (s: SiswaGrade) => {
@@ -370,6 +373,7 @@ export default function GuruGrades() {
         setError(`${successCount} berhasil disimpan, ${errors.length} gagal. Detail: ${errors.slice(0, 3).join('; ')}`);
       } else {
         setSaved(true);
+        setHasChanges(false);
         setTimeout(() => setSaved(false), 3000);
         if (successCount > 0) {
           addNotif({
@@ -599,7 +603,11 @@ export default function GuruGrades() {
             <div className="space-y-1.5 flex-1">
               <Label className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Jumlah Tugas Harian per Semester</Label>
               <Input type="number" min={1} max={50} value={jumlahTugas}
-                onChange={(e) => setJumlahTugas(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) => {
+                  const val = Math.max(1, parseInt(e.target.value) || 1);
+                  setJumlahTugas(val);
+                  setHasChanges(true);
+                }}
                 className="h-11 w-32 rounded-xl text-center" />
             </div>
             <p className="text-xs text-muted-foreground max-w-md">

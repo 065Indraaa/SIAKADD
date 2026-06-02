@@ -10,7 +10,7 @@ import { Calendar, Check, X, Loader2, RefreshCw, AlertCircle } from 'lucide-reac
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { fetchSiswa } from '@/lib/userService';
-import { fetchKelas, fetchKehadiranByKelas, recordKehadiran, removeKehadiran } from '@/lib/schoolService';
+import { fetchKelas, fetchKehadiranByKelas, saveKehadiran, removeKehadiran } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useManualRefresh } from '@/lib/useManualRefresh';
 import { currentSemester, currentTahunAjaran } from '@/lib/tahunAjaran';
@@ -86,7 +86,7 @@ export default function GuruAttendance() {
         await removeKehadiran(recordId);
       }
       if (status) {
-        await recordKehadiran({
+        await saveKehadiran({
           siswaId,
           kelasId: selectedKelasId,
           tanggal,

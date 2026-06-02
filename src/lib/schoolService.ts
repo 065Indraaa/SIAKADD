@@ -40,16 +40,16 @@ import {
   listAlumniRef,
   listTugasHarianRef,
   listTugasHarianByKelasRef,
-  upsertTugasHarianRef,
-  deleteTugasHarianRef,
+  upsertTugasHarian,
+  deleteTugasHarian,
   getBobotNilaiRef,
   listBobotNilaiByKelasRef,
-  upsertBobotNilaiRef,
-  updateBobotNilaiRef,
+  upsertBobotNilai,
+  updateBobotNilai,
   getKehadiranByKelasRef,
   getKehadiranBySiswaRef,
-  recordKehadiranRef,
-  deleteKehadiranRef,
+  recordKehadiran,
+  deleteKehadiran,
 } from '@uassiakad/connector';
 import { executeQuery } from 'firebase/data-connect';
 
@@ -401,7 +401,7 @@ export async function fetchTugasHarianByKelas(kelasId: string, mataPelajaranId: 
 }
 
 export async function addTugasHarian(data: any) {
-  return await upsertTugasHarianRef(dataConnect, {
+  return await upsertTugasHarian(dataConnect, {
     siswaId: data.siswaId,
     kelasId: data.kelasId,
     mataPelajaranId: data.mataPelajaranId,
@@ -413,7 +413,7 @@ export async function addTugasHarian(data: any) {
 }
 
 export async function removeTugasHarian(id: string) {
-  return await deleteTugasHarianRef(dataConnect, { id });
+  return await deleteTugasHarian(dataConnect, { id });
 }
 
 // ============================================================
@@ -430,7 +430,7 @@ export async function fetchBobotNilaiByKelas(kelasId: string, semester: string, 
 }
 
 export async function setBobotNilai(data: any) {
-  return await upsertBobotNilaiRef(dataConnect, {
+  return await upsertBobotNilai(dataConnect, {
     kelasId: data.kelasId,
     mataPelajaranId: data.mataPelajaranId,
     semester: data.semester,
@@ -444,7 +444,7 @@ export async function setBobotNilai(data: any) {
 }
 
 export async function editBobotNilai(id: string, data: any) {
-  return await updateBobotNilaiRef(dataConnect, {
+  return await updateBobotNilai(dataConnect, {
     id,
     bobotKehadiran: data.bobotKehadiran,
     bobotHarian: data.bobotHarian,
@@ -467,8 +467,8 @@ export async function fetchKehadiranBySiswa(siswaId: string) {
   return res.data.kehadirans || [];
 }
 
-export async function recordKehadiran(data: any) {
-  return await recordKehadiranRef(dataConnect, {
+export async function saveKehadiran(data: any) {
+  return await recordKehadiran(dataConnect, {
     siswaId: data.siswaId,
     kelasId: data.kelasId,
     tanggal: data.tanggal,
@@ -478,5 +478,5 @@ export async function recordKehadiran(data: any) {
 }
 
 export async function removeKehadiran(id: string) {
-  return await deleteKehadiranRef(dataConnect, { id });
+  return await deleteKehadiran(dataConnect, { id });
 }

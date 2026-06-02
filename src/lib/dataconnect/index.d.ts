@@ -484,6 +484,7 @@ export interface GetNilaiBySiswaData {
     semester: string;
     tahunAjaran: string;
     mataPelajaran: {
+      id: UUIDString;
       nama: string;
       kode: string;
     };

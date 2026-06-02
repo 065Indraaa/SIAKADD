@@ -12,6 +12,7 @@ import { useEffect, useRef } from 'react';
 export function useAutoRefresh(
   refresh: () => void | Promise<void>,
   intervalMs: number = 30_000,
+  enabled: boolean = true,
 ) {
   // Simpan callback di ref agar efek tidak restart saat callback berubah
   const refreshRef = useRef(refresh);
@@ -23,7 +24,7 @@ export function useAutoRefresh(
     let isActive = true;
 
     const run = () => {
-      if (isActive && document.visibilityState === 'visible') {
+      if (isActive && enabled && document.visibilityState === 'visible') {
         refreshRef.current();
       }
     };
@@ -33,10 +34,10 @@ export function useAutoRefresh(
 
     // Refresh saat tab fokus kembali
     const onVisibility = () => {
-      if (document.visibilityState === 'visible') refreshRef.current();
+      if (enabled && document.visibilityState === 'visible') refreshRef.current();
     };
-    const onOnline = () => refreshRef.current();
-    const onFocus = () => refreshRef.current();
+    const onOnline = () => { if (enabled) refreshRef.current(); };
+    const onFocus = () => { if (enabled) refreshRef.current(); };
 
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('online', onOnline);
@@ -49,5 +50,5 @@ export function useAutoRefresh(
       window.removeEventListener('online', onOnline);
       window.removeEventListener('focus', onFocus);
     };
-  }, [intervalMs]);
+  }, [intervalMs, enabled]);
 }

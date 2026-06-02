@@ -358,6 +358,7 @@ query GetNilaiBySiswa($siswaId: UUID!, $semester: String, $tahunAjaran: String) 
     semester
     tahunAjaran
     mataPelajaran {
+      id
       nama
       kode
     }

@@ -90,9 +90,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex items-center gap-3 border-b border-sidebar-border px-5 py-5">
-        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 shadow-lg shadow-blue-600/30">
-          <Zap className="w-4 h-4 text-white" />
-        </div>
+        <img src="/scola.jpg" alt="SCOLA" className="h-8 w-8 flex-shrink-0 rounded-lg object-cover shadow-lg shadow-blue-600/30" />
         <div>
           <div className="text-sidebar-foreground font-bold text-base leading-none" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             SCOLA
