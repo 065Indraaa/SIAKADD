@@ -5,12 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { LookupSelect } from '@/components/ui/lookup-select';
 import {
-  Search, Save, CheckCircle2, Loader2, RefreshCw, MoveRight, Info, Users, Calculator, X
+  Search, Save, CheckCircle2, Loader2, RefreshCw, MoveRight, Info, Users, Calculator, X, ArrowUpCircle, AlertTriangle
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 import { fetchSiswa } from '@/lib/userService';
-import { fetchJurusan, savePeminatan, hitungRataRataKelas10 } from '@/lib/schoolService';
+import { fetchJurusan, savePeminatan, hitungRataRataKelas10, fetchKelas, approvePenjurusan } from '@/lib/schoolService';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useManualRefresh } from '@/lib/useManualRefresh';
@@ -32,6 +32,9 @@ interface StudentRow {
   tahunMasuk: number | null;
   peminatanId: string;
   peminatanName: string;
+  /** Jurusan RESMI siswa (kosong selama masih kelas 10 / belum di-ACC). */
+  jurusanId: string;
+  jurusanName: string;
   assigned: string;
   rataRata: number | null;
 }
@@ -47,12 +50,14 @@ export default function AdminPenjuruan() {
 
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [jurusans, setJurusans] = useState<any[]>([]);
+  const [kelasList, setKelasList] = useState<any[]>([]);
+  const [accId, setAccId] = useState<string | null>(null);
   const [tingkatFilter, setTingkatFilter] = useState<string>('10');
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [siswaData, jurusanData] = await Promise.all([fetchSiswa(), fetchJurusan()]);
+      const [siswaData, jurusanData, kelasData] = await Promise.all([fetchSiswa(), fetchJurusan(), fetchKelas()]);
       const mapped: StudentRow[] = siswaData.map(s => ({
         siswaId: s.siswaId!,
         penggunaId: s.id,
@@ -63,11 +68,14 @@ export default function AdminPenjuruan() {
         tahunMasuk: s.tahunMasuk ?? null,
         peminatanId: s.peminatanId || '',
         peminatanName: s.peminatanName || '',
+        jurusanId: s.jurusanId || '',
+        jurusanName: s.jurusanName || '',
         assigned: s.peminatanId || '',
         rataRata: null,
       }));
       setStudents(mapped);
       setJurusans(jurusanData);
+      setKelasList(kelasData);
 
       // Hitung rata-rata kelas 10 secara paralel (hanya untuk kelas 10)
       const kelas10 = mapped.filter(m => m.gradeLevel === 10 && m.tahunMasuk);
@@ -115,6 +123,66 @@ export default function AdminPenjuruan() {
   });
 
   const changedCount = students.filter(s => s.assigned !== s.peminatanId).length;
+
+  const kodeOf = (id: string): 'A' | 'B' | 'C' | undefined =>
+    jurusans.find(j => j.id === id)?.kode;
+
+  // Okupansi kuota dihitung dari JURUSAN RESMI (siswa kelas 11 yang sudah di-ACC).
+  const officialCounts: Record<string, number> = { A: 0, B: 0, C: 0 };
+  students.forEach(s => {
+    const k = kodeOf(s.jurusanId);
+    if (k && officialCounts[k] !== undefined) officialCounts[k]++;
+  });
+
+  // Kelas 11 yang tersedia untuk sebuah rumpun (untuk penempatan otomatis saat ACC).
+  const kelas11ByJurusan = (jurusanId: string) =>
+    kelasList.filter(k => String(k.level) === '11' && k.jurusanId === jurusanId);
+
+  /** ACC satu siswa: tetapkan jurusan resmi + naikkan ke kelas 11 rumpun terkait. */
+  const handleAcc = async (student: StudentRow) => {
+    const targetId = student.assigned || student.peminatanId;
+    if (!targetId) {
+      alert('Siswa belum memilih rumpun. Tetapkan rumpun pada kolom "Tetapkan Peminatan" terlebih dahulu.');
+      return;
+    }
+    const kode = kodeOf(targetId);
+    if (kode === 'A' && (student.rataRata ?? 0) < 87) {
+      alert(`${student.name} belum memenuhi syarat Rumpun A (Kesehatan).\nRata-rata kelas 10 minimal 87 — saat ini ${student.rataRata != null ? student.rataRata.toFixed(1) : '—'}.`);
+      return;
+    }
+    const alreadyThere = student.jurusanId === targetId;
+    if (!alreadyThere && kode && officialCounts[kode] >= (KUOTA[kode] ?? Infinity)) {
+      alert(`Kuota Rumpun ${kode} sudah penuh (${officialCounts[kode]}/${KUOTA[kode]}).\nPindahkan siswa lain atau pilih rumpun yang masih tersedia.`);
+      return;
+    }
+    const jurusanNama = jurusans.find(j => j.id === targetId)?.nama || kode;
+    if (!confirm(`ACC ${student.name} ke Rumpun ${kode} — ${jurusanNama}?\nJurusan resmi & kelas siswa akan diperbarui (naik ke kelas 11).`)) return;
+
+    setAccId(student.siswaId);
+    try {
+      // Pilih kelas 11 rumpun terkait dengan anggota paling sedikit (distribusi merata).
+      const kelas11 = kelas11ByJurusan(targetId).map(k => ({
+        id: k.id,
+        name: k.name,
+        n: students.filter(s => s.className === k.name).length,
+      }));
+      kelas11.sort((a, b) => a.n - b.n);
+      const kelasId = kelas11[0]?.id;
+
+      await approvePenjurusan({ siswaId: student.siswaId, jurusanId: targetId, kelasId });
+      await new Promise(r => setTimeout(r, 400));
+      await loadData();
+      addNotif({
+        type: 'success', kind: 'akademik',
+        title: 'Penjurusan Disetujui',
+        body: `${student.name} ditetapkan ke Rumpun ${kode}${kelasId ? ` dan dinaikkan ke kelas ${kelas11[0].name}` : ' (kelas 11 rumpun ini belum dibuat)'}.`,
+      });
+    } catch (e: any) {
+      alert('Gagal ACC penjurusan: ' + (e.message || 'Error'));
+    } finally {
+      setAccId(null);
+    }
+  };
 
   const handleSave = async () => {
     if (changedCount === 0) return;
@@ -334,8 +402,45 @@ export default function AdminPenjuruan() {
               <strong>C = 60 siswa</strong>. Jika kuota penuh, siswa dengan nilai terendah di rumpun
               tersebut dipindahkan ke rumpun alternatif yang masih tersedia.
             </li>
+            <li>
+              Selama <strong>kelas 10</strong> siswa hanya <em>memilih</em> rumpun (kelas tetap umum, tanpa jurusan).
+              Saat admin menekan <strong>ACC</strong>, jurusan resmi ditetapkan dan siswa otomatis
+              <strong> dinaikkan ke kelas 11</strong> sesuai rumpun — perubahan langsung tampil di dashboard siswa.
+            </li>
           </ul>
         </div>
+      </div>
+
+      {/* Okupansi Kuota Rumpun (berdasarkan jurusan resmi kelas 11) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {(['A', 'B', 'C'] as const).map(kode => {
+          const used = officialCounts[kode] || 0;
+          const quota = KUOTA[kode];
+          const pct = Math.min(100, Math.round((used / quota) * 100));
+          const full = used >= quota;
+          const label = kode === 'A' ? 'Kesehatan' : kode === 'B' ? 'Teknik' : 'Sosial';
+          return (
+            <Card key={kode} className="bg-slate-900/60 border-white/10 rounded-xl">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-bold text-white">Rumpun {kode} <span className="text-slate-400 font-normal">· {label}</span></p>
+                  <span className={`text-xs font-semibold ${full ? 'text-red-400' : 'text-emerald-400'}`}>
+                    {used} / {quota}
+                  </span>
+                </div>
+                <div className="mt-2 h-2 rounded-full bg-slate-800 overflow-hidden">
+                  <div className={`h-full rounded-full ${full ? 'bg-red-500' : pct > 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                    style={{ width: `${pct}%` }} />
+                </div>
+                {full && (
+                  <p className="mt-1.5 text-[10px] text-red-400 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" /> Kuota penuh
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Stats */}
@@ -398,11 +503,12 @@ export default function AdminPenjuruan() {
                 <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4">Rata-rata Kls 10</TableHead>
                 <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4">Peminatan Saat Ini</TableHead>
                 <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4">Tetapkan Peminatan</TableHead>
+                <TableHead className="text-slate-200 font-semibold text-xs uppercase tracking-wider py-4 text-center">ACC / Naik Kelas 11</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-12">
+                <TableRow><TableCell colSpan={6} className="text-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
                 </TableCell></TableRow>
               ) : filteredStudents.length > 0 ? (
@@ -477,12 +583,40 @@ export default function AdminPenjuruan() {
                           )}
                         </div>
                       </TableCell>
+                      <TableCell className="text-center">
+                        {(() => {
+                          const targetId = student.assigned || student.peminatanId;
+                          const targetKode = getJurusanDisplay(targetId);
+                          const sudahResmi = !!student.jurusanId && student.jurusanId === targetId;
+                          const accendingThis = accId === student.siswaId;
+                          if (sudahResmi) {
+                            return (
+                              <Badge className="bg-emerald-600/20 text-emerald-300 border-emerald-500/30 text-[11px]">
+                                <CheckCircle2 className="mr-1 h-3 w-3" /> {targetKode} · {student.className}
+                              </Badge>
+                            );
+                          }
+                          return (
+                            <Button
+                              size="sm"
+                              disabled={!targetId || accendingThis || !!accId}
+                              onClick={() => handleAcc(student)}
+                              className="h-9 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-40"
+                              title={targetId ? `Setujui & naikkan ke kelas 11 (Rumpun ${targetKode})` : 'Tetapkan rumpun dulu'}
+                            >
+                              {accendingThis
+                                ? <Loader2 className="h-4 w-4 animate-spin" />
+                                : <><ArrowUpCircle className="mr-1.5 h-4 w-4" /> ACC</>}
+                            </Button>
+                          );
+                        })()}
+                      </TableCell>
                     </TableRow>
                   );
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center">
+                  <TableCell colSpan={6} className="h-32 text-center">
                     <Users className="h-10 w-10 text-slate-600 mx-auto mb-2" />
                     <p className="text-slate-300 font-semibold">Tidak ada siswa ditemukan</p>
                   </TableCell>

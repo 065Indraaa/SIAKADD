@@ -81,6 +81,41 @@ export default function SiswaMajoring() {
   const currentJurusan = jurusans.find(j => j.id === selectedId);
   const layakA = rataRata !== null && rataRata >= 87;
 
+  // Status penjurusan resmi (terisi setelah admin ACC & siswa naik ke kelas 11).
+  const sudahDitetapkan = !!(user as any)?.jurusanName;
+
+  // Rekomendasi rumpun + kata-kata singkat berdasarkan rata-rata nilai kelas 10.
+  const rekomendasi = (() => {
+    if (rataRata == null) return null;
+    const n = rataRata.toFixed(1);
+    if (rataRata >= 90) return {
+      kode: 'A', tone: 'emerald',
+      judul: 'Rumpun A — Kesehatan sangat cocok untukmu',
+      pesan: `Nilaimu ${n} luar biasa! Kamu sangat layak masuk Rumpun A (Kesehatan) untuk jalur kedokteran, farmasi, atau keperawatan. Pertahankan terus ya! 🔥`,
+    };
+    if (rataRata >= 87) return {
+      kode: 'A', tone: 'emerald',
+      judul: 'Kamu memenuhi syarat Rumpun A — Kesehatan',
+      pesan: `Rata-rata ${n} sudah melewati ambang 87. Kalau minatmu di sains kesehatan, ambil Rumpun A. Tertarik teknik atau sosial? Rumpun B & C juga tetap terbuka untukmu.`,
+    };
+    if (rataRata >= 80) return {
+      kode: 'B', tone: 'blue',
+      judul: 'Rumpun B (Teknik) atau C (Sosial) paling pas',
+      pesan: `Nilaimu ${n} sudah bagus. Rumpun A butuh minimal 87, jadi arahkan ke B (Teknik) atau C (Sosial) sesuai minatmu. Tinggal sedikit lagi untuk tembus 87 — semangat genjot semester depan!`,
+    };
+    return {
+      kode: 'B/C', tone: 'amber',
+      judul: 'Pilih Rumpun B (Teknik) atau C (Sosial)',
+      pesan: `Rata-rata ${n}. Rumpun A (min. 87) belum terjangkau untuk saat ini, tapi B dan C punya banyak jalur keren menuju kampus impian. Pilih sesuai passion-mu dan terus naikkan nilainya! 💪`,
+    };
+  })();
+
+  const toneClass: Record<string, string> = {
+    emerald: 'border-emerald-500 bg-emerald-500/8',
+    blue: 'border-blue-500 bg-blue-500/8',
+    amber: 'border-amber-500 bg-amber-500/8',
+  };
+
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
       {/* Header */}
@@ -88,7 +123,8 @@ export default function SiswaMajoring() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground">Rumpun Peminatan</h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            Pilih rumpun peminatan (A/B/C) untuk kelas 11 berdasarkan rata-rata nilai kelas 10 Anda.
+            Saat ini kamu masih di kelas 10 (kelas umum, belum ada jurusan). Pilih rumpun peminatan (A/B/C)
+            untuk kelas 11 berdasarkan rata-rata nilai kelas 10. Jurusan & kelas baru berubah setelah disetujui admin.
           </p>
         </div>
         {selectedId && (
@@ -110,6 +146,41 @@ export default function SiswaMajoring() {
         <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-sm flex items-center gap-3">
           <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
           Pilihan rumpun berhasil disimpan. Admin akan memverifikasi berdasarkan kuota dan nilai.
+        </div>
+      )}
+
+      {/* Status penjurusan resmi — muncul setelah di-ACC admin (naik kelas 11) */}
+      {sudahDitetapkan && (
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-3">
+          <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              Penjurusanmu sudah ditetapkan: {(user as any).jurusanName}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Kelas kamu sekarang: <strong className="text-foreground">{user?.className || '-'}</strong>. Selamat menempuh kelas 11! 🎉
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Rekomendasi rumpun berdasarkan nilai */}
+      {!sudahDitetapkan && rekomendasi && (
+        <div className={`scola-card rounded-2xl p-5 border-l-4 ${toneClass[rekomendasi.tone]}`}>
+          <div className="flex items-start gap-3">
+            <div className="h-9 w-9 rounded-xl bg-background/60 border border-border flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="h-4 w-4 text-foreground" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-bold text-foreground">{rekomendasi.judul}</p>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-background/70 border border-border text-foreground">
+                  Rekomendasi: {rekomendasi.kode}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{rekomendasi.pesan}</p>
+            </div>
+          </div>
         </div>
       )}
 

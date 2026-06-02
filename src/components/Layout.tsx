@@ -6,7 +6,7 @@ import { useNotifications } from '../contexts/NotificationContext';
 import {
   LogOut, LayoutDashboard, Users, GraduationCap, BookOpen,
   Award, Menu, X, MessageSquare, Calendar,
-  ChevronRight, Zap, Book, MoveRight, Sun, Moon
+  ChevronRight, Zap, Book, MoveRight, Sun, Moon, Compass
 } from 'lucide-react';
 import Chatbot from './Chatbot';
 import NotificationBell from './NotificationBell';
@@ -65,6 +65,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       { label: 'Beranda', href: '/siswa', icon: LayoutDashboard },
       { label: 'Profil Saya', href: '/siswa/profile', icon: Users },
       { label: 'Nilai & Rapor', href: '/siswa/grades', icon: BookOpen },
+      { label: 'Rumpun Peminatan', href: '/siswa/majoring', icon: Compass },
       { label: 'Jadwal', href: '/siswa/schedule', icon: Calendar },
       { label: 'Pencapaian', href: '/siswa/achievements', icon: Award },
       { label: 'Jejak Alumni', href: '/siswa/alumni', icon: GraduationCap },

@@ -26,6 +26,7 @@ import {
   deleteAlumni,
   getPenggunaByEmail,
   updateSiswaPeminatan,
+  updateSiswa,
   StatusAlumni,
   TipePrestasi,
   listSemuaKelasRef,
@@ -444,6 +445,34 @@ export async function savePeminatan(siswaId: string, jurusanId: string | null) {
   return await updateSiswaPeminatan(dataConnect, {
     id: siswaId,
     peminatanId: jurusanId || null
+  });
+}
+
+/**
+ * ACC penjurusan oleh admin — momen "naik ke kelas 11".
+ * Mengubah jurusan RESMI siswa dan (jika kelasId diberikan) memindahkan siswa
+ * ke kelas 11 sesuai rumpun. Selama masih kelas 10, fungsi ini TIDAK dipanggil,
+ * sehingga kelas 10 tetap kelas umum tanpa jurusan — hanya peminatan (pilihan)
+ * yang tersimpan lewat savePeminatan().
+ *
+ * - Set `jurusan` resmi = rumpun yang disetujui.
+ * - Set `peminatan` agar sinkron dengan jurusan resmi.
+ * - Pindahkan `kelas` ke kelas 11 rumpun terkait bila `kelasId` tersedia.
+ *   (kelasId undefined = tidak mengubah kelas.)
+ */
+export async function approvePenjurusan(params: {
+  siswaId: string;
+  jurusanId: string;
+  kelasId?: string | null;
+}) {
+  await updateSiswa(dataConnect, {
+    id: params.siswaId,
+    jurusanId: params.jurusanId,
+    kelasId: params.kelasId ?? undefined,
+  });
+  await updateSiswaPeminatan(dataConnect, {
+    id: params.siswaId,
+    peminatanId: params.jurusanId,
   });
 }
 
