@@ -50,9 +50,7 @@ export default function LoginPage() {
       <header className="relative z-10 w-full border-b border-border">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center">
-              <GraduationCap className="h-5 w-5 text-white" />
-            </div>
+            <img src="/images/scola.jpg" alt="SCOLA" className="h-9 w-9 rounded-lg object-cover" />
             <div>
               <div className="text-sm font-bold text-foreground leading-none">SCOLA</div>
               <div className="text-[11px] text-muted-foreground mt-0.5">SMAIT Nur Hidayah Sukoharjo</div>
