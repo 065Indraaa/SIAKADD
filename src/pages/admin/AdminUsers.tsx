@@ -15,6 +15,7 @@ import {
   createGuruWithAccount, createSiswaWithAccount, createAdminWithAccount,
   updateGuruData, updateSiswaData, updateAdminData,
   deleteUserById, clearAllData, seedDemoData,
+  getNextNisSeq, formatNIS, getNextNipSeq, formatNIP,
   UserListItem,
 } from '@/lib/userService';
 import { fetchKelas, fetchJurusan, graduateSiswa } from '@/lib/schoolService';
@@ -262,6 +263,12 @@ export default function AdminUsers() {
     const results: typeof importResults = [];
     const errors: string[] = [];
 
+    // Tentukan nomor urut awal SEKALI di awal, lalu naikkan di memori tiap baris.
+    // Mencegah duplikasi NIS/NIP (yang sebelumnya membuat hanya 1 baris berhasil
+    // karena setiap baris membaca "NIS terakhir" yang sama dari server).
+    let nisSeq = importType === 'siswa' ? await getNextNisSeq() : 0;
+    let nipSeq = importType === 'guru' ? await getNextNipSeq() : 0;
+
     for (let i = 0; i < dataRows.length; i++) {
       const row = dataRows[i];
       const name = String(row[0] || '').trim();
@@ -275,13 +282,17 @@ export default function AdminUsers() {
             address: String(row[4] || '').trim() || undefined,
             phone: String(row[5] || '').trim() || undefined,
             tahunMasuk: parseInt(String(row[6] || new Date().getFullYear())) || new Date().getFullYear(),
+            nis: formatNIS(nisSeq),
           });
+          nisSeq++;
           results.push({ name, email: r.email, password: r.defaultPassword, nis: r.nis });
         } else {
+          const manualNip = String(row[2] || '').trim();
+          const nip = manualNip || formatNIP(nipSeq);
           const r = await createGuruWithAccount({
             name,
             gender: String(row[1] || 'L').trim().toUpperCase() === 'P' ? 'P' : 'L',
-            nip: String(row[2] || '').trim() || undefined,
+            nip,
             jabatan: String(row[3] || 'Guru').trim(),
             specialization: String(row[4] || '').trim() || undefined,
             birthPlace: String(row[5] || '').trim() || undefined,
@@ -289,6 +300,7 @@ export default function AdminUsers() {
             phone: String(row[7] || '').trim() || undefined,
             address: String(row[8] || '').trim() || undefined,
           });
+          if (!manualNip) nipSeq++;
           results.push({ name, email: r.email, password: r.defaultPassword, nip: r.nip });
         }
       } catch (e: any) {

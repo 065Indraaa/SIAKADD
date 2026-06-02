@@ -8,7 +8,7 @@ import { LookupSelect } from '@/components/ui/lookup-select';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Save, Loader2, RefreshCw, CheckCircle2, Info, BookOpen, Calculator, AlertTriangle, Trash2, Settings, ChevronDown, ChevronUp } from 'lucide-react';
-import { fetchJadwalGuru, fetchKelas, fetchMataPelajaran, fetchBobotNilai, setBobotNilai, updateNilaiData, fetchTugasHarianByKelas, addTugasHarian } from '@/lib/schoolService';
+import { fetchJadwalGuru, fetchKelas, fetchMataPelajaran, fetchBobotNilai, setBobotNilai, updateNilaiData, fetchTugasHarianByKelas, addTugasHarian, fetchKehadiranBySiswa, hitungSkorKehadiran, hitungNilaiAkhirBobot } from '@/lib/schoolService';
 import { fetchSiswa } from '@/lib/userService';
 import { getGuruByPengguna, upsertNilai, getNilaiByKelasRef, deleteNilai } from '@uassiakad/connector';
 import { executeQuery } from 'firebase/data-connect';
@@ -30,6 +30,8 @@ interface SiswaGrade {
   nilaiRemedialUas: number | string;
   existingId?: string;
   tugas: Record<number, number | string>;
+  /** Skor kehadiran 0–100 (null jika belum ada catatan absensi). */
+  kehadiran: number | null;
 }
 
 interface TeachingAssignment {
@@ -207,6 +209,20 @@ export default function GuruGrades() {
         fetchTugasHarianByKelas(kelasId, mataPelajaranId, semester, tahunAjaran),
       ]);
 
+      // Ambil skor kehadiran tiap siswa (paralel) untuk komponen nilai kehadiran.
+      const kehadiranEntries = await Promise.all(
+        siswaData.map(async (s) => {
+          const sid = s.siswaId || s.id;
+          try {
+            const recs = await fetchKehadiranBySiswa(sid);
+            return [sid, hitungSkorKehadiran(recs)] as const;
+          } catch {
+            return [sid, null] as const;
+          }
+        })
+      );
+      const kehadiranMap = new Map<string, number | null>(kehadiranEntries);
+
       const gradesMap = new Map<string, any>();
       gradesRes.data.nilais.forEach((n: any) => {
         if (n.siswa?.id) gradesMap.set(n.siswa.id, n);
@@ -258,6 +274,7 @@ export default function GuruGrades() {
           nilaiRemedialUas: existing?.nilaiRemedialUas ?? '',
           existingId: existing?.id,
           tugas: tugasObj,
+          kehadiran: kehadiranMap.get(sid) ?? null,
         };
       }));
     } catch (e: any) {
@@ -303,14 +320,28 @@ export default function GuruGrades() {
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   };
 
+  /**
+   * Nilai Harian efektif: pakai input manual guru jika ada, jika tidak pakai
+   * rata-rata nilai tugas harian. Nilai inilah yang masuk ke persentase nilai akhir
+   * dan yang disimpan ke database sebagai nilaiHarian.
+   */
+  const effectiveHarian = (s: SiswaGrade): number | null => {
+    const nh = parseFloat(String(s.nilaiHarian));
+    if (!isNaN(nh)) return nh;
+    const at = avgTugas(s);
+    return at > 0 ? at : null;
+  };
+
   const calculateFinal = (s: SiswaGrade) => {
-    const nh = parseFloat(String(s.nilaiHarian)) || avgTugas(s) || 0;
-    const uts = effectiveUts(s);
-    const uas = effectiveUas(s);
-    if (!nh && !uts && !uas) return 0;
-    const totalBobot = bobot.bobotHarian + bobot.bobotUts + bobot.bobotUas;
-    if (totalBobot === 0) return 0;
-    return (nh * bobot.bobotHarian + uts * bobot.bobotUts + uas * bobot.bobotUas) / totalBobot;
+    return hitungNilaiAkhirBobot(
+      {
+        nilaiHarian: effectiveHarian(s),
+        nilaiUts: effectiveUts(s),
+        nilaiUas: effectiveUas(s),
+      },
+      bobot,
+      s.kehadiran,
+    );
   };
 
   const handleSave = async () => {
@@ -324,16 +355,18 @@ export default function GuruGrades() {
     const errors: string[] = [];
     try {
       for (const s of students) {
-        const nh = parseFloat(String(s.nilaiHarian));
         const uts = parseFloat(String(s.nilaiUts));
         const uas = parseFloat(String(s.nilaiUas));
         const remUts = parseFloat(String(s.nilaiRemedialUts));
         const remUas = parseFloat(String(s.nilaiRemedialUas));
+        // Nilai harian yang disimpan = input manual guru, atau rata-rata tugas harian.
+        // Dengan begitu nilai tugas benar-benar masuk ke persentase nilai akhir & rapor.
+        const effHarian = effectiveHarian(s);
         // Selalu simpan/update record agar jumlahTugasHarian tersimpan untuk semua siswa
         try {
           if (s.existingId) {
             await updateNilaiData(s.existingId, {
-              nilaiHarian: isNaN(nh) ? null : nh,
+              nilaiHarian: effHarian,
               nilaiUts: isNaN(uts) ? null : uts,
               nilaiUas: isNaN(uas) ? null : uas,
               nilaiRemedialUts: isNaN(remUts) ? null : remUts,
@@ -347,7 +380,7 @@ export default function GuruGrades() {
               mataPelajaranId: selectedAssignment.mataPelajaranId,
               semester,
               tahunAjaran,
-              nilaiHarian: isNaN(nh) ? null : nh,
+              nilaiHarian: effHarian,
               nilaiUts: isNaN(uts) ? null : uts,
               nilaiUas: isNaN(uas) ? null : uas,
               nilaiRemedialUts: isNaN(remUts) ? null : remUts,
@@ -599,7 +632,11 @@ export default function GuruGrades() {
         <div>
           <p className="font-semibold">Pembobotan Nilai Akhir</p>
           <p className="mt-1">
-            Harian <strong>{bobot.bobotHarian}%</strong> + UTS <strong>{bobot.bobotUts}%</strong> + UAS <strong>{bobot.bobotUas}%</strong> = Nilai Akhir. KKM: <strong>{bobot.kkm}</strong>. Remedial mengambil nilai tertinggi.
+            {bobot.bobotKehadiran > 0 && <>Kehadiran <strong>{bobot.bobotKehadiran}%</strong> + </>}
+            Harian <strong>{bobot.bobotHarian}%</strong> + UTS <strong>{bobot.bobotUts}%</strong> + UAS <strong>{bobot.bobotUas}%</strong> = Nilai Akhir. KKM: <strong>{bobot.kkm}</strong>.
+          </p>
+          <p className="mt-1 text-blue-700/80 dark:text-blue-300/80">
+            Nilai <strong>Harian</strong> otomatis terisi dari rata-rata nilai tugas bila dikosongkan. Skor <strong>Kehadiran</strong> dihitung dari absensi (Hadir 100, Izin/Sakit 75, Alpa 0) dan hanya dipakai jika bobot Kehadiran &gt; 0. Remedial mengambil nilai tertinggi.
           </p>
         </div>
       </div>
@@ -651,6 +688,7 @@ export default function GuruGrades() {
                   <TableHead key={`th${i}`} className="text-foreground text-xs uppercase tracking-wider font-semibold py-4 text-center min-w-[60px]">Tugas {i}</TableHead>
                 ))}
                 <TableHead className="text-foreground text-xs uppercase tracking-wider font-semibold py-4 text-center">Harian</TableHead>
+                <TableHead className="text-foreground text-xs uppercase tracking-wider font-semibold py-4 text-center">Kehadiran</TableHead>
                 <TableHead className="text-foreground text-xs uppercase tracking-wider font-semibold py-4 text-center">UTS</TableHead>
                 <TableHead className="text-foreground text-xs uppercase tracking-wider font-semibold py-4 text-center">Rem UTS</TableHead>
                 <TableHead className="text-foreground text-xs uppercase tracking-wider font-semibold py-4 text-center">UAS</TableHead>
@@ -661,7 +699,7 @@ export default function GuruGrades() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={8 + tugasHeaders.length} className="text-center py-12">
+                <TableRow><TableCell colSpan={9 + tugasHeaders.length} className="text-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
                 </TableCell></TableRow>
               ) : students.length > 0 ? students.map((s) => {
@@ -684,7 +722,16 @@ export default function GuruGrades() {
                     <TableCell className="text-center">
                       <Input type="number" min={0} max={100} step={0.5}
                         className="w-20 h-10 mx-auto text-center font-semibold"
+                        placeholder={avgTugas(s) > 0 ? avgTugas(s).toFixed(1) : ''}
+                        title={avgTugas(s) > 0 ? `Otomatis dari rata-rata tugas: ${avgTugas(s).toFixed(1)} (kosongkan untuk pakai nilai ini)` : undefined}
                         value={s.nilaiHarian} onChange={(e) => handleNilaiChange(s.siswaId, 'nilaiHarian', e.target.value)} />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {s.kehadiran != null ? (
+                        <span className="text-sm font-semibold tabular-nums text-foreground">{s.kehadiran.toFixed(0)}</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       <Input type="number" min={0} max={100} step={0.5}
@@ -724,7 +771,7 @@ export default function GuruGrades() {
                   </TableRow>
                 );
               }) : (
-                <TableRow><TableCell colSpan={8 + tugasHeaders.length} className="h-32 text-center">
+                <TableRow><TableCell colSpan={9 + tugasHeaders.length} className="h-32 text-center">
                   <BookOpen className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
                   <p className="text-muted-foreground font-semibold">Belum ada siswa</p>
                   <p className="text-sm text-muted-foreground">

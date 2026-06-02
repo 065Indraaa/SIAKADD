@@ -195,12 +195,84 @@ export async function fetchNilaiSiswa(siswaId: string, semester: string, tahunAj
   return res.data.nilais;
 }
 
-/** Hitung nilai akhir satu mapel (default 30% harian + 30% UTS + 40% UAS, remedial menggantikan). */
+// ============================================================
+// PERHITUNGAN NILAI — util bersama (dipakai guru & siswa)
+// ============================================================
+
+/** Poin kehadiran per pertemuan. Hadir penuh, izin/sakit diberi keringanan, alpa nol. */
+export const POIN_KEHADIRAN: Record<string, number> = {
+  Hadir: 100,
+  Izin: 75,
+  Sakit: 75,
+  Alpa: 0,
+};
+
+/**
+ * Hitung skor kehadiran (0–100) dari daftar catatan kehadiran.
+ * Mengembalikan null jika belum ada catatan sama sekali, agar komponen
+ * kehadiran bisa diabaikan (tidak menjatuhkan nilai siswa yang absensinya kosong).
+ */
+export function hitungSkorKehadiran(
+  records: Array<{ status?: string | null }> | null | undefined
+): number | null {
+  if (!records || records.length === 0) return null;
+  const total = records.reduce((sum, r) => sum + (POIN_KEHADIRAN[r.status || 'Alpa'] ?? 0), 0);
+  return total / records.length;
+}
+
+export interface BobotInput {
+  bobotKehadiran?: number | null;
+  bobotHarian?: number | null;
+  bobotUts?: number | null;
+  bobotUas?: number | null;
+}
+
+export interface NilaiInput {
+  nilaiHarian?: number | null;
+  nilaiUts?: number | null;
+  nilaiUas?: number | null;
+  nilaiRemedialUts?: number | null;
+  nilaiRemedialUas?: number | null;
+}
+
+/**
+ * Hitung nilai akhir satu mapel berdasarkan bobot.
+ * - UTS/UAS mengambil nilai tertinggi antara nilai asli dan remedial.
+ * - Komponen kehadiran hanya dihitung jika `skorKehadiran` tidak null DAN bobotKehadiran > 0.
+ * - Pembagi (total bobot) menyesuaikan komponen yang benar-benar dipakai, sehingga
+ *   skala hasil tetap 0–100 meski salah satu komponen kosong.
+ * Default bobot mengikuti skema umum: Harian 30, UTS 30, UAS 40, Kehadiran 0.
+ */
+export function hitungNilaiAkhirBobot(
+  nilai: NilaiInput,
+  bobot?: BobotInput | null,
+  skorKehadiran?: number | null
+): number {
+  const bHarian = bobot?.bobotHarian ?? 30;
+  const bUts = bobot?.bobotUts ?? 30;
+  const bUas = bobot?.bobotUas ?? 40;
+  const bKehadiran = bobot?.bobotKehadiran ?? 0;
+
+  const nh = nilai.nilaiHarian || 0;
+  const uts = Math.max(nilai.nilaiUts || 0, nilai.nilaiRemedialUts || 0);
+  const uas = Math.max(nilai.nilaiUas || 0, nilai.nilaiRemedialUas || 0);
+  const pakaiKehadiran = skorKehadiran != null && bKehadiran > 0;
+
+  if (!nh && !uts && !uas && !pakaiKehadiran) return 0;
+
+  let totalNilai = nh * bHarian + uts * bUts + uas * bUas;
+  let totalBobot = bHarian + bUts + bUas;
+  if (pakaiKehadiran) {
+    totalNilai += (skorKehadiran as number) * bKehadiran;
+    totalBobot += bKehadiran;
+  }
+  if (totalBobot === 0) return 0;
+  return totalNilai / totalBobot;
+}
+
+/** Kompat lama: hitung nilai akhir satu record nilai dengan bobot default 30/30/40. */
 function hitungNilaiAkhir(n: any): number {
-  const nh = n.nilaiHarian || 0;
-  const uts = Math.max(n.nilaiUts || 0, n.nilaiRemedialUts || 0);
-  const uas = Math.max(n.nilaiUas || 0, n.nilaiRemedialUas || 0);
-  return nh * 0.3 + uts * 0.3 + uas * 0.4;
+  return hitungNilaiAkhirBobot(n);
 }
 
 /**

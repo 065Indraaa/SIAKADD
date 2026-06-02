@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 export default function SiswaMajoring() {
-  const { user } = useAuth();
+  const { user, updateUserCache } = useAuth();
   const [jurusans, setJurusans] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,6 +57,9 @@ export default function SiswaMajoring() {
     setError(null);
     try {
       await savePeminatan(user.siswaId, selectedId);
+      // Segarkan cache agar pilihan tetap tampil setelah reload / pindah halaman.
+      const chosen = jurusans.find(j => j.id === selectedId);
+      updateUserCache({ peminatanId: selectedId, peminatanName: chosen?.nama });
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 3000);
     } catch (e: any) {

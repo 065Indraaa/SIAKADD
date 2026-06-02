@@ -274,12 +274,13 @@ export default function AdminAlumni() {
                   <TableHead className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Status</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Institusi / Perusahaan</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Jurusan / Jabatan</TableHead>
+                  <TableHead className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Catatan Prestasi</TableHead>
                   <TableHead className="text-right pr-6 text-muted-foreground text-xs uppercase tracking-wider font-semibold">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={6} className="text-center py-12">
+                  <TableRow><TableCell colSpan={7} className="text-center py-12">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-500" />
                   </TableCell></TableRow>
                 ) : filteredAlumni.length > 0 ? filteredAlumni.map((alum) => (
@@ -300,6 +301,11 @@ export default function AdminAlumni() {
                     <TableCell className="text-foreground">
                       {alum.position || <span className="text-muted-foreground italic">Belum diisi</span>}
                     </TableCell>
+                    <TableCell className="text-foreground max-w-[220px]">
+                      {alum.achievements
+                        ? <span className="text-sm line-clamp-2" title={alum.achievements}>{alum.achievements}</span>
+                        : <span className="text-muted-foreground italic">—</span>}
+                    </TableCell>
                     <TableCell className="text-right pr-6">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(alum)}
@@ -315,7 +321,7 @@ export default function AdminAlumni() {
                   </TableRow>
                 )) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
+                    <TableCell colSpan={7} className="text-center py-12">
                       <GraduationCap className="h-10 w-10 text-muted-foreground/50 mx-auto mb-2" />
                       <p className="text-foreground font-semibold">Belum ada alumni</p>
                       <p className="text-sm text-muted-foreground mt-1">

@@ -70,6 +70,7 @@ export interface CreateSiswaPayload {
   classId?: string;
   majorId?: string;
   tahunMasuk?: number;
+  nis?: string;             // Manual / batch-assigned NIS (hindari race saat impor massal)
 }
 
 export interface UserListItem {
@@ -104,19 +105,26 @@ export interface UserListItem {
 // Format: NIP{tahun}{5-digit-urutan}
 // ============================================================
 
-export async function generateNIP(): Promise<string> {
+export function formatNIP(seq: number): string {
+  const year = new Date().getFullYear();
+  return `NIP${year}${seq.toString().padStart(5, '0')}`;
+}
+
+/** Ambil nomor urut NIP berikutnya dari server (sekali query). */
+export async function getNextNipSeq(): Promise<number> {
   try {
     const result = await getLastNip(dataConnect);
     const gurus = result.data.gurus;
-    const year = new Date().getFullYear();
-    if (!gurus || gurus.length === 0) return `NIP${year}00001`;
+    if (!gurus || gurus.length === 0) return 1;
     const lastSeq = parseInt(gurus[0].nip.slice(-5), 10);
-    const nextSeq = (lastSeq + 1).toString().padStart(5, '0');
-    return `NIP${year}${nextSeq}`;
+    return (isNaN(lastSeq) ? 0 : lastSeq) + 1;
   } catch {
-    const year = new Date().getFullYear();
-    return `NIP${year}${Math.floor(Math.random() * 99999).toString().padStart(5, '0')}`;
+    return Math.floor(Math.random() * 99999) + 1;
   }
+}
+
+export async function generateNIP(): Promise<string> {
+  return formatNIP(await getNextNipSeq());
 }
 
 // ============================================================
@@ -124,18 +132,26 @@ export async function generateNIP(): Promise<string> {
 // Format: NIS{2-digit-tahun}{4-digit-urutan}
 // ============================================================
 
-export async function generateNIS(): Promise<string> {
+export function formatNIS(seq: number): string {
+  const year = new Date().getFullYear().toString().slice(-2);
+  return `NIS${year}${seq.toString().padStart(4, '0')}`;
+}
+
+/** Ambil nomor urut NIS berikutnya dari server (sekali query). */
+export async function getNextNisSeq(): Promise<number> {
   try {
     const result = await getLastNis(dataConnect);
     const siswas = result.data.siswas;
-    const year = new Date().getFullYear().toString().slice(-2);
-    if (!siswas || siswas.length === 0) return `NIS${year}0001`;
+    if (!siswas || siswas.length === 0) return 1;
     const lastSeq = parseInt(siswas[0].nis.slice(-4), 10);
-    return `NIS${year}${(lastSeq + 1).toString().padStart(4, '0')}`;
+    return (isNaN(lastSeq) ? 0 : lastSeq) + 1;
   } catch {
-    const year = new Date().getFullYear().toString().slice(-2);
-    return `NIS${year}${Math.floor(Math.random() * 9999).toString().padStart(4, '0')}`;
+    return Math.floor(Math.random() * 9999) + 1;
   }
+}
+
+export async function generateNIS(): Promise<string> {
+  return formatNIS(await getNextNisSeq());
 }
 
 // ============================================================
@@ -215,7 +231,7 @@ export async function createSiswaWithAccount(payload: CreateSiswaPayload): Promi
   email: string;
   defaultPassword: string;
 }> {
-  const nis = await generateNIS();
+  const nis = payload.nis || await generateNIS();
   const email = payload.email || generateSiswaEmail(nis);
   // Demo-friendly password for easy login during presentations
   const defaultPassword = email.endsWith('@demo.com') ? 'Siswa@123' : `Siswa@${nis.slice(-6)}`;
@@ -524,8 +540,13 @@ export async function seedDemoData() {
       { name: 'Doni Saputra', email: 'siswa.doni@demo.com', gender: 'L', birthPlace: 'Denpasar', birthDate: '2008-07-19', address: 'Jl. Imam Bonjol No. 12', phone: '081200000009', classId: kelasIds[3], majorId: jurusanIds['B'], tahunMasuk: 2023 },
       { name: 'Eka Wulandari', email: 'siswa.eka@demo.com', gender: 'P', birthPlace: 'Makassar', birthDate: '2008-03-30', address: 'Jl. Urip Sumoharjo No. 22', phone: '081200000010', classId: kelasIds[4], majorId: jurusanIds['C'], tahunMasuk: 2023 },
     ];
+    // Nomor urut NIS sekuensial (hindari race read "NIS terakhir" di dalam loop).
+    let seedNisSeq = await getNextNisSeq();
     for (const s of siswaList) {
-      try { await createSiswaWithAccount(s); } catch (e) { console.error('Skip siswa:', (e as any).message); }
+      try {
+        await createSiswaWithAccount({ ...s, nis: formatNIS(seedNisSeq) });
+        seedNisSeq++;
+      } catch (e) { console.error('Skip siswa:', (e as any).message); }
     }
 
     return {

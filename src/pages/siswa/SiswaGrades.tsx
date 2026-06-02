@@ -5,9 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Download, BookOpen, TrendingUp, Loader2, Calculator } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { fetchNilaiSiswa, fetchBobotNilaiByKelas } from '@/lib/schoolService';
+import { fetchNilaiSiswa, fetchBobotNilaiByKelas, fetchKehadiranBySiswa, hitungSkorKehadiran, hitungNilaiAkhirBobot } from '@/lib/schoolService';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { currentTahunAjaran, currentSemester, buildTahunAjaranOptions } from '@/lib/tahunAjaran';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const SEMESTER_OPTIONS = ['Ganjil', 'Genap'];
 const DEFAULT_BOBOT = { bobotKehadiran: 0, bobotHarian: 30, bobotUts: 30, bobotUas: 40, kkm: 75 };
@@ -19,6 +21,7 @@ export default function SiswaGrades() {
   const [semester, setSemester] = useState(currentSemester());
   const [tahunAjaran, setTahunAjaran] = useState(currentTahunAjaran());
   const [bobotMap, setBobotMap] = useState<Record<string, any>>({});
+  const [skorKehadiran, setSkorKehadiran] = useState<number | null>(null);
 
   const tahunAjaranOptions = useMemo(() => buildTahunAjaranOptions(), []);
 
@@ -29,9 +32,10 @@ export default function SiswaGrades() {
     }
     setLoading(true);
     try {
-      const [data, bobotData] = await Promise.all([
+      const [data, bobotData, kehadiranData] = await Promise.all([
         fetchNilaiSiswa(user.siswaId, semester, tahunAjaran),
         user?.kelasId ? fetchBobotNilaiByKelas(user.kelasId, semester, tahunAjaran) : Promise.resolve([]),
+        fetchKehadiranBySiswa(user.siswaId).catch(() => []),
       ]);
       setGrades(data || []);
       const map: Record<string, any> = {};
@@ -41,6 +45,7 @@ export default function SiswaGrades() {
         }
       });
       setBobotMap(map);
+      setSkorKehadiran(hitungSkorKehadiran(kehadiranData));
     } catch (e) {
       console.error(e);
     } finally {
@@ -53,18 +58,109 @@ export default function SiswaGrades() {
 
   const calculateNilaiAkhir = (g: any) => {
     const bobot = bobotMap[g.mataPelajaran?.id] || DEFAULT_BOBOT;
-    const nh = g.nilaiHarian || 0;
-    const uts = Math.max(g.nilaiUts || 0, g.nilaiRemedialUts || 0);
-    const uas = Math.max(g.nilaiUas || 0, g.nilaiRemedialUas || 0);
-    if (!nh && !uts && !uas) return 0;
-    const totalBobot = (bobot.bobotHarian || 30) + (bobot.bobotUts || 30) + (bobot.bobotUas || 40);
-    if (totalBobot === 0) return 0;
-    return (nh * (bobot.bobotHarian || 30) + uts * (bobot.bobotUts || 30) + uas * (bobot.bobotUas || 40)) / totalBobot;
+    return hitungNilaiAkhirBobot(g, bobot, skorKehadiran);
   };
 
   const avgIpk = grades.length > 0
     ? (grades.reduce((acc, curr) => acc + calculateNilaiAkhir(curr), 0) / grades.length).toFixed(2)
     : '0.00';
+
+  const predikat = (n: number) =>
+    n >= 90 ? 'A' : n >= 80 ? 'B' : n >= 70 ? 'C' : n >= 60 ? 'D' : 'E';
+
+  const handleDownloadRapor = () => {
+    if (grades.length === 0) {
+      alert('Belum ada nilai untuk diunduh pada semester & tahun ajaran ini.');
+      return;
+    }
+    const doc = new jsPDF();
+    const pageW = doc.internal.pageSize.getWidth();
+
+    // Kop
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('LAPORAN HASIL BELAJAR SISWA', pageW / 2, 16, { align: 'center' });
+    doc.setFontSize(11);
+    doc.text('SMAIT Nur Hidayah Sukoharjo', pageW / 2, 23, { align: 'center' });
+    doc.setDrawColor(180);
+    doc.line(14, 27, pageW - 14, 27);
+
+    // Identitas siswa
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const idLeft: [string, string][] = [
+      ['Nama', user?.name || '-'],
+      ['NIS', user?.nis || '-'],
+    ];
+    const idRight: [string, string][] = [
+      ['Kelas', user?.className || '-'],
+      ['Tahun Ajaran', `${tahunAjaran} — Semester ${semester}`],
+    ];
+    let y = 35;
+    idLeft.forEach(([k, v], i) => {
+      doc.text(`${k}`, 14, y + i * 6);
+      doc.text(`: ${v}`, 40, y + i * 6);
+    });
+    idRight.forEach(([k, v], i) => {
+      doc.text(`${k}`, pageW / 2, y + i * 6);
+      doc.text(`: ${v}`, pageW / 2 + 30, y + i * 6);
+    });
+
+    // Tabel nilai
+    autoTable(doc, {
+      startY: y + 14,
+      head: [['No', 'Mata Pelajaran', 'Harian', 'UTS', 'UAS', 'Akhir', 'Predikat']],
+      body: grades.map((g, i) => {
+        const akhir = calculateNilaiAkhir(g);
+        return [
+          String(i + 1),
+          g.mataPelajaran?.nama || '-',
+          g.nilaiHarian ?? '-',
+          Math.max(g.nilaiUts || 0, g.nilaiRemedialUts || 0) || '-',
+          Math.max(g.nilaiUas || 0, g.nilaiRemedialUas || 0) || '-',
+          akhir > 0 ? akhir.toFixed(1) : '-',
+          akhir > 0 ? predikat(akhir) : '-',
+        ];
+      }),
+      styles: { fontSize: 9, cellPadding: 2.5 },
+      headStyles: { fillColor: [37, 99, 235], halign: 'center' },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 12 },
+        2: { halign: 'center' }, 3: { halign: 'center' },
+        4: { halign: 'center' }, 5: { halign: 'center' }, 6: { halign: 'center' },
+      },
+    });
+
+    // Ringkasan
+    const afterTable = (doc as any).lastAutoTable?.finalY ?? y + 14;
+    let ry = afterTable + 10;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(`Rata-rata Nilai Akhir : ${avgIpk}`, 14, ry);
+    if (skorKehadiran != null) {
+      ry += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Skor Kehadiran : ${skorKehadiran.toFixed(0)} / 100`, 14, ry);
+    }
+
+    // Tanda tangan
+    ry += 18;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('Mengetahui,', pageW - 70, ry);
+    doc.text('Wali Kelas', pageW - 70, ry + 5);
+    doc.text('(________________________)', pageW - 70, ry + 28);
+
+    doc.setFontSize(8);
+    doc.setTextColor(130);
+    doc.text(
+      'Dokumen ini dicetak otomatis dari portal SCOLA. Rapor resmi diserahkan melalui wali kelas.',
+      14, doc.internal.pageSize.getHeight() - 10,
+    );
+
+    const safeName = (user?.name || 'siswa').replace(/\s+/g, '_');
+    doc.save(`rapor_${safeName}_${semester}_${tahunAjaran.replace('/', '-')}.pdf`);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -79,8 +175,10 @@ export default function SiswaGrades() {
         </div>
         <Button
           variant="outline"
-          className="bg-blue-600 hover:bg-blue-500 text-white border-none rounded-xl px-5 h-11 font-semibold text-sm"
-          onClick={() => alert('Fitur unduh rapor sedang disiapkan.')}
+          disabled={loading || grades.length === 0}
+          className="bg-blue-600 hover:bg-blue-500 text-white border-none rounded-xl px-5 h-11 font-semibold text-sm disabled:opacity-50"
+          onClick={handleDownloadRapor}
+          title={grades.length === 0 ? 'Belum ada nilai untuk diunduh' : 'Unduh rapor sebagai PDF'}
         >
           <Download className="mr-2 h-4 w-4" /> Unduh rapor (PDF)
         </Button>
@@ -244,7 +342,9 @@ export default function SiswaGrades() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-md">
-              Nilai akhir dihitung berdasarkan bobot yang ditentukan guru masing-masing mata pelajaran. KKM: 75. Remedial mengambil nilai tertinggi.
+              Nilai akhir dihitung berdasarkan bobot yang ditentukan guru masing-masing mata pelajaran
+              {skorKehadiran != null && <>, termasuk komponen kehadiran (skor kehadiranmu: <strong className="text-foreground">{skorKehadiran.toFixed(0)}</strong>)</>}.
+              KKM: 75. Remedial mengambil nilai tertinggi.
             </p>
           </div>
         </CardContent>
