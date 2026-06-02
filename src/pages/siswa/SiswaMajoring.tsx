@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { fetchJurusan, savePeminatan } from '@/lib/schoolService';
-import { BookOpen, CheckCircle2, Loader2, Save, AlertCircle } from 'lucide-react';
+import { fetchJurusan, savePeminatan, hitungRataRataKelas10 } from '@/lib/schoolService';
+import {
+  BookOpen, CheckCircle2, Loader2, Save, AlertCircle, TrendingUp, Lock
+} from 'lucide-react';
 
 export default function SiswaMajoring() {
   const { user } = useAuth();
@@ -12,6 +14,8 @@ export default function SiswaMajoring() {
   const [saving, setSaving] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rataRata, setRataRata] = useState<number | null>(null);
+  const [loadingRata, setLoadingRata] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -19,7 +23,6 @@ export default function SiswaMajoring() {
       try {
         const data = await fetchJurusan();
         setJurusans(data);
-        // Gunakan peminatan yang sudah tersimpan jika ada
         const savedId = (user as any)?.peminatanId;
         if (savedId) setSelectedId(savedId);
       } catch (e: any) {
@@ -30,6 +33,23 @@ export default function SiswaMajoring() {
     };
     load();
   }, [user]);
+
+  // Hitung rata-rata kelas 10
+  useEffect(() => {
+    const calc = async () => {
+      if (!user?.siswaId || !user?.tahunMasuk) return;
+      setLoadingRata(true);
+      try {
+        const rata = await hitungRataRataKelas10(user.siswaId, user.tahunMasuk as any);
+        setRataRata(rata);
+      } catch {
+        setRataRata(null);
+      } finally {
+        setLoadingRata(false);
+      }
+    };
+    calc();
+  }, [user?.siswaId, user?.tahunMasuk]);
 
   const handleSave = async () => {
     if (!user?.siswaId || !selectedId) return;
@@ -56,6 +76,7 @@ export default function SiswaMajoring() {
   }
 
   const currentJurusan = jurusans.find(j => j.id === selectedId);
+  const layakA = rataRata !== null && rataRata >= 87;
 
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
@@ -64,7 +85,7 @@ export default function SiswaMajoring() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground">Rumpun Peminatan</h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            Pilih rumpun peminatan (A/B/C) untuk dipertimbangkan dalam penetapan kelas 11.
+            Pilih rumpun peminatan (A/B/C) untuk kelas 11 berdasarkan rata-rata nilai kelas 10 Anda.
           </p>
         </div>
         {selectedId && (
@@ -85,9 +106,82 @@ export default function SiswaMajoring() {
       {isSuccess && (
         <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-sm flex items-center gap-3">
           <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
-          Pilihan rumpun berhasil disimpan. Tim kurikulum & BK akan mempertimbangkan pilihan Anda.
+          Pilihan rumpun berhasil disimpan. Admin akan memverifikasi berdasarkan kuota dan nilai.
         </div>
       )}
+
+      {/* Info kriteria & rata-rata */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="scola-card rounded-2xl p-5 border-l-4 border-blue-500">
+          <div className="flex items-start gap-3">
+            <TrendingUp className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Rata-rata Nilai Kelas 10</p>
+              {loadingRata ? (
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Menghitung...
+                </p>
+              ) : rataRata !== null ? (
+                <>
+                  <p className="text-2xl font-bold text-foreground mt-1">{rataRata.toFixed(1)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Dihitung dari semester Ganjil & Genap kelas 10.
+                  </p>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Data nilai kelas 10 belum tersedia.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className={`scola-card rounded-2xl p-5 border-l-4 ${layakA ? 'border-emerald-500' : 'border-amber-500'}`}>
+          <div className="flex items-start gap-3">
+            {layakA ? <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" /> : <Lock className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />}
+            <div>
+              <p className="text-sm font-semibold text-foreground">Status Kelayakan</p>
+              {loadingRata ? (
+                <p className="text-xs text-muted-foreground mt-1">Memuat...</p>
+              ) : layakA ? (
+                <>
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+                    Anda memenuhi syarat memilih semua rumpun, termasuk Kesehatan.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Rata-rata &ge; 87 memungkinkan Anda masuk Rumpun A (Kesehatan).
+                  </p>
+                </>
+              ) : rataRata !== null ? (
+                <>
+                  <p className="text-sm text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                    Anda hanya bisa memilih Rumpun B (Teknik) atau C (Sosial).
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Rata-rata &lt; 87, sehingga Rumpun A (Kesehatan) memerlukan nilai lebih tinggi.
+                  </p>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Hubungi admin jika data nilai belum muncul.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Kriteria info */}
+      <div className="p-4 rounded-xl bg-blue-500/8 border border-blue-500/15 text-sm">
+        <p className="font-semibold text-blue-600 dark:text-blue-400 mb-2">Kriteria Penjurusan Kelas 11</p>
+        <ul className="space-y-1 text-muted-foreground list-disc list-inside">
+          <li>Kriteria diambil dari <strong>rata-rata nilai kelas 10</strong> (semester Ganjil & Genap).</li>
+          <li><strong>Rumpun A — Kesehatan</strong>: minimal rata-rata <strong>87</strong>.</li>
+          <li><strong>Rumpun B — Teknik</strong> & <strong>C — Sosial</strong>: bebas memilih.</li>
+          <li>Kuota: A = 2 kelas, B = 1 kelas, C = 2 kelas. Jika kuota penuh, siswa nilai terendah dipindah ke rumpun alternatif.</li>
+        </ul>
+      </div>
 
       {jurusans.length === 0 ? (
         <div className="text-center py-16 scola-card rounded-2xl">
@@ -101,31 +195,40 @@ export default function SiswaMajoring() {
         <div className="grid md:grid-cols-2 gap-4">
           {jurusans.map((j) => {
             const isSelected = selectedId === j.id;
+            const isKesehatan = j.kode === 'A';
+            const disabled = isKesehatan && !layakA && !loadingRata && rataRata !== null;
             return (
               <button
                 key={j.id}
                 type="button"
-                onClick={() => setSelectedId(j.id)}
+                disabled={disabled}
+                onClick={() => !disabled && setSelectedId(j.id)}
                 className={`text-left w-full transition-all duration-200 rounded-2xl p-6 border ${
-                  isSelected
+                  disabled
+                    ? 'opacity-50 cursor-not-allowed bg-muted/40 border-muted'
+                    : isSelected
                     ? 'ring-2 ring-blue-500 bg-blue-500/5 border-blue-500/30'
                     : 'scola-card hover:border-blue-500/30'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    isSelected ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground'
+                    isSelected ? 'bg-blue-600 text-white' : disabled ? 'bg-muted text-muted-foreground' : 'bg-muted text-muted-foreground'
                   }`}>
                     <BookOpen className="h-5 w-5" />
                   </div>
                   {isSelected && <CheckCircle2 className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />}
+                  {disabled && <Lock className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />}
                 </div>
 
                 <h3 className="text-base font-bold text-foreground mt-4 mb-1">{j.nama}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {/* Tampilkan kode rumpun jika ada */}
                   {j.kode ? `Kode: ${j.kode} · ` : ''}
-                  Pilih rumpun ini jika sesuai dengan minat dan rencana studi lanjut Anda.
+                  {isKesehatan
+                    ? 'Diarahkan untuk jalur kedokteran, farmasi, dan ilmu kesehatan. Memerlukan rata-rata kelas 10 minimal 87.'
+                    : j.kode === 'B'
+                    ? 'Diarahkan untuk jalur teknik dan teknologi. Terbuka untuk semua siswa kelas 10.'
+                    : 'Diarahkan untuk jalur sosial, hukum, bisnis, dan humaniora. Terbuka untuk semua siswa kelas 10.'}
                 </p>
               </button>
             );
@@ -141,8 +244,9 @@ export default function SiswaMajoring() {
             <div>
               <p className="text-sm font-semibold text-foreground">Pilihan Anda: {currentJurusan.nama}</p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Pilihan ini akan diteruskan ke tim kurikulum & BK untuk dipertimbangkan dalam penetapan kelas 11.
-                Jika kuota rumpun pilihan utama penuh, sekolah dapat menawarkan rumpun alternatif.
+                Pilihan ini akan diteruskan ke tim kurikulum & BK untuk diverifikasi.
+                Penetapan akhir memperhatikan rata-rata nilai kelas 10, kuota kelas, dan kebijakan sekolah.
+                Jika kuota pilihan utama penuh, Anda dapat dialihkan ke rumpun alternatif sesuai nilai.
               </p>
             </div>
           </div>

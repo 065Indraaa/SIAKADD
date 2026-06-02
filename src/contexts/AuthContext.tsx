@@ -27,6 +27,7 @@ interface UserData {
   birthPlace?: string;
   birthDate?: string;
   gender?: string;
+  tahunMasuk?: number;
 }
 
 interface AuthContextType {
@@ -93,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           jurusanName: (s as any).jurusan?.nama || undefined,
           peminatanId: (s as any).peminatan?.id || undefined,
           peminatanName: (s as any).peminatan?.nama || undefined,
+          tahunMasuk: s.tahunMasuk ?? undefined,
         };
       }
     } catch (e) {

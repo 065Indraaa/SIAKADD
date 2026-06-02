@@ -60,7 +60,7 @@ import { useTheme } from '@/contexts/ThemeContext';
  * ─────────────────────────────────────────────────────────────
  */
 const HERO_IMAGE = '/images/hero.jpeg';
-const PROFIL_IMAGE = '/image/profill.jpeg';
+const PROFIL_IMAGE = '/images/profill.jpg';
 
 const SCHOOL = {
   name: 'SMAIT Nur Hidayah',
@@ -93,7 +93,7 @@ const RUMPUNS = [
     accent: 'blue',
     code: 'Rumpun A',
     title: 'Kelompok Kesehatan',
-    desc: 'Mendalami Matematika, Fisika, Kimia, dan Biologi untuk jalur kedokteran, farmasi, keperawatan, dan bidang kesehatan lain.',
+    desc: 'Mendalami Matematika, Fisika, Kimia, dan Biologi untuk jalur kedokteran, farmasi, keperawatan, dan bidang kesehatan lain. Diperlukan rata-rata nilai kelas 10 minimal 87.',
     tags: ['Matematika', 'Fisika', 'Kimia', 'Biologi'],
   },
   {
@@ -101,7 +101,7 @@ const RUMPUNS = [
     accent: 'emerald',
     code: 'Rumpun B',
     title: 'Kelompok Teknik',
-    desc: 'Fokus pada Matematika Tingkat Lanjut, Fisika, Kimia, dan Biologi untuk arah teknik, informatika, sipil, dan rekayasa.',
+    desc: 'Fokus pada Matematika Tingkat Lanjut, Fisika, Kimia, dan Biologi untuk arah teknik, informatika, sipil, dan rekayasa. Terbuka untuk semua siswa kelas 10.',
     tags: ['Matematika Lanjut', 'Fisika', 'Kimia', 'Biologi'],
   },
   {
@@ -109,7 +109,7 @@ const RUMPUNS = [
     accent: 'amber',
     code: 'Rumpun C',
     title: 'Kelompok Sosial dan Humaniora',
-    desc: 'Mendalami Ekonomi, Sosiologi, Geografi, dan Sejarah untuk jalur hukum, bisnis, komunikasi, dan dakwah.',
+    desc: 'Mendalami Ekonomi, Sosiologi, Geografi, dan Sejarah untuk jalur hukum, bisnis, komunikasi, dan dakwah. Terbuka untuk semua siswa kelas 10.',
     tags: ['Ekonomi', 'Sosiologi', 'Geografi', 'Sejarah'],
   },
 ] as const;
@@ -156,7 +156,7 @@ const SYSTEM_FEATURES = [
   {
     icon: UserCog,
     title: 'Penjurusan A, B, C',
-    desc: 'Penempatan kelas 10 dan peminatan kelas 11 dikelola berdasarkan pilihan, nilai, dan kuota.',
+    desc: 'Penjurusan kelas 11 berdasarkan rata-rata nilai kelas 10. Kesehatan (A) minimal 87, Teknik (B) dan Sosial (C) bebas pilih dengan kuota kelas.',
   },
   {
     icon: Trophy,
@@ -486,8 +486,9 @@ export default function LandingPage() {
           </div>
 
           <div className={`mt-6 rounded-2xl border p-4 text-sm leading-7 ${surfaceClass} ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-            Penempatan kelas 10 mengacu pada hasil tes dan rapor. Saat masuk kelas 11, siswa diarahkan ke rumpun A,
-            B, atau C sesuai pilihan dan kuota sekolah.
+            Penjurusan kelas 11 mengacu pada <strong>rata-rata nilai kelas 10</strong>. Rumpun A (Kesehatan) memerlukan
+            rata-rata minimal <strong>87</strong>. Rumpun B (Teknik) dan C (Sosial) terbuka bebas dengan kuota kelas.
+            Jika kuota penuh, siswa nilai terendah dipindahkan ke rumpun alternatif.
           </div>
         </div>
       </section>

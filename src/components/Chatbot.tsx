@@ -30,17 +30,24 @@ SISTEM KELAS:
 - Kelas 11: siswa dibagi ulang berdasarkan rumpun peminatan yang dipilih mulai kelas 10 semester 2.
 
 PROGRAM PEMINATAN (mulai kelas 11):
-1. Rumpun A — Kelompok Kesehatan (2 kelas)
-   Mata pelajaran: Matematika, Fisika, Kimia, Biologi.
-   Diarahkan untuk jalur kedokteran, farmasi, keperawatan, dan ilmu kesehatan lainnya.
-   Merupakan rumpun paling diminati sehingga seleksinya ketat.
-2. Rumpun B — Kelompok Teknik (1 kelas)
-   Mata pelajaran: Fisika, Matematika Tingkat Lanjut, Biologi, Kimia.
-   Diarahkan untuk jalur teknik (informatika, sipil, mesin, industri, arsitektur).
-3. Rumpun C — Kelompok Sosial & Humaniora (2 kelas)
-   Mata pelajaran: Ekonomi, Sosiologi, Geografi, Sejarah.
-   Diarahkan untuk jalur hukum, bisnis, hubungan internasional, komunikasi, dan dakwah.
-Jika siswa memilih rumpun A namun tidak lolos, akan ditawarkan pindah ke rumpun B atau C.
+KRITERIA PENJURUSAN:
+- Kriteria diambil dari RATA-RATA NILAI KELAS 10 (semester Ganjil & Genap), bukan per mata pelajaran.
+- Rumpun A — Kelompok Kesehatan (2 kelas, kuota ~60 siswa)
+  Syarat: rata-rata nilai kelas 10 minimal 87.
+  Mata pelajaran: Matematika, Fisika, Kimia, Biologi.
+  Diarahkan untuk jalur kedokteran, farmasi, keperawatan, dan ilmu kesehatan lainnya.
+- Rumpun B — Kelompok Teknik (1 kelas, kuota ~30 siswa)
+  Syarat: siswa bebas memilih tanpa batasan nilai minimal.
+  Mata pelajaran: Fisika, Matematika Tingkat Lanjut, Biologi, Kimia.
+  Diarahkan untuk jalur teknik (informatika, sipil, mesin, industri, arsitektur).
+- Rumpun C — Kelompok Sosial & Humaniora (2 kelas, kuota ~60 siswa)
+  Syarat: siswa bebas memilih tanpa batasan nilai minimal.
+  Mata pelajaran: Ekonomi, Sosiologi, Geografi, Sejarah.
+  Diarahkan untuk jalur hukum, bisnis, hubungan internasional, komunikasi, dan dakwah.
+KEBIJAKAN KUOTA:
+- Jika kuota Teknik (B) penuh, siswa dengan nilai terendah di Teknik dipindahkan ke Sosial (C).
+- Jika kuota Sosial (C) penuh, siswa dengan nilai terendah di Sosial dipindahkan ke Teknik (B).
+- Siswa yang tidak memenuhi syarat A (rata-rata < 87) hanya bisa masuk B atau C.
 
 FASILITAS:
 - Masjid sekolah sebagai pusat ibadah dan halaqah
