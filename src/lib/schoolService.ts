@@ -195,6 +195,52 @@ export async function fetchNilaiSiswa(siswaId: string, semester: string, tahunAj
   return res.data.nilais;
 }
 
+/** Hitung nilai akhir satu mapel (default 30% harian + 30% UTS + 40% UAS, remedial menggantikan). */
+function hitungNilaiAkhir(n: any): number {
+  const nh = n.nilaiHarian || 0;
+  const uts = Math.max(n.nilaiUts || 0, n.nilaiRemedialUts || 0);
+  const uas = Math.max(n.nilaiUas || 0, n.nilaiRemedialUas || 0);
+  return nh * 0.3 + uts * 0.3 + uas * 0.4;
+}
+
+/**
+ * Hitung rata-rata nilai kelas 10 seorang siswa.
+ * Mengambil semua nilai semester Ganjil & Genap pada tahun ajaran kelas 10
+ * (diturunkan dari tahunMasuk), lalu merata-ratakan nilai akhir tiap mapel.
+ * Hasil 0–100, atau null jika belum ada data nilai.
+ */
+export async function hitungRataRataKelas10(
+  siswaId: string,
+  tahunMasuk: number | null | undefined
+): Promise<number | null> {
+  if (!tahunMasuk) return null;
+  const ta10 = `${tahunMasuk}/${tahunMasuk + 1}`;
+  try {
+    const [ganjil, genap] = await Promise.all([
+      fetchNilaiSiswa(siswaId, 'Ganjil', ta10),
+      fetchNilaiSiswa(siswaId, 'Genap', ta10),
+    ]);
+    const semuaNilai = [...(ganjil || []), ...(genap || [])];
+    if (semuaNilai.length === 0) return null;
+
+    // Agregasi nilai akhir per mapel (jika ada duplikasi, ambil rata-rata entry-nya)
+    const perMapel: Record<string, number[]> = {};
+    for (const n of semuaNilai) {
+      const kode = n.mataPelajaran?.kode || n.mataPelajaran?.nama || 'unknown';
+      if (!perMapel[kode]) perMapel[kode] = [];
+      perMapel[kode].push(hitungNilaiAkhir(n));
+    }
+
+    const total = Object.values(perMapel).reduce((sum, arr) => {
+      const avgMapel = arr.reduce((a, b) => a + b, 0) / arr.length;
+      return sum + avgMapel;
+    }, 0);
+    return total / Object.keys(perMapel).length;
+  } catch {
+    return null;
+  }
+}
+
 // ============================================================
 // PRESTASI
 // ============================================================
