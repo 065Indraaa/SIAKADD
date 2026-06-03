@@ -361,6 +361,39 @@ export default function GuruGrades() {
     let successCount = 0;
     const errors: string[] = [];
     try {
+      // Ambil ID record nilai TERKINI dari server tepat sebelum menyimpan.
+      // `upsertNilai` sebenarnya hanya INSERT (nilai_insert), jadi tanpa ini
+      // baris yang sudah ada di DB tetapi existingId-nya basi/kosong akan
+      // di-INSERT ulang → bikin duplikat atau melanggar unique key (siswa yang
+      // ke-2 dst "mental"). Dengan memetakan ulang dari server, simpan massal
+      // berperilaku sama seperti simpan satu per satu (selalu UPDATE bila ada).
+      const freshIdBySiswa = new Map<string, string>();
+      const duplikatNilai: string[] = []; // baris ganda artefak insert-only → dibersihkan
+      try {
+        const freshRes = await executeQuery(getNilaiByKelasRef(dataConnect, {
+          kelasId: selectedAssignment.kelasId,
+          mataPelajaranId: selectedAssignment.mataPelajaranId,
+          semester,
+          tahunAjaran,
+        }), { fetchPolicy: 'SERVER_ONLY' });
+        freshRes.data.nilais.forEach((n: any) => {
+          const sid = n.siswa?.id;
+          if (!sid) return;
+          if (!freshIdBySiswa.has(sid)) {
+            freshIdBySiswa.set(sid, n.id); // simpan satu record per siswa
+          } else {
+            duplikatNilai.push(n.id); // sisanya duplikat → hapus
+          }
+        });
+      } catch (e) {
+        // Kalau gagal ambil data terkini, lanjut pakai existingId dari state.
+        console.error('Gagal memuat ID nilai terkini sebelum simpan:', e);
+      }
+      // Bersihkan baris nilai ganda (1 siswa hanya boleh 1 record per mapel/semester/TA).
+      for (const dupId of duplikatNilai) {
+        try { await deleteNilai(dataConnect, { id: dupId }); } catch { /* mungkin sudah terhapus */ }
+      }
+
       for (const s of students) {
         const uts = parseFloat(String(s.nilaiUts));
         const uas = parseFloat(String(s.nilaiUas));
@@ -371,10 +404,13 @@ export default function GuruGrades() {
         // Cek apakah ada data nilai yang benar-benar diisi
         const hasAnyGrade = effHarian != null || !isNaN(uts) || !isNaN(uas) || !isNaN(remUts) || !isNaN(remUas);
 
+        // Utamakan ID dari server (paling akurat), fallback ke state.
+        const existingId = freshIdBySiswa.get(s.siswaId) || s.existingId;
+
         try {
-          if (s.existingId) {
+          if (existingId) {
             // Update record yang sudah ada (termasuk jika semua nilai dihapus)
-            await updateNilaiData(s.existingId, {
+            await updateNilaiData(existingId, {
               nilaiHarian: effHarian,
               nilaiUts: isNaN(uts) ? null : uts,
               nilaiUas: isNaN(uas) ? null : uas,
