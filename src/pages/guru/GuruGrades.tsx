@@ -8,7 +8,7 @@ import { LookupSelect } from '@/components/ui/lookup-select';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Save, Loader2, RefreshCw, CheckCircle2, Info, BookOpen, Calculator, AlertTriangle, Trash2, Settings, ChevronDown, ChevronUp } from 'lucide-react';
-import { fetchJadwalGuru, fetchKelas, fetchMataPelajaran, fetchBobotNilai, setBobotNilai, updateNilaiData, fetchTugasHarianByKelas, addTugasHarian, fetchKehadiranBySiswa, hitungSkorKehadiran, hitungNilaiAkhirBobot } from '@/lib/schoolService';
+import { fetchJadwalGuru, fetchKelas, fetchMataPelajaran, fetchBobotNilai, setBobotNilai, updateNilaiData, fetchTugasHarianByKelas, addTugasHarian, removeTugasHarian, fetchKehadiranBySiswa, hitungSkorKehadiran, hitungNilaiAkhirBobot } from '@/lib/schoolService';
 import { fetchSiswa } from '@/lib/userService';
 import { getGuruByPengguna, upsertNilai, getNilaiByKelasRef, deleteNilai } from '@uassiakad/connector';
 import { executeQuery } from 'firebase/data-connect';
@@ -71,6 +71,7 @@ export default function GuruGrades() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   const [bobot, setBobot] = useState<Bobot>(DEFAULT_BOBOT);
   const [bobotLoading, setBobotLoading] = useState(false);
@@ -285,13 +286,14 @@ export default function GuruGrades() {
   }, [selectedAssignment, semester, tahunAjaran]);
 
   useEffect(() => { loadStudentsWithGrades(); }, [loadStudentsWithGrades]);
-  useAutoRefresh(loadStudentsWithGrades, 20_000);
+  useAutoRefresh(loadStudentsWithGrades, 20_000, !hasChanges);
 
   const [refreshing, refresh] = useManualRefresh(loadAssignments, loadStudentsWithGrades);
 
   const handleNilaiChange = (siswaId: string, field: keyof Omit<SiswaGrade, 'tugas'>, val: string) => {
     setStudents(prev => prev.map(s => s.siswaId === siswaId ? { ...s, [field]: val } : s));
     setSaved(false);
+    setHasChanges(true);
   };
 
   const handleTugasChange = (siswaId: string, pertemuan: number, val: string) => {
@@ -300,6 +302,7 @@ export default function GuruGrades() {
       return { ...s, tugas: { ...s.tugas, [pertemuan]: val } };
     }));
     setSaved(false);
+    setHasChanges(true);
   };
 
   const effectiveUts = (s: SiswaGrade) => {
@@ -349,6 +352,10 @@ export default function GuruGrades() {
       setError('Pilih kelas dan mata pelajaran yang Anda ampu terlebih dahulu.');
       return;
     }
+    if (!tahunAjaran.trim()) {
+      setError('Tahun ajaran tidak boleh kosong. Format: YYYY/YYYY (contoh: 2024/2025).');
+      return;
+    }
     setSaving(true);
     setError(null);
     let successCount = 0;
@@ -359,12 +366,14 @@ export default function GuruGrades() {
         const uas = parseFloat(String(s.nilaiUas));
         const remUts = parseFloat(String(s.nilaiRemedialUts));
         const remUas = parseFloat(String(s.nilaiRemedialUas));
-        // Nilai harian yang disimpan = input manual guru, atau rata-rata tugas harian.
-        // Dengan begitu nilai tugas benar-benar masuk ke persentase nilai akhir & rapor.
         const effHarian = effectiveHarian(s);
-        // Selalu simpan/update record agar jumlahTugasHarian tersimpan untuk semua siswa
+
+        // Cek apakah ada data nilai yang benar-benar diisi
+        const hasAnyGrade = effHarian != null || !isNaN(uts) || !isNaN(uas) || !isNaN(remUts) || !isNaN(remUas);
+
         try {
           if (s.existingId) {
+            // Update record yang sudah ada (termasuk jika semua nilai dihapus)
             await updateNilaiData(s.existingId, {
               nilaiHarian: effHarian,
               nilaiUts: isNaN(uts) ? null : uts,
@@ -373,7 +382,9 @@ export default function GuruGrades() {
               nilaiRemedialUas: isNaN(remUas) ? null : remUas,
               jumlahTugasHarian: jumlahTugas,
             });
-          } else {
+            successCount++;
+          } else if (hasAnyGrade) {
+            // Hanya buat record baru jika ada nilai yang diisi
             await upsertNilai(dataConnect, {
               siswaId: s.siswaId,
               kelasId: selectedAssignment.kelasId,
@@ -387,10 +398,11 @@ export default function GuruGrades() {
               nilaiRemedialUas: isNaN(remUas) ? null : remUas,
               jumlahTugasHarian: jumlahTugas,
             } as any);
+            successCount++;
           }
-          successCount++;
         } catch (e: any) {
           errors.push(`${s.name}: ${e.message}`);
+          console.error(`Gagal simpan nilai ${s.name}:`, e);
         }
       }
 
@@ -400,6 +412,11 @@ export default function GuruGrades() {
           const val = parseFloat(String(s.tugas[i]));
           if (isNaN(val)) continue;
           try {
+            // Hapus tugas lama jika ada agar bisa update (karena tidak ada mutation update)
+            const existingTugas = tugasMap[s.siswaId]?.[i];
+            if (existingTugas?.id) {
+              try { await removeTugasHarian(existingTugas.id); } catch { /* mungkin sudah terhapus */ }
+            }
             await addTugasHarian({
               siswaId: s.siswaId,
               kelasId: selectedAssignment.kelasId,
@@ -409,7 +426,9 @@ export default function GuruGrades() {
               pertemuanKe: i,
               nilai: val,
             });
-          } catch { /* ignore duplicate key conflicts */ }
+          } catch (e: any) {
+            console.error(`Gagal simpan tugas ${s.name} pertemuan ${i}:`, e);
+          }
         }
       }
 
@@ -417,6 +436,7 @@ export default function GuruGrades() {
         setError(`${successCount} berhasil disimpan, ${errors.length} gagal. Detail: ${errors.slice(0, 3).join('; ')}`);
       } else {
         setSaved(true);
+        setHasChanges(false);
         setTimeout(() => setSaved(false), 3000);
         if (successCount > 0) {
           addNotif({
@@ -435,6 +455,7 @@ export default function GuruGrades() {
       await loadStudentsWithGrades();
     } catch (e: any) {
       setError(e.message || 'Gagal menyimpan nilai.');
+      console.error('Error saat menyimpan nilai:', e);
     } finally {
       setSaving(false);
     }
@@ -760,7 +781,7 @@ export default function GuruGrades() {
                     </TableCell>
                     <TableCell className="text-center">
                       {s.existingId ? (
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteNilai(s)}
+                        <Button type="button" variant="ghost" size="sm" onClick={() => handleDeleteNilai(s)}
                           className="h-8 px-2 text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg">
                           <Trash2 className="h-4 w-4" />
                         </Button>

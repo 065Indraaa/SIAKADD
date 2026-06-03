@@ -286,7 +286,10 @@ export async function hitungRataRataKelas10(
   siswaId: string,
   tahunMasuk: number | null | undefined
 ): Promise<number | null> {
-  if (!tahunMasuk) return null;
+  if (!tahunMasuk) {
+    console.warn('hitungRataRataKelas10: tahunMasuk kosong');
+    return null;
+  }
   const ta10 = `${tahunMasuk}/${tahunMasuk + 1}`;
   try {
     const [ganjil, genap] = await Promise.all([
@@ -294,11 +297,23 @@ export async function hitungRataRataKelas10(
       fetchNilaiSiswa(siswaId, 'Genap', ta10),
     ]);
     const semuaNilai = [...(ganjil || []), ...(genap || [])];
-    if (semuaNilai.length === 0) return null;
+
+    // Filter record yang benar-benar punya nilai (abaikan record kosong)
+    const nilaiBerisi = semuaNilai.filter((n: any) => {
+      const nh = n.nilaiHarian ?? 0;
+      const uts = n.nilaiUts ?? 0;
+      const uas = n.nilaiUas ?? 0;
+      return nh > 0 || uts > 0 || uas > 0;
+    });
+
+    if (nilaiBerisi.length === 0) {
+      console.log(`hitungRataRataKelas10: tidak ada nilai berisi untuk siswa ${siswaId} pada TA ${ta10}`);
+      return null;
+    }
 
     // Agregasi nilai akhir per mapel (jika ada duplikasi, ambil rata-rata entry-nya)
     const perMapel: Record<string, number[]> = {};
-    for (const n of semuaNilai) {
+    for (const n of nilaiBerisi) {
       const kode = n.mataPelajaran?.kode || n.mataPelajaran?.nama || 'unknown';
       if (!perMapel[kode]) perMapel[kode] = [];
       perMapel[kode].push(hitungNilaiAkhir(n));
@@ -309,7 +324,8 @@ export async function hitungRataRataKelas10(
       return sum + avgMapel;
     }, 0);
     return total / Object.keys(perMapel).length;
-  } catch {
+  } catch (e: any) {
+    console.error('hitungRataRataKelas10 error:', e);
     return null;
   }
 }

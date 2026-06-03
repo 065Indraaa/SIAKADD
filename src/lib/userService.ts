@@ -23,6 +23,7 @@ import {
   listPengguna,
   getLastNip,
   getLastNis,
+  getPenggunaByEmail,
   JenisKelamin,
   PeranPengguna,
   JabatanGuru,
@@ -41,6 +42,23 @@ export const dataConnect = getDataConnect(app, connectorConfig);
 
 // Helper: selalu fetch dari server, tidak pakai cache
 const NO_CACHE = { fetchPolicy: 'SERVER_ONLY' as const };
+
+/** Cek apakah email sudah terdaftar di sistem. */
+async function isEmailExists(email: string): Promise<boolean> {
+  try {
+    const result = await getPenggunaByEmail(dataConnect, { email });
+    return result.data.penggunas.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Lempar error yang jelas jika email sudah ada. */
+async function assertEmailUnique(email: string) {
+  if (await isEmailExists(email)) {
+    throw new Error(`Email "${email}" sudah terdaftar. Gunakan email lain atau hapus pengguna yang sudah ada.`);
+  }
+}
 
 // ============================================================
 // PAYLOAD TYPES
@@ -167,6 +185,12 @@ function generateSiswaEmail(nis: string): string {
   return `${nis.toLowerCase()}@siswa.sma.sch.id`;
 }
 
+function generateAdminEmail(name: string): string {
+  const slug = name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `${slug}.${random}@admin.sma.sch.id`;
+}
+
 function toJabatanGuru(val?: string): JabatanGuru {
   const map: Record<string, JabatanGuru> = {
     WaliKelas: JabatanGuru.WaliKelas,
@@ -193,6 +217,8 @@ export async function createGuruWithAccount(payload: CreateGuruPayload): Promise
   const email = payload.email || generateGuruEmail(payload.name, nip);
   // Demo-friendly password for easy login during presentations
   const defaultPassword = email.endsWith('@demo.com') ? 'Guru@123' : `Guru@${nip.slice(-5)}`;
+
+  await assertEmailUnique(email);
 
   const userResult = await createPengguna(dataConnect, {
     email,
@@ -236,6 +262,8 @@ export async function createSiswaWithAccount(payload: CreateSiswaPayload): Promi
   // Demo-friendly password for easy login during presentations
   const defaultPassword = email.endsWith('@demo.com') ? 'Siswa@123' : `Siswa@${nis.slice(-6)}`;
 
+  await assertEmailUnique(email);
+
   const userResult = await createPengguna(dataConnect, {
     email,
     password: defaultPassword,
@@ -273,8 +301,10 @@ export async function createAdminWithAccount(payload: { name: string; email?: st
   email: string;
   defaultPassword: string;
 }> {
-  const email = payload.email || `${payload.name.toLowerCase().replace(/\s+/g, '')}@admin.sma.sch.id`;
+  const email = payload.email || generateAdminEmail(payload.name);
   const defaultPassword = `Admin@123`;
+
+  await assertEmailUnique(email);
 
   const userResult = await createPengguna(dataConnect, {
     email,
