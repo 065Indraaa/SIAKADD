@@ -192,8 +192,14 @@ export async function removeJadwalData(id: string) {
 // NILAI
 // ============================================================
 export async function fetchNilaiSiswa(siswaId: string, semester: string, tahunAjaran: string) {
+  if (!semester?.trim() || !tahunAjaran?.trim()) {
+    throw new Error('Semester dan tahun ajaran wajib diisi untuk mengambil nilai.');
+  }
   const res = await executeQuery(getNilaiBySiswaRef(dataConnect, { siswaId, semester, tahunAjaran }), NO_CACHE);
-  return res.data.nilais;
+  return (res.data.nilais || []).filter((n: any) => {
+    // Safety net: pastikan record benar-benar milik semester & tahun ajaran yang diminta
+    return n.semester === semester && n.tahunAjaran === tahunAjaran;
+  });
 }
 
 // ============================================================
@@ -286,44 +292,54 @@ export async function hitungRataRataKelas10(
   siswaId: string,
   tahunMasuk: number | null | undefined
 ): Promise<number | null> {
-  if (!tahunMasuk) {
-    console.warn('hitungRataRataKelas10: tahunMasuk kosong');
-    return null;
-  }
-  const ta10 = `${tahunMasuk}/${tahunMasuk + 1}`;
+  // Kandidat tahun ajaran kelas 10, diurut dari yang paling mungkin benar:
+  //  1. Diturunkan dari tahunMasuk (`${tahunMasuk}/${tahunMasuk+1}`) — sumber utama.
+  //  2. Tahun ajaran berjalan — untuk siswa yang SAAT INI kelas 10 namun
+  //     tahunMasuk-nya keliru (mis. terisi tahun kalender, bukan tahun ajaran).
+  //  3. Geser satu tahun ke belakang — menutup off-by-one arah sebaliknya.
+  // Kandidat pertama yang punya nilai dipakai, jadi data dengan tahunMasuk benar
+  // tetap memakai tahun ajaran persisnya dan tidak salah ambil tahun lain.
+  const kandidat: string[] = [];
+  if (tahunMasuk) kandidat.push(`${tahunMasuk}/${tahunMasuk + 1}`);
+  kandidat.push(currentTahunAjaran());
+  if (tahunMasuk) kandidat.push(`${tahunMasuk - 1}/${tahunMasuk}`);
+  const tahunAjaranList = Array.from(new Set(kandidat)); // dedupe, jaga urutan
+
   try {
-    const [ganjil, genap] = await Promise.all([
-      fetchNilaiSiswa(siswaId, 'Ganjil', ta10),
-      fetchNilaiSiswa(siswaId, 'Genap', ta10),
-    ]);
-    const semuaNilai = [...(ganjil || []), ...(genap || [])];
+    for (const ta10 of tahunAjaranList) {
+      const [ganjil, genap] = await Promise.all([
+        fetchNilaiSiswa(siswaId, 'Ganjil', ta10),
+        fetchNilaiSiswa(siswaId, 'Genap', ta10),
+      ]);
+      const semuaNilai = [...(ganjil || []), ...(genap || [])];
 
-    // Filter record yang benar-benar punya nilai (abaikan record kosong)
-    const nilaiBerisi = semuaNilai.filter((n: any) => {
-      const nh = n.nilaiHarian ?? 0;
-      const uts = n.nilaiUts ?? 0;
-      const uas = n.nilaiUas ?? 0;
-      return nh > 0 || uts > 0 || uas > 0;
-    });
+      // Filter record yang benar-benar punya nilai (abaikan record kosong)
+      const nilaiBerisi = semuaNilai.filter((n: any) => {
+        const nh = n.nilaiHarian ?? 0;
+        const uts = n.nilaiUts ?? 0;
+        const uas = n.nilaiUas ?? 0;
+        return nh > 0 || uts > 0 || uas > 0;
+      });
 
-    if (nilaiBerisi.length === 0) {
-      console.log(`hitungRataRataKelas10: tidak ada nilai berisi untuk siswa ${siswaId} pada TA ${ta10}`);
-      return null;
+      if (nilaiBerisi.length === 0) continue; // coba kandidat tahun ajaran berikutnya
+
+      // Agregasi nilai akhir per mapel (jika ada duplikasi, ambil rata-rata entry-nya)
+      const perMapel: Record<string, number[]> = {};
+      for (const n of nilaiBerisi) {
+        const kode = n.mataPelajaran?.kode || n.mataPelajaran?.nama || 'unknown';
+        if (!perMapel[kode]) perMapel[kode] = [];
+        perMapel[kode].push(hitungNilaiAkhir(n));
+      }
+
+      const total = Object.values(perMapel).reduce((sum, arr) => {
+        const avgMapel = arr.reduce((a, b) => a + b, 0) / arr.length;
+        return sum + avgMapel;
+      }, 0);
+      return total / Object.keys(perMapel).length;
     }
 
-    // Agregasi nilai akhir per mapel (jika ada duplikasi, ambil rata-rata entry-nya)
-    const perMapel: Record<string, number[]> = {};
-    for (const n of nilaiBerisi) {
-      const kode = n.mataPelajaran?.kode || n.mataPelajaran?.nama || 'unknown';
-      if (!perMapel[kode]) perMapel[kode] = [];
-      perMapel[kode].push(hitungNilaiAkhir(n));
-    }
-
-    const total = Object.values(perMapel).reduce((sum, arr) => {
-      const avgMapel = arr.reduce((a, b) => a + b, 0) / arr.length;
-      return sum + avgMapel;
-    }, 0);
-    return total / Object.keys(perMapel).length;
+    console.log(`hitungRataRataKelas10: tidak ada nilai untuk siswa ${siswaId} pada TA ${tahunAjaranList.join(', ')}`);
+    return null;
   } catch (e: any) {
     console.error('hitungRataRataKelas10 error:', e);
     return null;

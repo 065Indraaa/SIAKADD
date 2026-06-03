@@ -37,6 +37,7 @@ import { executeQuery } from 'firebase/data-connect';
 import { getDataConnect } from 'firebase/data-connect';
 import { connectorConfig } from '@uassiakad/connector';
 import { app } from './firebase';
+import { currentTahunMasuk } from './tahunAjaran';
 
 export const dataConnect = getDataConnect(app, connectorConfig);
 
@@ -284,7 +285,7 @@ export async function createSiswaWithAccount(payload: CreateSiswaPayload): Promi
     alamat: payload.address || undefined,
     jurusanId: payload.majorId || undefined,
     kelasId: payload.classId || undefined,
-    tahunMasuk: payload.tahunMasuk ?? new Date().getFullYear(),
+    tahunMasuk: payload.tahunMasuk ?? currentTahunMasuk(),
   });
 
   const siswaId = siswaResult.data.siswa_insert.id;

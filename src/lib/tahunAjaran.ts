@@ -45,6 +45,19 @@ export function buildTahunAjaranOptions(
   return list;
 }
 
+/**
+ * Tahun masuk (academic start year) untuk siswa baru di tahun ajaran aktif.
+ * Berbeda dari `new Date().getFullYear()` (tahun kalender): karena tahun ajaran
+ * dimulai bulan Juli, siswa yang dibuat Januari–Juni tetap memakai tahun awal
+ * tahun ajaran berjalan (mis. Juni 2026 → tahun masuk 2025, bukan 2026).
+ * Nilai ini harus konsisten dengan komponen pertama `currentTahunAjaran()`
+ * agar perhitungan rata-rata kelas 10 menemukan nilai yang sudah diinput.
+ */
+export function currentTahunMasuk(now: Date = new Date()): number {
+  const y = now.getFullYear();
+  return now.getMonth() >= 6 ? y : y - 1;
+}
+
 /** Tahun lulus hipotetis untuk kelas 12 di tahun ajaran aktif. */
 export function currentGraduationYear(now: Date = new Date()): number {
   // Kelas 12 lulus di akhir semester genap (Juni tahun kedua).

@@ -19,7 +19,7 @@ import {
   UserListItem,
 } from '@/lib/userService';
 import { fetchKelas, fetchJurusan, graduateSiswa } from '@/lib/schoolService';
-import { currentGraduationYear } from '@/lib/tahunAjaran';
+import { currentGraduationYear, currentTahunMasuk } from '@/lib/tahunAjaran';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useManualRefresh } from '@/lib/useManualRefresh';
 import * as XLSX from 'xlsx';
@@ -43,6 +43,65 @@ const GURU_TEMPLATE_COLUMNS = ['Nama Lengkap', 'Jenis Kelamin (L/P)', 'NIP (opsi
 // ============================================================
 // TEMPLATE & EXPORT HELPERS
 // ============================================================
+
+/**
+ * Normalkan nilai tanggal dari sel Excel menjadi string `YYYY-MM-DD`.
+ * Data Connect memakai scalar `Date` yang HANYA menerima format ISO ini —
+ * jika nilai mentah dikirim apa adanya (mis. objek Date, angka serial Excel,
+ * atau "15/05/2008" dari locale Indonesia) mutation gagal dan seluruh baris
+ * batal terimpor. Mengembalikan `undefined` bila kosong/tak bisa diparse,
+ * sehingga tanggal yang salah hanya dilewati, bukan menggagalkan impor.
+ */
+function normalizeExcelDate(value: unknown): string | undefined {
+  if (value == null || value === '') return undefined;
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const fromParts = (y: number, m: number, d: number): string | undefined => {
+    if (!y || !m || !d || m < 1 || m > 12 || d < 1 || d > 31) return undefined;
+    return `${y}-${pad(m)}-${pad(d)}`;
+  };
+
+  // Objek Date (saat workbook dibaca dengan cellDates: true)
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    return fromParts(value.getFullYear(), value.getMonth() + 1, value.getDate());
+  }
+
+  // Angka serial Excel (jika sel tidak terbaca sebagai Date)
+  if (typeof value === 'number' && isFinite(value)) {
+    // Epoch Excel: 1899-12-30 (sudah memperhitungkan bug tahun kabisat 1900).
+    const ms = Math.round((value - 25569) * 86400 * 1000);
+    const d = new Date(ms);
+    if (!isNaN(d.getTime())) return fromParts(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate());
+    return undefined;
+  }
+
+  const s = String(value).trim();
+  if (!s) return undefined;
+
+  // Sudah ISO "YYYY-MM-DD" (abaikan komponen waktu bila ada)
+  const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+  if (iso) return fromParts(+iso[1], +iso[2], +iso[3]);
+
+  // Format bertitik/garis miring: D/M/Y atau M/D/Y atau D-M-Y
+  const dmy = /^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/.exec(s);
+  if (dmy) {
+    let a = +dmy[1];
+    let b = +dmy[2];
+    const y = +dmy[3];
+    // Jika salah satu > 12 jelas itu komponen tanggal; kalau ambigu, asumsikan
+    // urutan Indonesia D/M/Y (templat mencontohkan tanggal-bulan-tahun).
+    if (a > 12 && b <= 12) return fromParts(y, b, a); // D/M/Y
+    if (b > 12 && a <= 12) return fromParts(y, a, b); // M/D/Y
+    return fromParts(y, b, a); // ambigu → D/M/Y
+  }
+
+  // Upaya terakhir: serahkan ke parser bawaan (mis. "May 15, 2008")
+  const parsed = new Date(s);
+  if (!isNaN(parsed.getTime())) {
+    return fromParts(parsed.getFullYear(), parsed.getMonth() + 1, parsed.getDate());
+  }
+  return undefined;
+}
 
 function downloadTemplate(type: 'siswa' | 'guru') {
   const columns = type === 'siswa' ? SISWA_TEMPLATE_COLUMNS : GURU_TEMPLATE_COLUMNS;
@@ -251,9 +310,11 @@ export default function AdminUsers() {
 
   const handleImportExcel = async (file: File) => {
     const data = await file.arrayBuffer();
-    const wb = XLSX.read(data);
+    // cellDates + dateNF: sel tanggal langsung dirender "YYYY-MM-DD", sementara
+    // raw:false menjaga teks lain (mis. nomor telepon berawalan 0) tetap utuh.
+    const wb = XLSX.read(data, { cellDates: true });
     const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false });
+    const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, dateNF: 'yyyy-mm-dd', blankrows: false });
     if (rows.length < 2) { alert('File kosong atau tidak valid.'); return; }
     const dataRows = rows.slice(1).filter(r => r && r[0] && String(r[0]).trim());
     if (dataRows.length === 0) { alert('Tidak ada baris data yang valid.'); return; }
@@ -278,10 +339,10 @@ export default function AdminUsers() {
             name,
             gender: String(row[1] || 'L').trim().toUpperCase() === 'P' ? 'P' : 'L',
             birthPlace: String(row[2] || '').trim() || undefined,
-            birthDate: String(row[3] || '').trim() || undefined,
+            birthDate: normalizeExcelDate(row[3]),
             address: String(row[4] || '').trim() || undefined,
             phone: String(row[5] || '').trim() || undefined,
-            tahunMasuk: parseInt(String(row[6] || new Date().getFullYear())) || new Date().getFullYear(),
+            tahunMasuk: parseInt(String(row[6] || currentTahunMasuk())) || currentTahunMasuk(),
             nis: formatNIS(nisSeq),
           });
           nisSeq++;
@@ -296,7 +357,7 @@ export default function AdminUsers() {
             jabatan: String(row[3] || 'Guru').trim(),
             specialization: String(row[4] || '').trim() || undefined,
             birthPlace: String(row[5] || '').trim() || undefined,
-            birthDate: String(row[6] || '').trim() || undefined,
+            birthDate: normalizeExcelDate(row[6]),
             phone: String(row[7] || '').trim() || undefined,
             address: String(row[8] || '').trim() || undefined,
           });
@@ -354,7 +415,7 @@ export default function AdminUsers() {
       role, name: '', email: '', phone: '', address: '',
       gender: 'L', birthPlace: '', birthDate: '',
       specialization: '', jabatan: 'Guru', nip: '',
-      classId: '', majorId: '', tahunMasuk: new Date().getFullYear(),
+      classId: '', majorId: '', tahunMasuk: currentTahunMasuk(),
     });
     setIsDialogOpen(true);
   };
@@ -368,7 +429,7 @@ export default function AdminUsers() {
       gender: u.gender || 'L', birthPlace: u.birthPlace || '',
       birthDate: u.birthDate || '',
       classId: u.kelasId || '', majorId: u.jurusanId || '',
-      tahunMasuk: u.tahunMasuk || new Date().getFullYear(),
+      tahunMasuk: u.tahunMasuk || currentTahunMasuk(),
     });
     setIsDialogOpen(true);
   };

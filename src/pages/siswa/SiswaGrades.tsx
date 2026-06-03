@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,6 +22,7 @@ export default function SiswaGrades() {
   const [tahunAjaran, setTahunAjaran] = useState(currentTahunAjaran());
   const [bobotMap, setBobotMap] = useState<Record<string, any>>({});
   const [skorKehadiran, setSkorKehadiran] = useState<number | null>(null);
+  const reqCounterRef = useRef(0);
 
   const tahunAjaranOptions = useMemo(() => buildTahunAjaranOptions(), []);
 
@@ -30,6 +31,7 @@ export default function SiswaGrades() {
       setGrades([]);
       return;
     }
+    const reqId = ++reqCounterRef.current;
     setLoading(true);
     try {
       const [data, bobotData, kehadiranData] = await Promise.all([
@@ -37,6 +39,8 @@ export default function SiswaGrades() {
         user?.kelasId ? fetchBobotNilaiByKelas(user.kelasId, semester, tahunAjaran) : Promise.resolve([]),
         fetchKehadiranBySiswa(user.siswaId).catch(() => []),
       ]);
+      // Abaikan response stale (race condition saat user ganti semester cepat)
+      if (reqId !== reqCounterRef.current) return;
       setGrades(data || []);
       const map: Record<string, any> = {};
       (bobotData || []).forEach((b: any) => {
@@ -47,9 +51,11 @@ export default function SiswaGrades() {
       setBobotMap(map);
       setSkorKehadiran(hitungSkorKehadiran(kehadiranData));
     } catch (e) {
-      console.error(e);
+      console.error('Gagal memuat nilai rapor:', e);
     } finally {
-      setLoading(false);
+      if (reqId === reqCounterRef.current) {
+        setLoading(false);
+      }
     }
   }, [user?.siswaId, user?.kelasId, semester, tahunAjaran]);
 

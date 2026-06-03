@@ -77,8 +77,10 @@ export default function AdminPenjuruan() {
       setJurusans(jurusanData);
       setKelasList(kelasData);
 
-      // Hitung rata-rata kelas 10 secara paralel (hanya untuk kelas 10)
-      const kelas10 = mapped.filter(m => m.gradeLevel === 10 && m.tahunMasuk);
+      // Hitung rata-rata kelas 10 secara paralel (hanya untuk kelas 10).
+      // tahunMasuk tidak lagi wajib: hitungRataRataKelas10 punya fallback ke
+      // tahun ajaran berjalan bila tahunMasuk kosong/keliru.
+      const kelas10 = mapped.filter(m => m.gradeLevel === 10);
       if (kelas10.length > 0) {
         setCalculating(true);
         const rataMap = new Map<string, number | null>();
