@@ -135,12 +135,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loginByEmail = async (email: string, password?: string): Promise<Role | void> => {
     // 1. Find pengguna by email (single query returns password too)
-    const res = await getPenggunaByEmail(dataConnect, { email: email.trim().toLowerCase() });
+    // Gunakan executeQuery dengan SERVER_ONLY agar tidak memakai cache (menghindari bug login setelah daftar)
+    const { executeQuery } = await import('firebase/data-connect');
+    const { getPenggunaByEmailRef } = await import('@uassiakad/connector');
+    
+    const queryRef = getPenggunaByEmailRef(dataConnect, { email: email.trim().toLowerCase() });
+    const res = await executeQuery(queryRef, { fetchPolicy: 'SERVER_ONLY' });
     const penggunas = res.data.penggunas;
 
     if (!penggunas || penggunas.length === 0) {
       // Try original case as fallback
-      const fallback = await getPenggunaByEmail(dataConnect, { email });
+      const fallbackRef = getPenggunaByEmailRef(dataConnect, { email });
+      const fallback = await executeQuery(fallbackRef, { fetchPolicy: 'SERVER_ONLY' });
       if (!fallback.data.penggunas || fallback.data.penggunas.length === 0) {
         throw new Error('Email tidak terdaftar dalam sistem.');
       }
