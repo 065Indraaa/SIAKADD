@@ -803,6 +803,188 @@ html.dark [data-slot="dialog-content"] .hover\:bg-slate-50:hover {
   background: var(--accent) !important;
 }
 
+/* ─── COMPREHENSIVE LIGHT MODE FONT COLOR FIXES ─── */
+/* Memperbaiki semua teks yang hardcoded untuk dark mode agar terbaca di light mode */
+
+/* text-white di dalam .scola-portal untuk semua elemen yg tidak pakai dark: prefix
+   Khusus button: hanya override jika TIDAK punya background berwarna */
+.scola-portal h2.text-white,
+.scola-portal h3.text-white,
+.scola-portal h4.text-white,
+.scola-portal p.text-white,
+.scola-portal span.text-white,
+.scola-portal div.text-white,
+.scola-portal td.text-white,
+.scola-portal th.text-white {
+  color: var(--foreground) !important;
+}
+/* Khusus button text-white hanya di-override jika tidak ada background warna */
+.scola-portal button.text-white:not([class*="bg-blue"]):not([class*="bg-emerald"]):not([class*="bg-red"]):not([class*="bg-green"]):not([class*="bg-purple"]):not([class*="bg-violet"]):not([class*="bg-primary"]):not([class*="bg-gradient"]) {
+  color: var(--foreground) !important;
+}
+.dark .scola-portal h2.text-white,
+.dark .scola-portal h3.text-white,
+.dark .scola-portal h4.text-white,
+.dark .scola-portal p.text-white,
+.dark .scola-portal span.text-white,
+.dark .scola-portal div.text-white,
+.dark .scola-portal td.text-white,
+.dark .scola-portal th.text-white {
+  color: oklch(0.96 0 0) !important;
+}
+.dark .scola-portal button.text-white:not([class*="bg-blue"]):not([class*="bg-emerald"]):not([class*="bg-red"]):not([class*="bg-green"]):not([class*="bg-purple"]):not([class*="bg-violet"]):not([class*="bg-primary"]):not([class*="bg-gradient"]) {
+  color: oklch(0.96 0 0) !important;
+}
+
+/* text-slate-400 yang dipakai tanpa dark: prefix (muncul terlalu terang di light mode) */
+.scola-portal .text-slate-400 {
+  color: var(--muted-foreground) !important;
+}
+.dark .scola-portal .text-slate-400 {
+  color: oklch(0.62 0 0) !important;
+}
+
+/* text-slate-300 tanpa dark: prefix */
+.scola-portal .text-slate-300 {
+  color: var(--foreground) !important;
+  opacity: 0.8;
+}
+.dark .scola-portal .text-slate-300 {
+  color: oklch(0.80 0 0) !important;
+  opacity: 1;
+}
+
+/* input dan elemen form dengan text-white hardcoded */
+.scola-portal input.text-white,
+.scola-portal textarea.text-white,
+.scola-portal select.text-white,
+.scola-portal button.text-white:not(.bg-blue-600):not(.bg-emerald-600):not(.bg-red-600):not(.bg-primary),
+[data-slot="select-trigger"].text-white {
+  color: var(--foreground) !important;
+}
+.dark .scola-portal input.text-white,
+.dark .scola-portal textarea.text-white,
+.dark .scola-portal select.text-white,
+.dark [data-slot="select-trigger"].text-white {
+  color: oklch(0.96 0 0) !important;
+}
+
+/* bg-slate-950 dan bg-slate-900 di dalam portal (input field) */
+.scola-portal .bg-slate-950,
+.scola-portal .bg-slate-950\/50,
+.scola-portal .bg-slate-950\/40,
+.scola-portal .bg-slate-950\/30,
+.scola-portal .bg-slate-950\/20 {
+  background: var(--input) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+.dark .scola-portal .bg-slate-950 { background: oklch(0.115 0.018 264) !important; color: oklch(0.96 0 0) !important; }
+.dark .scola-portal .bg-slate-950\/50 { background: oklch(0.115 0.018 264 / 50%) !important; color: oklch(0.96 0 0) !important; }
+.dark .scola-portal .bg-slate-950\/40 { background: oklch(0.115 0.018 264 / 40%) !important; color: oklch(0.96 0 0) !important; }
+.dark .scola-portal .bg-slate-950\/30 { background: oklch(0.115 0.018 264 / 30%) !important; color: oklch(0.96 0 0) !important; }
+
+/* placeholder text di input */
+.scola-portal .placeholder\:text-slate-400::placeholder {
+  color: var(--muted-foreground) !important;
+  opacity: 0.7;
+}
+
+/* TabsList dan TabsTrigger dengan bg gelap */
+.scola-portal [role="tablist"].bg-slate-950\/50,
+.scola-portal [role="tablist"] {
+  background: var(--muted) !important;
+  border-color: var(--border) !important;
+}
+.dark .scola-portal [role="tablist"].bg-slate-950\/50 {
+  background: oklch(0.115 0.018 264 / 50%) !important;
+}
+
+/* TabsTrigger non-active teks gelap di light mode */
+.scola-portal [role="tab"]:not([data-state="active"]).text-slate-400 {
+  color: var(--muted-foreground) !important;
+}
+
+/* CardTitle dan elemen dengan font weight bold yang punya text-white (bukan button) */
+.scola-portal [class*="CardTitle"].text-white {
+  color: var(--foreground) !important;
+}
+.dark .scola-portal [class*="CardTitle"].text-white {
+  color: oklch(0.96 0 0) !important;
+}
+
+/* TableHead dengan text-slate-400 hardcoded */
+.scola-portal thead th.text-slate-400,
+.scola-portal [role="columnheader"].text-slate-400 {
+  color: var(--muted-foreground) !important;
+}
+
+/* Elemen di dalam dialog (role="dialog" dan data-slot) yang masih hardcoded */
+html.light [role="dialog"] .text-white,
+html.light [role="dialog"] .text-slate-400,
+html.light [role="dialog"] input.text-white,
+html.light [role="dialog"] button.text-white:not([class*="bg-"]),
+html.light [role="alertdialog"] .text-white,
+html.light [role="alertdialog"] .text-slate-400 {
+  color: var(--foreground) !important;
+}
+html.light [role="dialog"] .text-slate-400,
+html.light [role="alertdialog"] .text-slate-400 {
+  color: var(--muted-foreground) !important;
+}
+
+/* bg-slate-800 badge dalam light mode */
+.scola-portal .bg-slate-800.text-white,
+.scola-portal .bg-slate-800 .text-white {
+  color: var(--foreground) !important;
+}
+.dark .scola-portal .bg-slate-800.text-white,
+.dark .scola-portal .bg-slate-800 .text-white {
+  color: oklch(0.96 0 0) !important;
+}
+
+/* text-slate-400 di dalam AlertDialog */
+html.light [role="alertdialog"] .text-white {
+  color: var(--foreground) !important;
+}
+
+/* Teks yang menggunakan kelas font-black atau font-bold combined dengan text-white
+   Hanya untuk heading/teks biasa, bukan button berwarna */
+.scola-portal h1.font-black.text-white,
+.scola-portal h2.font-black.text-white,
+.scola-portal h2.font-bold.text-white,
+.scola-portal h2.font-semibold.text-white,
+.scola-portal h3.font-black.text-white,
+.scola-portal h3.font-bold.text-white,
+.scola-portal h4.font-bold.text-white,
+.scola-portal p.font-bold.text-white,
+.scola-portal div.font-black.text-white,
+.scola-portal div.font-bold.text-white {
+  color: var(--foreground) !important;
+}
+.dark .scola-portal h1.font-black.text-white,
+.dark .scola-portal h2.font-black.text-white,
+.dark .scola-portal h2.font-bold.text-white,
+.dark .scola-portal h2.font-semibold.text-white,
+.dark .scola-portal h3.font-black.text-white,
+.dark .scola-portal h3.font-bold.text-white,
+.dark .scola-portal h4.font-bold.text-white,
+.dark .scola-portal p.font-bold.text-white,
+.dark .scola-portal div.font-black.text-white,
+.dark .scola-portal div.font-bold.text-white {
+  color: oklch(0.96 0 0) !important;
+}
+
+/* Border white di dalam portal (light mode) */
+.scola-portal .border-white\/5,
+.scola-portal .border-white\/10,
+.scola-portal .border-white\/20 {
+  border-color: var(--border) !important;
+}
+.dark .scola-portal .border-white\/5 { border-color: oklch(1 0 0 / 5%) !important; }
+.dark .scola-portal .border-white\/10 { border-color: oklch(1 0 0 / 10%) !important; }
+.dark .scola-portal .border-white\/20 { border-color: oklch(1 0 0 / 20%) !important; }
+
 /* Penyesuaian layar kecil agar seluruh halaman portal tetap rapi. */
 @media (max-width: 640px) {
   .scola-portal > div {
