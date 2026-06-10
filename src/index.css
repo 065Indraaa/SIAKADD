@@ -712,6 +712,67 @@ html.light [data-radix-popper-content-wrapper] input {
   color: oklch(0.85 0 0) !important;
 }
 
+/* ─── ENHANCED LIGHT & DARK MODE OVERRIDES ─── */
+/* Menangani warna-warna statis yang tidak terbaca / tidak selaras saat berganti mode */
+
+/* 1. Teks gelap statis (misal text-slate-900) agar menjadi terang di Dark Mode */
+.dark .scola-portal .text-slate-900,
+.dark .scola-portal .text-slate-800,
+.dark .scola-portal .text-slate-700,
+.dark .scola-portal .text-black,
+html.dark [role="dialog"] .text-slate-900,
+html.dark [role="dialog"] .text-slate-800,
+html.dark [role="dialog"] .text-slate-700,
+html.dark [role="dialog"] .text-black,
+html.dark [data-radix-popper-content-wrapper] .text-slate-900,
+html.dark [data-radix-popper-content-wrapper] .text-slate-800,
+html.dark [data-radix-popper-content-wrapper] .text-slate-700 {
+  color: var(--foreground) !important;
+}
+
+/* 2. Background putih/terang statis agar menjadi gelap (card) di Dark Mode */
+.dark .scola-portal .bg-white,
+.dark .scola-portal .bg-slate-50,
+.dark .scola-portal .bg-slate-100,
+.dark .scola-portal .bg-slate-200,
+html.dark [role="dialog"] .bg-white,
+html.dark [role="dialog"] .bg-slate-50,
+html.dark [role="dialog"] .bg-slate-100,
+html.dark [data-radix-popper-content-wrapper] .bg-white,
+html.dark [data-radix-popper-content-wrapper] .bg-slate-50 {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+/* 3. Background statis hitam/gelap agar terang di Light Mode */
+.scola-portal .bg-slate-900,
+.scola-portal .bg-slate-900\/80,
+.scola-portal .bg-black,
+html.light [role="dialog"] .bg-slate-900,
+html.light [role="dialog"] .bg-black,
+html.light [data-radix-popper-content-wrapper] .bg-slate-900 {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+/* 4. Border terang statis agar terlihat sinkron dengan Dark Mode */
+.dark .scola-portal .border-slate-100,
+.dark .scola-portal .border-slate-200,
+.dark .scola-portal .border-slate-300,
+html.dark [role="dialog"] .border-slate-100,
+html.dark [role="dialog"] .border-slate-200 {
+  border-color: var(--border) !important;
+}
+
+/* 5. Hover state terang statis agar berubah gelap di Dark Mode */
+.dark .scola-portal .hover\:bg-slate-50:hover,
+.dark .scola-portal .hover\:bg-slate-100:hover,
+.dark .scola-portal .hover\:bg-slate-200:hover,
+html.dark [role="dialog"] .hover\:bg-slate-50:hover,
+html.dark [role="dialog"] .hover\:bg-slate-100:hover {
+  background: var(--accent) !important;
+}
+
 /* Penyesuaian layar kecil agar seluruh halaman portal tetap rapi. */
 @media (max-width: 640px) {
   .scola-portal > div {
