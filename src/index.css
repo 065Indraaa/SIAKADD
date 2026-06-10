@@ -688,6 +688,46 @@ html.light [data-radix-popper-content-wrapper] input {
 .scola-portal .bg-red-900\/30 { background: #fee2e2 !important; border-color: #fca5a5 !important; }
 .dark .scola-portal .bg-red-900\/30 { background: oklch(0.3 0.1 22 / 30%) !important; }
 
+/* ─── Info Banner Biru (Kriteria Penjurusan & sejenisnya) ─── */
+/* text-blue-100 dan text-blue-200 terlalu terang di light mode */
+.scola-portal .text-blue-100,
+.scola-portal .text-blue-200 {
+  color: oklch(0.3 0.18 264) !important; /* biru gelap agar terbaca */
+}
+.dark .scola-portal .text-blue-100 { color: oklch(0.88 0.06 240) !important; }
+.dark .scola-portal .text-blue-200 { color: oklch(0.80 0.1 240) !important; }
+
+/* bg-blue-500/10 di light mode terlihat hampir tidak ada, jadikan lebih kentara */
+.scola-portal .bg-blue-500\/10 {
+  background: oklch(0.94 0.04 264) !important; /* biru sangat muda */
+  border-color: oklch(0.7 0.12 264) !important;
+}
+.dark .scola-portal .bg-blue-500\/10 { background: oklch(0.52 0.22 264 / 10%) !important; border-color: oklch(0.52 0.22 264 / 30%) !important; }
+
+/* Badge emerald & amber teks terlalu terang di light mode */
+.scola-portal .text-emerald-300 { color: oklch(0.35 0.15 160) !important; }
+.dark .scola-portal .text-emerald-300 { color: oklch(0.76 0.17 160) !important; }
+.scola-portal .text-emerald-400 { color: oklch(0.4 0.16 160) !important; }
+.dark .scola-portal .text-emerald-400 { color: oklch(0.64 0.18 160) !important; }
+.scola-portal .text-amber-300 { color: oklch(0.4 0.15 60) !important; }
+.dark .scola-portal .text-amber-300 { color: oklch(0.78 0.18 60) !important; }
+.scola-portal .text-amber-400 { color: oklch(0.45 0.16 60) !important; }
+.dark .scola-portal .text-amber-400 { color: oklch(0.7 0.2 60) !important; }
+.scola-portal .text-blue-400 { color: oklch(0.4 0.18 264) !important; }
+.dark .scola-portal .text-blue-400 { color: oklch(0.65 0.2 264) !important; }
+.scola-portal .text-purple-400 { color: oklch(0.4 0.18 290) !important; }
+.dark .scola-portal .text-purple-400 { color: oklch(0.65 0.2 290) !important; }
+.scola-portal .text-red-400 { color: oklch(0.45 0.18 22) !important; }
+.dark .scola-portal .text-red-400 { color: oklch(0.65 0.2 22) !important; }
+
+/* Badge bg di light mode — jadikan lebih gelap & kontras */
+.scola-portal .bg-emerald-600\/20 { background: oklch(0.92 0.06 160) !important; }
+.dark .scola-portal .bg-emerald-600\/20 { background: oklch(0.4 0.18 160 / 20%) !important; }
+.scola-portal .bg-amber-600\/20 { background: oklch(0.94 0.06 60) !important; }
+.dark .scola-portal .bg-amber-600\/20 { background: oklch(0.5 0.2 60 / 20%) !important; }
+.scola-portal .bg-blue-600\/20 { background: oklch(0.92 0.06 264) !important; }
+.dark .scola-portal .bg-blue-600\/20 { background: oklch(0.4 0.2 264 / 20%) !important; }
+
 /* Teks italic/placeholder di tabel */
 .scola-portal .italic { color: var(--muted-foreground) !important; }
 .dark .scola-portal .italic { color: oklch(0.5 0 0) !important; }
