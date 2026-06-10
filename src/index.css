@@ -402,119 +402,176 @@
 }
 .dark .scola-portal .bg-slate-800 { background: oklch(0.22 0.014 264) !important; }
 
-/* ─── Light Mode Dialog / Modal Overrides ──────────────────
+/* ─── Light Mode Dialog & AlertDialog Overrides ──────────────────
    Dialog shadcn di-render ke body via portal, di luar .scola-portal.
-   Gunakan selector html.light agar hanya aktif di light mode.
+   Menggunakan selector html.light dan [class*="..."] attribute selector
+   untuk menghindari masalah escape karakter Tailwind serta menangkap 
+   baik elemen dialog itu sendiri maupun isinya.
    ────────────────────────────────────────────────────────── */
 html.light [data-radix-popper-content-wrapper],
-html.light [role="dialog"] {
+html.light [role="dialog"],
+html.light [role="alertdialog"],
+html.light [data-slot="dialog-content"] {
   --dialog-bg: var(--card);
   --dialog-fg: var(--foreground);
   --dialog-border: var(--border);
 }
 
-html.light [role="dialog"] .bg-slate-950,
-html.light [role="dialog"] .bg-slate-900,
-html.light [role="dialog"] .bg-slate-900\/60,
-html.light [role="dialog"] .bg-slate-900\/50,
-html.light [role="dialog"] .bg-slate-900\/40,
-html.light [role="dialog"] .bg-slate-900\/30,
-html.light [role="dialog"] .bg-slate-900\/20 {
+/* Background dialog (hitam pekat -> putih/terang) */
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+)[class*="bg-slate-9"],
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="bg-slate-9"] {
   background: var(--card) !important;
   border-color: var(--border) !important;
 }
 
-html.light [role="dialog"] .text-white,
-html.light [role="dialog"] .text-slate-100,
-html.light [role="dialog"] .text-slate-200,
-html.light [role="dialog"] .text-slate-300 {
-  color: var(--foreground) !important;
-}
-
-html.light [role="dialog"] .text-slate-400 {
-  color: var(--muted-foreground) !important;
-}
-
-html.light [role="dialog"] .text-slate-500 {
-  color: var(--muted-foreground) !important;
-  opacity: 0.85;
-}
-
-html.light [role="dialog"] .border-white\/10,
-html.light [role="dialog"] .border-white\/5,
-html.light [role="dialog"] .border-white\/\[0\.06\],
-html.light [role="dialog"] .border-white\/\[0\.04\] {
-  border-color: var(--border) !important;
-}
-
-html.light [role="dialog"] .bg-slate-950\/50,
-html.light [role="dialog"] .bg-slate-950\/30,
-html.light [role="dialog"] .bg-slate-950\/20,
-html.light [role="dialog"] .bg-white\/5,
-html.light [role="dialog"] .bg-white\/\[0\.03\],
-html.light [role="dialog"] .bg-white\/\[0\.04\],
-html.light [role="dialog"] .bg-white\/\[0\.05\] {
+/* Background semi-transparan untuk header/footer modal */
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="bg-slate-950/"],
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="bg-white/"] {
   background: var(--muted) !important;
 }
 
-html.light [role="dialog"] input,
-html.light [role="dialog"] textarea,
-html.light [role="dialog"] select {
+/* Warna Teks (putih/abu terang -> hitam/gelap)
+   KECUALIKAN elemen dengan background berwarna (seperti button: bg-blue, bg-emerald, dll)
+   agar teks pada button tetap terbaca dengan baik. */
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+)[class*="text-white"]:not([class*="bg-blue"], [class*="bg-emerald"], [class*="bg-red"], [class*="bg-amber"], [class*="bg-green"], [class*="bg-purple"], [class*="bg-indigo"], [class*="bg-rose"], [class*="bg-orange"]),
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="text-white"]:not([class*="bg-blue"], [class*="bg-emerald"], [class*="bg-red"], [class*="bg-amber"], [class*="bg-green"], [class*="bg-purple"], [class*="bg-indigo"], [class*="bg-rose"], [class*="bg-orange"]),
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+)[class*="text-slate-1"]:not([class*="bg-blue"], [class*="bg-emerald"], [class*="bg-red"], [class*="bg-amber"], [class*="bg-green"], [class*="bg-purple"], [class*="bg-indigo"], [class*="bg-rose"], [class*="bg-orange"]),
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="text-slate-1"]:not([class*="bg-blue"], [class*="bg-emerald"], [class*="bg-red"], [class*="bg-amber"], [class*="bg-green"], [class*="bg-purple"], [class*="bg-indigo"], [class*="bg-rose"], [class*="bg-orange"]),
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+)[class*="text-slate-2"]:not([class*="bg-blue"], [class*="bg-emerald"], [class*="bg-red"], [class*="bg-amber"], [class*="bg-green"], [class*="bg-purple"], [class*="bg-indigo"], [class*="bg-rose"], [class*="bg-orange"]),
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="text-slate-2"]:not([class*="bg-blue"], [class*="bg-emerald"], [class*="bg-red"], [class*="bg-amber"], [class*="bg-green"], [class*="bg-purple"], [class*="bg-indigo"], [class*="bg-rose"], [class*="bg-orange"]),
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+)[class*="text-slate-3"]:not([class*="bg-blue"], [class*="bg-emerald"], [class*="bg-red"], [class*="bg-amber"], [class*="bg-green"], [class*="bg-purple"], [class*="bg-indigo"], [class*="bg-rose"], [class*="bg-orange"]),
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="text-slate-3"]:not([class*="bg-blue"], [class*="bg-emerald"], [class*="bg-red"], [class*="bg-amber"], [class*="bg-green"], [class*="bg-purple"], [class*="bg-indigo"], [class*="bg-rose"], [class*="bg-orange"]) {
+  color: var(--foreground) !important;
+}
+
+/* Teks muted (slate-400 / 500 -> muted-foreground) */
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+)[class*="text-slate-4"],
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="text-slate-4"],
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+)[class*="text-slate-5"],
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="text-slate-5"] {
+  color: var(--muted-foreground) !important;
+}
+
+/* Border transparan / putih di dalam dialog (putih -> border color biasa) */
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+)[class*="border-white"],
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="border-white"] {
+  border-color: var(--border) !important;
+}
+
+/* Form Input / Textarea / Select di dalam dialog */
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) input,
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) textarea,
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) select {
   background: var(--input) !important;
   color: var(--foreground) !important;
   border-color: var(--border) !important;
 }
 
-html.light [role="dialog"] input::placeholder,
-html.light [role="dialog"] textarea::placeholder {
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) input::placeholder,
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) textarea::placeholder {
   color: var(--muted-foreground) !important;
   opacity: 0.7;
 }
 
-html.light [role="dialog"] .hover\:bg-white\/5:hover,
-html.light [role="dialog"] .hover\:bg-white\/\[0\.02\]:hover,
-html.light [role="dialog"] .hover\:bg-white\/\[0\.03\]:hover {
+/* Hover effects */
+html.light :where(
+  [role="dialog"],
+  [role="alertdialog"],
+  [data-slot="dialog-content"]
+) [class*="hover:bg-white"]:hover {
   background: var(--accent) !important;
-}
-
-/* ─── Light Mode AlertDialog Overrides ───────────────────── */
-html.light [role="alertdialog"] .bg-slate-950,
-html.light [role="alertdialog"] .bg-slate-900,
-html.light [role="alertdialog"] .bg-slate-900\/60,
-html.light [role="alertdialog"] .bg-slate-900\/50,
-html.light [role="alertdialog"] .bg-slate-900\/40 {
-  background: var(--card) !important;
-  border-color: var(--border) !important;
-}
-
-html.light [role="alertdialog"] .text-white,
-html.light [role="alertdialog"] .text-slate-100,
-html.light [role="alertdialog"] .text-slate-200,
-html.light [role="alertdialog"] .text-slate-300 {
-  color: var(--foreground) !important;
-}
-
-html.light [role="alertdialog"] .text-slate-400 {
-  color: var(--muted-foreground) !important;
-}
-
-html.light [role="alertdialog"] .border-white\/10,
-html.light [role="alertdialog"] .border-white\/5 {
-  border-color: var(--border) !important;
-}
-
-html.light [role="alertdialog"] .bg-slate-950\/50,
-html.light [role="alertdialog"] .bg-white\/5,
-html.light [role="alertdialog"] .bg-white\/\[0\.03\],
-html.light [role="alertdialog"] .bg-white\/\[0\.05\] {
-  background: var(--muted) !important;
-}
-
-html.light [role="alertdialog"] input,
-html.light [role="alertdialog"] textarea {
-  background: var(--input) !important;
-  color: var(--foreground) !important;
-  border-color: var(--border) !important;
 }
 
 /* ─── Light Mode Radix Popper (Select / DropdownMenu / Popover) Overrides ───────────────────── */
@@ -689,44 +746,72 @@ html.light [data-radix-popper-content-wrapper] input {
 .dark .scola-portal .bg-red-900\/30 { background: oklch(0.3 0.1 22 / 30%) !important; }
 
 /* ─── Info Banner Biru (Kriteria Penjurusan & sejenisnya) ─── */
-/* text-blue-100 dan text-blue-200 terlalu terang di light mode */
-.scola-portal .text-blue-100,
-.scola-portal .text-blue-200 {
-  color: oklch(0.3 0.18 264) !important; /* biru gelap agar terbaca */
-}
-.dark .scola-portal .text-blue-100 { color: oklch(0.88 0.06 240) !important; }
-.dark .scola-portal .text-blue-200 { color: oklch(0.80 0.1 240) !important; }
+/* Gunakan attribute selector [class*=] agar tidak ada masalah escape karakter */
 
-/* bg-blue-500/10 di light mode terlihat hampir tidak ada, jadikan lebih kentara */
-.scola-portal .bg-blue-500\/10 {
-  background: oklch(0.94 0.04 264) !important; /* biru sangat muda */
-  border-color: oklch(0.7 0.12 264) !important;
+/* Warna teks biru terang → biru gelap di light mode */
+.scola-portal [class*="text-blue-1"],
+.scola-portal [class*="text-blue-2"] {
+  color: oklch(0.28 0.18 264) !important;
 }
-.dark .scola-portal .bg-blue-500\/10 { background: oklch(0.52 0.22 264 / 10%) !important; border-color: oklch(0.52 0.22 264 / 30%) !important; }
+.dark .scola-portal [class*="text-blue-1"] { color: oklch(0.88 0.06 240) !important; }
+.dark .scola-portal [class*="text-blue-2"] { color: oklch(0.80 0.1 240) !important; }
+
+/* Semua teks DI DALAM div banner biru → gelap di light mode */
+.scola-portal [class*="bg-blue-5"],
+.scola-portal [class*="bg-blue-6"] {
+  background: oklch(0.93 0.05 264) !important;
+  border-color: oklch(0.68 0.14 264) !important;
+  color: oklch(0.28 0.18 264) !important;
+}
+.scola-portal [class*="bg-blue-5"] *,
+.scola-portal [class*="bg-blue-6"] * {
+  color: oklch(0.28 0.18 264) !important;
+}
+.dark .scola-portal [class*="bg-blue-5"] {
+  background: oklch(0.52 0.22 264 / 10%) !important;
+  border-color: oklch(0.52 0.22 264 / 30%) !important;
+  color: oklch(0.80 0.1 240) !important;
+}
+.dark .scola-portal [class*="bg-blue-5"] *,
+.dark .scola-portal [class*="bg-blue-6"] * {
+  color: inherit !important;
+}
+.dark .scola-portal [class*="bg-blue-6"] {
+  background: oklch(0.4 0.2 264 / 20%) !important;
+  color: oklch(0.80 0.1 240) !important;
+}
+
+/* Teks biru terang yang mewarisi warna dari parent (text-blue-200 di tag `<ul>`) */
+.scola-portal [class~="text-blue-200"],
+.scola-portal [class*="text-blue-200"] {
+  color: oklch(0.28 0.18 264) !important;
+}
+.dark .scola-portal [class~="text-blue-200"],
+.dark .scola-portal [class*="text-blue-200"] {
+  color: oklch(0.80 0.1 240) !important;
+}
 
 /* Badge emerald & amber teks terlalu terang di light mode */
-.scola-portal .text-emerald-300 { color: oklch(0.35 0.15 160) !important; }
-.dark .scola-portal .text-emerald-300 { color: oklch(0.76 0.17 160) !important; }
-.scola-portal .text-emerald-400 { color: oklch(0.4 0.16 160) !important; }
-.dark .scola-portal .text-emerald-400 { color: oklch(0.64 0.18 160) !important; }
-.scola-portal .text-amber-300 { color: oklch(0.4 0.15 60) !important; }
-.dark .scola-portal .text-amber-300 { color: oklch(0.78 0.18 60) !important; }
-.scola-portal .text-amber-400 { color: oklch(0.45 0.16 60) !important; }
-.dark .scola-portal .text-amber-400 { color: oklch(0.7 0.2 60) !important; }
-.scola-portal .text-blue-400 { color: oklch(0.4 0.18 264) !important; }
-.dark .scola-portal .text-blue-400 { color: oklch(0.65 0.2 264) !important; }
-.scola-portal .text-purple-400 { color: oklch(0.4 0.18 290) !important; }
-.dark .scola-portal .text-purple-400 { color: oklch(0.65 0.2 290) !important; }
-.scola-portal .text-red-400 { color: oklch(0.45 0.18 22) !important; }
-.dark .scola-portal .text-red-400 { color: oklch(0.65 0.2 22) !important; }
+.scola-portal [class*="text-emerald-3"] { color: oklch(0.35 0.15 160) !important; }
+.dark .scola-portal [class*="text-emerald-3"] { color: oklch(0.76 0.17 160) !important; }
+.scola-portal [class*="text-emerald-4"] { color: oklch(0.4 0.16 160) !important; }
+.dark .scola-portal [class*="text-emerald-4"] { color: oklch(0.64 0.18 160) !important; }
+.scola-portal [class*="text-amber-3"] { color: oklch(0.4 0.15 60) !important; }
+.dark .scola-portal [class*="text-amber-3"] { color: oklch(0.78 0.18 60) !important; }
+.scola-portal [class*="text-amber-4"] { color: oklch(0.45 0.16 60) !important; }
+.dark .scola-portal [class*="text-amber-4"] { color: oklch(0.7 0.2 60) !important; }
+.scola-portal [class*="text-blue-4"] { color: oklch(0.4 0.18 264) !important; }
+.dark .scola-portal [class*="text-blue-4"] { color: oklch(0.65 0.2 264) !important; }
+.scola-portal [class*="text-purple-4"] { color: oklch(0.4 0.18 290) !important; }
+.dark .scola-portal [class*="text-purple-4"] { color: oklch(0.65 0.2 290) !important; }
+.scola-portal [class*="text-red-4"] { color: oklch(0.45 0.18 22) !important; }
+.dark .scola-portal [class*="text-red-4"] { color: oklch(0.65 0.2 22) !important; }
 
-/* Badge bg di light mode — jadikan lebih gelap & kontras */
-.scola-portal .bg-emerald-600\/20 { background: oklch(0.92 0.06 160) !important; }
-.dark .scola-portal .bg-emerald-600\/20 { background: oklch(0.4 0.18 160 / 20%) !important; }
-.scola-portal .bg-amber-600\/20 { background: oklch(0.94 0.06 60) !important; }
-.dark .scola-portal .bg-amber-600\/20 { background: oklch(0.5 0.2 60 / 20%) !important; }
-.scola-portal .bg-blue-600\/20 { background: oklch(0.92 0.06 264) !important; }
-.dark .scola-portal .bg-blue-600\/20 { background: oklch(0.4 0.2 264 / 20%) !important; }
+/* Badge bg emerald/amber — lebih terang di light agar kontras */
+.scola-portal [class*="bg-emerald-6"] { background: oklch(0.92 0.06 160) !important; }
+.dark .scola-portal [class*="bg-emerald-6"] { background: oklch(0.4 0.18 160 / 20%) !important; }
+.scola-portal [class*="bg-amber-6"] { background: oklch(0.94 0.06 60) !important; }
+.dark .scola-portal [class*="bg-amber-6"] { background: oklch(0.5 0.2 60 / 20%) !important; }
 
 /* Teks italic/placeholder di tabel */
 .scola-portal .italic { color: var(--muted-foreground) !important; }
