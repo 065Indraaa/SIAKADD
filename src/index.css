@@ -724,9 +724,12 @@ html.dark [role="dialog"] .text-slate-900,
 html.dark [role="dialog"] .text-slate-800,
 html.dark [role="dialog"] .text-slate-700,
 html.dark [role="dialog"] .text-black,
+html.dark [data-slot="dialog-content"] .text-slate-900,
+html.dark [data-slot="dialog-content"] .text-slate-800,
+html.dark [data-slot="dialog-content"] .text-slate-700,
+html.dark [data-slot="dialog-content"] .text-black,
 html.dark [data-radix-popper-content-wrapper] .text-slate-900,
-html.dark [data-radix-popper-content-wrapper] .text-slate-800,
-html.dark [data-radix-popper-content-wrapper] .text-slate-700 {
+html.dark [data-slot="select-content"] .text-slate-900 {
   color: var(--foreground) !important;
 }
 
@@ -738,8 +741,10 @@ html.dark [data-radix-popper-content-wrapper] .text-slate-700 {
 html.dark [role="dialog"] .bg-white,
 html.dark [role="dialog"] .bg-slate-50,
 html.dark [role="dialog"] .bg-slate-100,
+html.dark [data-slot="dialog-content"] .bg-white,
+html.dark [data-slot="dialog-content"] .bg-slate-50,
 html.dark [data-radix-popper-content-wrapper] .bg-white,
-html.dark [data-radix-popper-content-wrapper] .bg-slate-50 {
+html.dark [data-slot="select-content"] .bg-white {
   background: var(--card) !important;
   border-color: var(--border) !important;
 }
@@ -750,9 +755,35 @@ html.dark [data-radix-popper-content-wrapper] .bg-slate-50 {
 .scola-portal .bg-black,
 html.light [role="dialog"] .bg-slate-900,
 html.light [role="dialog"] .bg-black,
-html.light [data-radix-popper-content-wrapper] .bg-slate-900 {
+html.light [data-slot="dialog-content"] .bg-slate-950,
+html.light [data-slot="dialog-content"] .bg-slate-900,
+html.light [data-slot="dialog-content"] .bg-black,
+html.light [data-slot="dialog-content"] .bg-white\/5,
+html.light [data-radix-popper-content-wrapper] .bg-slate-900,
+html.light [data-slot="select-content"] .bg-slate-900,
+html.light [data-slot="select-content"] .bg-slate-950 {
   background: var(--card) !important;
   border-color: var(--border) !important;
+}
+
+/* Memastikan teks putih statis di dalam dialog menjadi gelap di Light Mode */
+html.light [data-slot="dialog-content"] .text-white,
+html.light [data-slot="dialog-content"] .text-slate-100,
+html.light [data-slot="dialog-content"] .text-slate-200,
+html.light [data-slot="dialog-content"] .text-slate-300,
+html.light [data-slot="select-content"] .text-white {
+  color: var(--foreground) !important;
+}
+
+/* Memastikan input, select trigger, dan elemen form terbaca di Light Mode */
+html.light [data-slot="dialog-content"] input,
+html.light [data-slot="dialog-content"] textarea,
+html.light [data-slot="select-trigger"],
+html.light [data-slot="dialog-content"] button {
+  color: var(--foreground) !important;
+}
+html.light [data-slot="dialog-content"] input::placeholder {
+  color: var(--muted-foreground) !important;
 }
 
 /* 4. Border terang statis agar terlihat sinkron dengan Dark Mode */
@@ -760,16 +791,15 @@ html.light [data-radix-popper-content-wrapper] .bg-slate-900 {
 .dark .scola-portal .border-slate-200,
 .dark .scola-portal .border-slate-300,
 html.dark [role="dialog"] .border-slate-100,
-html.dark [role="dialog"] .border-slate-200 {
+html.dark [data-slot="dialog-content"] .border-slate-100 {
   border-color: var(--border) !important;
 }
 
 /* 5. Hover state terang statis agar berubah gelap di Dark Mode */
 .dark .scola-portal .hover\:bg-slate-50:hover,
 .dark .scola-portal .hover\:bg-slate-100:hover,
-.dark .scola-portal .hover\:bg-slate-200:hover,
 html.dark [role="dialog"] .hover\:bg-slate-50:hover,
-html.dark [role="dialog"] .hover\:bg-slate-100:hover {
+html.dark [data-slot="dialog-content"] .hover\:bg-slate-50:hover {
   background: var(--accent) !important;
 }
 
